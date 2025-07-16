@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Assistant Display</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="round-display">
+            <!-- Custom circular temperature gauge -->
+            <div class="temperature-gauge-wrapper">
+                <!-- Gauge arc background -->
+                <svg class="gauge-svg" viewBox="0 0 720 720">
+                    <!-- SVG Gradient Definitions -->
+                    <defs>
+                        <!-- Temperature gradient (main arc) - using true conic-like gradient -->
+                        <linearGradient id="temperature-gradient" gradientUnits="userSpaceOnUse" x1="60" y1="360" x2="660" y2="360">
+                            <stop offset="0%" stop-color="#00a2ff" /> <!-- Cold (blue) -->
+                            <stop offset="25%" stop-color="#4caf50" /> <!-- Cool (green) -->
+                            <stop offset="50%" stop-color="#8BC34A" /> <!-- Mild (light green) -->
+                            <stop offset="75%" stop-color="#FFC107" /> <!-- Warm (yellow) -->
+                            <stop offset="100%" stop-color="#f44336" /> <!-- Hot (red) -->
+                        </linearGradient>
+                        
+                        <!-- Secondary temperature gradient (bottom arc) - using true conic-like gradient -->
+                        <linearGradient id="secondary-temp-gradient" gradientUnits="userSpaceOnUse" x1="60" y1="360" x2="660" y2="360">
+                            <stop offset="0%" stop-color="#0077FF" /> <!-- Cold (5°C - blue) -->
+                            <stop offset="14%" stop-color="#2196F3" /> <!-- Cool (10°C - light blue) -->
+                            <stop offset="28%" stop-color="#4caf50" /> <!-- Cool (15°C - green) -->
+                            <stop offset="43%" stop-color="#8BC34A" /> <!-- Mild (20°C - light green) -->
+                            <stop offset="57%" stop-color="#CDDC39" /> <!-- Comfortable (25°C - lime) -->
+                            <stop offset="71%" stop-color="#FFC107" /> <!-- Warm (30°C - yellow) -->
+                            <stop offset="86%" stop-color="#FF9800" /> <!-- Hot (35°C - orange) -->
+                            <stop offset="100%" stop-color="#f44336" /> <!-- Very hot (40°C - red) -->
+                        </linearGradient>
+                        
+                        <!-- Humidity gradient (inner arc) - using true conic-like gradient -->
+                        <linearGradient id="humidity-gradient" gradientUnits="userSpaceOnUse" x1="110" y1="360" x2="610" y2="360">
+                            <stop offset="0%" stop-color="#FFEB3B" /> <!-- Very dry (yellow) -->
+                            <stop offset="25%" stop-color="#8BC34A" /> <!-- Dry (light green) -->
+                            <stop offset="50%" stop-color="#4CAF50" /> <!-- Comfortable (green) -->
+                            <stop offset="75%" stop-color="#03A9F4" /> <!-- Humid (light blue) -->
+                            <stop offset="100%" stop-color="#0D47A1" /> <!-- Very humid (deep blue) -->
+                        </linearGradient>
+                        
+                        <!-- Pressure gradient (innermost arc) - using true conic-like gradient -->
+                        <linearGradient id="pressure-gradient" gradientUnits="userSpaceOnUse" x1="137" y1="360" x2="583" y2="360">
+                            <stop offset="0%" stop-color="#9C27B0" /> <!-- Low pressure (purple) -->
+                            <stop offset="50%" stop-color="#2196F3" /> <!-- Normal pressure (blue) -->
+                            <stop offset="100%" stop-color="#FF9800" /> <!-- High pressure (orange) -->
+                        </linearGradient>
+                    </defs>
+                    <!-- Main temperature background arc - will be set by JavaScript -->
+                    <path class="gauge-background" d="" />
+                    <!-- Temperature arc - will be set by JavaScript -->
+                    <path class="gauge-arc" id="temperature-arc" d="" />
+                    <!-- Humidity background arc (inner arc) - smaller radius (250px) -->
+                    <!-- Humidity background arc - will be set by JavaScript -->
+                    <path class="humidity-background" d="" />
+                    <!-- Humidity arc - will be set by JavaScript -->
+                    <path class="humidity-arc" id="humidity-arc" d="" />
+                    <!-- Pressure background arc - will be set by JavaScript -->
+                    <path class="pressure-background" d="" />
+                    <!-- Pressure arc - will be set by JavaScript -->
+                    <path class="pressure-arc" id="pressure-arc" d="" />
+                    <!-- Secondary Temperature background arc - will be set by JavaScript -->
+                    <path class="secondary-temp-background" d="" />
+                    <!-- Secondary Temperature arc - will be set by JavaScript -->
+                    <path class="secondary-temp-arc" id="secondary-temp-arc" d="" />
+                    <!-- Temperature Scale markers -->
+                    <g class="gauge-markers" id="temperature-markers">
+                        <!-- Temperature markers will be generated by JavaScript -->
+                    </g>
+                    <!-- Secondary Temperature Scale markers -->
+                    <g class="gauge-markers" id="secondary-temp-markers">
+                        <!-- Secondary temperature markers will be generated by JavaScript -->
+                    </g>
+                    <!-- Humidity Scale markers -->
+                    <g class="gauge-markers" id="humidity-markers">
+                        <!-- Humidity markers will be generated by JavaScript -->
+                    </g>
+                    <!-- Pressure Scale markers -->
+                    <g class="gauge-markers" id="pressure-markers">
+                        <!-- Pressure markers will be generated by JavaScript -->
+                    </g>
+                </svg>
+                
+                <!-- Center content -->
+                <div class="gauge-center">
+                    <div class="temperature-display">
+                        <span class="temperature-value" id="temperature-value">--</span><span class="temperature-unit">°C</span>
+                    </div>
+                    <div class="humidity-display">
+                        <span id="humidity-value">--</span>
+                        <span class="humidity-unit">%</span>
+                    </div>
+                    <div class="pressure-display">
+                        <span id="pressure-value">--</span>
+                        <span class="pressure-unit">hPa</span>
+                    </div>
+                </div>
+                
+                <!-- Secondary temperature display -->
+                <div class="secondary-temp-display">
+                    <span class="secondary-temp-value" id="secondary-temp-value">--</span><span class="secondary-temp-unit">°C</span>
+                </div>
+                
+                <!-- Scale labels now generated by JavaScript -->
+            </div>
+            
+            <!-- Humidity gauge removed -->
+            
+            <!-- Connection status indicator -->
+            <div class="connection-status" id="connection-status">Connecting to Home Assistant...</div>
+        </div>
+        
+        <!-- Admin Controls (outside the circle) -->
+        <div class="admin-controls top-left">
+            <button id="test-button" class="admin-button test-button">Test Gauges</button>
+        </div>
+        
+        <div class="admin-controls top-right">
+            <button id="admin-button" class="admin-button">Admin Settings</button>
+        </div>
+        
+        <!-- Charts section removed -->
+    </div>
+
+    <!-- Load libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/home-assistant-js-websocket@8.2.0/dist/haws.umd.js"></script>
+    
+    <!-- Load our scripts as ES modules -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

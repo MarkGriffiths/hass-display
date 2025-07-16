@@ -1,0 +1,606 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.round-display {
+    width: 720px;
+    height: 720px;
+    border-radius: 50%;
+    background-color: #1e1e1e;
+    position: relative;
+    top: -8px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+}
+
+/* Temperature gauge wrapper */
+.temperature-gauge-wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+/* SVG gauge styling */
+.gauge-svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+/* Background arc path */
+.gauge-background {
+    fill: none;
+    stroke: #333;
+    stroke-width: 60; /* Matches arcWidth in JavaScript */
+    stroke-linecap: round;
+}
+
+/* Temperature arc path */
+.gauge-arc {
+    fill: none;
+    stroke: url(#temperature-gradient);
+    stroke-width: 60; /* Matches arcWidth in JavaScript */
+    stroke-linecap: round;
+    /*transition: all 1s ease;*/
+    /* Ensure smooth rendering of the gradient */
+    shape-rendering: geometricPrecision;
+    z-index: 10;
+}
+
+/* Humidity background arc path (inner arc) */
+.humidity-background {
+    fill: none;
+    stroke: #1a1a1a;
+    stroke-width: 24; /* 40% of temperature arc width (60px) */
+    stroke-linecap: round;
+    z-index: 2;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Humidity arc path */
+.humidity-arc {
+    fill: none;
+    stroke: url(#humidity-gradient);
+    stroke-width: 24; /* 40% of temperature arc width (60px) */
+    stroke-linecap: round;
+    /*transition: all 1s ease;*/
+    shape-rendering: geometricPrecision;
+    z-index: 3;
+    filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.3));
+}
+
+/* Pressure background arc path (innermost arc) */
+.pressure-background {
+    fill: none;
+    stroke: #151515;
+    stroke-width: 16; /* ~27% of temperature arc width (60px) */
+    stroke-linecap: round;
+    z-index: 4;
+    filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.5));
+}
+
+/* Pressure arc path */
+.pressure-arc {
+    fill: none;
+    stroke: url(#pressure-gradient);
+    stroke-width: 16; /* ~27% of temperature arc width (60px) */
+    stroke-linecap: round;
+    /*transition: all 1s ease;*/
+    shape-rendering: geometricPrecision;
+    z-index: 5;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Secondary Temperature background arc path (bottom arc) */
+.secondary-temp-background {
+    fill: none;
+    stroke: #333;
+    stroke-width: 30; /* Half of temperature arc width (60px) */
+    stroke-linecap: round;
+    z-index: 1;
+}
+
+/* Secondary Temperature arc path (bottom arc) */
+.secondary-temp-arc {
+    fill: none;
+    stroke: url(#secondary-temp-gradient);
+    stroke-width: 30; /* Half of temperature arc width (60px) */
+    stroke-linecap: round;
+    /*transition: all 1s ease;*/
+    shape-rendering: geometricPrecision;
+    z-index: 2;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Secondary temperature scale text */
+.secondary-temp-text {
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8), 0 0 5px rgba(0, 0, 0, 0.6);
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    fill: white;
+}
+
+/* Gauge markers */
+.gauge-markers line {
+    stroke: rgba(255, 255, 255, 0.3);
+    stroke-width: 2;
+}
+
+.gauge-markers text {
+    fill: white;
+    font-size: 18px;
+    text-anchor: middle;
+    font-weight: bold;
+    text-shadow: 0px 0px 3px rgba(0, 0, 0, 0.9), 0px 0px 5px rgba(0, 0, 0, 0.7);
+}
+
+/* Center content */
+.gauge-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.temperature-display {
+    text-align: center;
+    line-height: 1;
+}
+
+.temperature-value {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.temperature-unit {
+    font-size: 2rem;
+    font-weight: normal;
+    color: #cccccc;
+    vertical-align: top;
+    margin-left: 0.2rem;
+}
+
+/* Temperature display */
+.temperature-display {
+    font-size: 72px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
+}
+
+.temperature-unit {
+    font-size: 36px;
+    font-weight: normal;
+    margin-left: 5px;
+}
+
+/* Humidity display */
+.humidity-display {
+    font-size: 36px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 5px;
+}
+
+.humidity-unit {
+    font-size: 24px;
+    font-weight: normal;
+    margin-left: 3px;
+}
+
+/* Pressure display */
+.pressure-display {
+    font-size: 28px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.pressure-unit {
+    font-size: 18px;
+    font-weight: normal;
+    margin-left: 3px;
+}
+
+/* Secondary Temperature display */
+.secondary-temp-display {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.secondary-temp-value {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.secondary-temp-unit {
+    font-size: 16px;
+    font-weight: normal;
+    margin-left: 2px;
+}
+
+/* Scale labels */
+.scale-labels {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.scale-label {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 16px;
+    font-weight: bold;
+    transform: translate(-50%, -50%);
+}
+
+/* Position labels according to the new scale */
+.scale-label.min {
+    /* -10°C at 180° position (left side) */
+    left: 60px;
+    top: 50%;
+}
+
+.scale-label.mid {
+    /* 15°C at 270° position (top middle) */
+    left: 50%;
+    top: 60px;
+}
+
+.scale-label.max {
+    /* 40°C at 0° position (right side) */
+    right: 60px;
+    top: 50%;
+}
+
+.gauge-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-container {
+    position: absolute;
+    z-index: 1;
+    opacity: 0.3;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+/* Make the display responsive */
+@media (max-width: 720px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .round-display {
+        width: 100vw;
+        height: 100vw;
+        max-width: 720px;
+        max-height: 720px;
+    }
+}
+
+/* Error message styling */
+.error-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.error-content {
+    background-color: #2c2c2c;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.error-content h2 {
+    color: #f44336;
+    margin-top: 0;
+}
+
+.error-content button {
+    background-color: #03a9f4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+}
+
+/* Sensor info styling */
+.sensor-info {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.sensor-info h3 {
+    margin: 5px 0;
+    color: #03a9f4;
+}
+
+.entity-name {
+    font-size: 14px;
+    color: #aaaaaa;
+    margin-bottom: 5px;
+    word-break: break-all;
+}
+
+/* Humidity gauge wrapper */
+.humidity-gauge-wrapper {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    bottom: 60px;
+    right: 60px;
+    background-color: rgba(30, 30, 30, 0.7);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Gauge element styles */
+.gauge {
+    width: 200px !important;
+    height: 200px !important;
+    margin: 0 auto;
+}
+
+.gauge-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 5px;
+    color: #ffffff;
+    text-align: center;
+}
+
+.gauge-value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 5px;
+    color: #03a9f4;
+    text-align: center;
+}
+
+/* Charts section */
+.charts-section {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.chart-container {
+    width: 48%;
+    height: 250px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    margin-bottom: 20px;
+}
+
+.chart-container h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #03a9f4;
+    font-size: 16px;
+}
+
+/* Connection status styling */
+.connection-status {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+    background-color: #4CAF50;
+}
+
+.connection-status.error {
+    background-color: #F44336;
+}
+
+.connection-status.connecting {
+    background-color: #FFC107;
+    color: #333;
+}
+
+.error-content button {
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.error-content button:hover {
+    background-color: #0288d1;
+}
+
+/* Admin Controls */
+.admin-controls {
+    position: absolute;
+    z-index: 100;
+    padding: 15px;
+}
+
+/* Position variants for admin controls */
+.admin-controls.top-right {
+    top: 8px;
+    right: 8px;
+}
+
+.admin-controls.top-left {
+    top: 8px;
+    left: 8px;
+}
+
+.admin-controls.bottom-right {
+    bottom: 8px;
+    right: 8px;
+}
+
+.admin-controls.bottom-left {
+    bottom: 8px;
+    left: 8px;
+}
+
+/* Admin buttons */
+.admin-button {
+    background-color: rgba(76, 175, 80, 0.8);
+    color: white;
+    border: none;
+    padding: 5px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.admin-button:hover {
+    background-color: rgba(76, 175, 80, 1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Test button group */
+.test-button-group {
+    background-color: rgba(30, 30, 30, 0.7);
+    border-radius: 5px;
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.test-group-label {
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    text-align: center;
+}
+
+.test-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.test-button {
+    flex: 1;
+    font-size: 10px;
+    padding: 4px 6px;
+    margin: 0;
+}
+
+/* Test controls */
+.test-controls {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+}
+
+.test-btn {
+    background-color: #03a9f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 0 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.test-btn:hover {
+    background-color: #0288d1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Gauge styling */
+.gauge-title {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-top: 10px;
+    color: #03a9f4;
+}
+
+.gauge-value {
+    font-size: 2rem;
+    text-align: center;
+    font-weight: bold;
+}

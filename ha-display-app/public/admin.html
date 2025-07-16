@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Assistant Display Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #03a9f4;
+            margin-top: 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #333;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #03a9f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0288d1;
+        }
+        .instructions {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .success-message {
+            background-color: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+        .button-group {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 20px;
+        }
+        .cancel-button {
+            background-color: #757575;
+        }
+        .cancel-button:hover {
+            background-color: #616161;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Home Assistant Display Admin</h1>
+        
+        <div class="instructions">
+            <h3>Edit Configuration Settings</h3>
+            <p>Update your Home Assistant connection settings and entity IDs below.</p>
+        </div>
+        
+        <form id="admin-form">
+            <div>
+                <label for="ha-url">Home Assistant URL:</label>
+                <input type="url" id="ha-url" name="ha-url" required>
+            </div>
+            
+            <div>
+                <label for="access-token">Long-Lived Access Token:</label>
+                <input type="text" id="access-token" name="access-token" required>
+            </div>
+            
+            <div>
+                <label for="temperature-entity">Temperature Entity ID:</label>
+                <input type="text" id="temperature-entity" name="temperature-entity" required>
+            </div>
+            
+            <div>
+                <label for="humidity-entity">Humidity Entity ID:</label>
+                <input type="text" id="humidity-entity" name="humidity-entity" required>
+            </div>
+            
+            <div>
+                <label for="pressure-entity">Pressure Entity ID:</label>
+                <input type="text" id="pressure-entity" name="pressure-entity" required>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit">Save Configuration</button>
+                <button type="button" id="cancel-button" class="cancel-button">Cancel</button>
+            </div>
+        </form>
+        
+        <div id="success-message" class="success-message">
+            Configuration saved successfully! <a href="/">Go to Dashboard</a>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { loadConfig, saveConfig } from './js/config-manager.js';
+        
+        // Load saved configuration
+        document.addEventListener('DOMContentLoaded', function() {
+            const config = loadConfig();
+            
+            if (config) {
+                // Populate form fields
+                document.getElementById('ha-url').value = config.homeAssistant.url || '';
+                document.getElementById('access-token').value = config.homeAssistant.accessToken || '';
+                document.getElementById('temperature-entity').value = config.entities.temperature || '';
+                document.getElementById('humidity-entity').value = config.entities.humidity || '';
+                document.getElementById('pressure-entity').value = config.entities.pressure || '';
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('admin-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const haUrl = document.getElementById('ha-url').value;
+            const accessToken = document.getElementById('access-token').value;
+            const temperatureEntity = document.getElementById('temperature-entity').value;
+            const humidityEntity = document.getElementById('humidity-entity').value;
+            const pressureEntity = document.getElementById('pressure-entity').value;
+            
+            // Create configuration object
+            const configuration = {
+                homeAssistant: {
+                    url: haUrl,
+                    accessToken: accessToken
+                },
+                entities: {
+                    temperature: temperatureEntity,
+                    humidity: humidityEntity,
+                    pressure: pressureEntity
+                }
+            };
+            
+            // Save configuration using the config-manager module
+            saveConfig(configuration);
+            
+            // Show success message
+            document.getElementById('success-message').style.display = 'block';
+        });
+        
+        // Handle cancel button
+        document.getElementById('cancel-button').addEventListener('click', function() {
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>

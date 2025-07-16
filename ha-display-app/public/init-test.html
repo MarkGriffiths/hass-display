@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gauge Initialization Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .button-group {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .log-container {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 4px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .log-error {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .log-warn {
+            color: #ff9800;
+        }
+        .log-info {
+            color: #2196f3;
+        }
+        .log-success {
+            color: #4caf50;
+        }
+        .status-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .status-pending {
+            background-color: #9e9e9e;
+        }
+        .status-success {
+            background-color: #4caf50;
+        }
+        .status-error {
+            background-color: #d32f2f;
+        }
+        .gauge-svg {
+            width: 720px;
+            height: 720px;
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gauge Initialization Test</h1>
+        
+        <div class="button-group">
+            <button id="check-dom">Check DOM Elements</button>
+            <button id="init-gauges">Initialize Gauges</button>
+            <button id="clear-log">Clear Log</button>
+        </div>
+        
+        <div class="status-container">
+            <h3>Element Status</h3>
+            <div id="element-status"></div>
+        </div>
+        
+        <div class="log-container" id="log-output"></div>
+        
+        <!-- SVG Container -->
+        <svg class="gauge-svg" viewBox="0 0 720 720">
+            <!-- SVG Gradient Definitions -->
+            <defs>
+                <!-- Temperature gradient (main arc) -->
+                <linearGradient id="temperature-gradient" gradientUnits="userSpaceOnUse" x1="60" y1="360" x2="660" y2="360">
+                    <stop offset="0%" stop-color="#00a2ff" /> <!-- Cold (blue) -->
+                    <stop offset="25%" stop-color="#4caf50" /> <!-- Cool (green) -->
+                    <stop offset="50%" stop-color="#8BC34A" /> <!-- Mild (light green) -->
+                    <stop offset="75%" stop-color="#FFC107" /> <!-- Warm (yellow) -->
+                    <stop offset="100%" stop-color="#f44336" /> <!-- Hot (red) -->
+                </linearGradient>
+                
+                <!-- Secondary temperature gradient (bottom arc) -->
+                <linearGradient id="secondary-temp-gradient" gradientUnits="userSpaceOnUse" x1="60" y1="360" x2="660" y2="360">
+                    <stop offset="0%" stop-color="#0077FF" /> <!-- Cold (5°C - blue) -->
+                    <stop offset="14%" stop-color="#2196F3" /> <!-- Cool (10°C - light blue) -->
+                    <stop offset="28%" stop-color="#4caf50" /> <!-- Cool (15°C - green) -->
+                    <stop offset="43%" stop-color="#8BC34A" /> <!-- Mild (20°C - light green) -->
+                    <stop offset="57%" stop-color="#CDDC39" /> <!-- Comfortable (25°C - lime) -->
+                    <stop offset="71%" stop-color="#FFC107" /> <!-- Warm (30°C - yellow) -->
+                    <stop offset="86%" stop-color="#FF9800" /> <!-- Hot (35°C - orange) -->
+                    <stop offset="100%" stop-color="#f44336" /> <!-- Very hot (40°C - red) -->
+                </linearGradient>
+                
+                <!-- Humidity gradient (inner arc) -->
+                <linearGradient id="humidity-gradient" gradientUnits="userSpaceOnUse" x1="110" y1="360" x2="610" y2="360">
+                    <stop offset="0%" stop-color="#FFEB3B" /> <!-- Very dry (yellow) -->
+                    <stop offset="25%" stop-color="#8BC34A" /> <!-- Dry (light green) -->
+                    <stop offset="50%" stop-color="#4CAF50" /> <!-- Comfortable (green) -->
+                    <stop offset="75%" stop-color="#03A9F4" /> <!-- Humid (light blue) -->
+                    <stop offset="100%" stop-color="#0D47A1" /> <!-- Very humid (deep blue) -->
+                </linearGradient>
+                
+                <!-- Pressure gradient (innermost arc) -->
+                <linearGradient id="pressure-gradient" gradientUnits="userSpaceOnUse" x1="137" y1="360" x2="583" y2="360">
+                    <stop offset="0%" stop-color="#9C27B0" /> <!-- Low pressure (purple) -->
+                    <stop offset="50%" stop-color="#2196F3" /> <!-- Normal pressure (blue) -->
+                    <stop offset="100%" stop-color="#FF9800" /> <!-- High pressure (orange) -->
+                </linearGradient>
+            </defs>
+            
+            <!-- Main temperature background arc - will be set by JavaScript -->
+            <path class="gauge-background" d="" />
+            <!-- Temperature arc - will be set by JavaScript -->
+            <path class="gauge-arc" id="temperature-arc" d="" />
+            <!-- Humidity background arc (inner arc) - smaller radius (250px) -->
+            <!-- Humidity background arc - will be set by JavaScript -->
+            <path class="humidity-background" d="" />
+            <!-- Humidity arc - will be set by JavaScript -->
+            <path class="humidity-arc" id="humidity-arc" d="" />
+            <!-- Pressure background arc - will be set by JavaScript -->
+            <path class="pressure-background" d="" />
+            <!-- Pressure arc - will be set by JavaScript -->
+            <path class="pressure-arc" id="pressure-arc" d="" />
+            <!-- Secondary Temperature background arc - will be set by JavaScript -->
+            <path class="secondary-temp-background" d="" />
+            <!-- Secondary Temperature arc - will be set by JavaScript -->
+            <path class="secondary-temp-arc" id="secondary-temp-arc" d="" />
+            
+            <!-- Temperature Scale markers -->
+            <g class="gauge-markers" id="temperature-markers">
+                <!-- Temperature markers will be generated by JavaScript -->
+            </g>
+            
+            <!-- Secondary Temperature Scale markers -->
+            <g class="gauge-markers" id="secondary-temp-markers">
+                <!-- Secondary temperature markers will be generated by JavaScript -->
+            </g>
+            
+            <!-- Humidity Scale markers -->
+            <g class="gauge-markers" id="humidity-markers">
+                <!-- Humidity markers will be generated by JavaScript -->
+            </g>
+            
+            <!-- Pressure Scale markers -->
+            <g class="gauge-markers" id="pressure-markers">
+                <!-- Pressure markers will be generated by JavaScript -->
+            </g>
+        </svg>
+    </div>
+
+    <script type="module">
+        import { checkDOMElements, testInitGauges, runTest } from './js/test-gauge-init.js';
+        
+        // Override console methods to display logs in the UI
+        const logOutput = document.getElementById('log-output');
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-info';
+            logEntry.textContent = args.map(arg => {
+                if (typeof arg === 'object') return JSON.stringify(arg);
+                return arg;
+            }).join(' ');
+            logOutput.appendChild(logEntry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        };
+        
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-error';
+            logEntry.textContent = args.map(arg => {
+                if (typeof arg === 'object') return JSON.stringify(arg);
+                return arg;
+            }).join(' ');
+            logOutput.appendChild(logEntry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        };
+        
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-warn';
+            logEntry.textContent = args.map(arg => {
+                if (typeof arg === 'object') return JSON.stringify(arg);
+                return arg;
+            }).join(' ');
+            logOutput.appendChild(logEntry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        };
+        
+        // Update element status display
+        function updateElementStatus(checkResult) {
+            const statusContainer = document.getElementById('element-status');
+            statusContainer.innerHTML = '';
+            
+            // Add found elements
+            checkResult.found.forEach(id => {
+                const statusItem = document.createElement('div');
+                statusItem.className = 'status-item';
+                
+                const indicator = document.createElement('div');
+                indicator.className = 'status-indicator status-success';
+                
+                statusItem.innerHTML = `${indicator.outerHTML} <span>#${id}: Found</span>`;
+                statusContainer.appendChild(statusItem);
+            });
+            
+            // Add missing elements
+            checkResult.missing.forEach(id => {
+                const statusItem = document.createElement('div');
+                statusItem.className = 'status-item';
+                
+                const indicator = document.createElement('div');
+                indicator.className = 'status-indicator status-error';
+                
+                statusItem.innerHTML = `${indicator.outerHTML} <span>#${id}: Not found</span>`;
+                statusContainer.appendChild(statusItem);
+            });
+        }
+        
+        // Event listeners
+        document.getElementById('check-dom').addEventListener('click', () => {
+            console.log('Checking DOM elements...');
+            const result = checkDOMElements();
+            updateElementStatus(result);
+        });
+        
+        document.getElementById('init-gauges').addEventListener('click', () => {
+            console.log('Starting gauge initialization test...');
+            testInitGauges().then(result => {
+                if (result) {
+                    const successLog = document.createElement('div');
+                    successLog.className = 'log-entry log-success';
+                    successLog.textContent = 'GAUGE INITIALIZATION SUCCESSFUL';
+                    logOutput.appendChild(successLog);
+                } else {
+                    const errorLog = document.createElement('div');
+                    errorLog.className = 'log-entry log-error';
+                    errorLog.textContent = 'GAUGE INITIALIZATION FAILED';
+                    logOutput.appendChild(errorLog);
+                }
+            });
+        });
+        
+        document.getElementById('clear-log').addEventListener('click', () => {
+            logOutput.innerHTML = '';
+        });
+        
+        // Check DOM elements on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded event fired');
+            setTimeout(() => {
+                const result = checkDOMElements();
+                updateElementStatus(result);
+            }, 500);
+        });
+        
+        // Log when window is fully loaded
+        window.addEventListener('load', () => {
+            console.log('Window load event fired');
+            console.log('Document ready state:', document.readyState);
+        });
+    </script>
+</body>
+</html>
