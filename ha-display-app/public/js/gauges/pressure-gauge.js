@@ -221,7 +221,7 @@ export function updatePressureGauge(pressure) {
             pressure = Math.max(pressureConfig.minPressure, Math.min(pressure, pressureConfig.maxPressure));
             
             // Calculate the angle for the current pressure using the shared utility function
-            const currentAngle = calculateAngle(
+            const angle = calculateAngle(
                 pressure,
                 pressureConfig.minPressure,
                 pressureConfig.maxPressure,
@@ -229,28 +229,28 @@ export function updatePressureGauge(pressure) {
                 pressureConfig.endAngle
             );
             
-            // Convert angle to radians
-            const radians = currentAngle * (Math.PI / 180);
-            
             // Get center coordinates and radius
             const centerX = config.gaugeDimensions.centerX;
             const centerY = config.gaugeDimensions.centerY;
             const radius = pressureConfig.arcRadius;
             
-            // Calculate end point of the arc
-            const endX = centerX + radius * Math.cos(radians);
-            const endY = centerY + radius * Math.sin(radians);
-            
-            // Calculate start point (always at the start angle)
+            // For pressure gauge, we want it at the top (180° to 360°/0°)
+            // Calculate start point (always at startAngle, which is 180 degrees or left side)
             const startRad = pressureConfig.startAngle * (Math.PI / 180);
             const startX = centerX + radius * Math.cos(startRad);
             const startY = centerY + radius * Math.sin(startRad);
             
-            // Determine if we need to use the large arc flag
-            const largeArcFlag = Math.abs(currentAngle - pressureConfig.startAngle) > 180 ? 1 : 0;
+            // Calculate end point based on the current pressure (moving from left toward right)
+            const endRad = angle * (Math.PI / 180);
+            const endX = centerX + radius * Math.cos(endRad);
+            const endY = centerY + radius * Math.sin(endRad);
             
-            // Create the arc path
-            const arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
+            // Determine if we need to use the large arc flag
+            const largeArcFlag = Math.abs(angle - pressureConfig.startAngle) > 180 ? 1 : 0;
+            
+            // Create the SVG arc path
+            const sweepFlag = 1; // 0 for clockwise, 1 for counterclockwise - use 1 to draw in the correct direction
+            const arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
             
             // Update the path
             gaugePath.setAttribute('d', arcPath);

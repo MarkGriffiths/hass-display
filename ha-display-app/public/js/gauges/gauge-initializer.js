@@ -181,7 +181,7 @@ export async function initGauges() {
         // Add a small delay to ensure all DOM operations have completed
         await new Promise(resolve => setTimeout(resolve, 200));
         
-        // Create scale markers with retry logic
+        // Create scale markers with retry logic - only for temperature gauges
         console.log('Creating temperature markers...');
         const tempMarkersResult = await createTemperatureMarkers();
         console.log('Temperature markers result:', tempMarkersResult);
@@ -190,17 +190,15 @@ export async function initGauges() {
         const secondaryTempMarkersResult = await createSecondaryTemperatureMarkers();
         console.log('Secondary temperature markers result:', secondaryTempMarkersResult);
         
-        console.log('Creating humidity markers...');
-        const humidityMarkersResult = await createHumidityMarkers();
-        console.log('Humidity markers result:', humidityMarkersResult);
+        // Skip creating humidity and pressure markers as per requirements
+        console.log('Skipping humidity markers as per requirements');
+        const humidityMarkersResult = true;
         
-        console.log('Creating pressure markers...');
-        const pressureMarkersResult = await createPressureScaleMarkers();
-        console.log('Pressure markers result:', pressureMarkersResult);
+        console.log('Skipping pressure markers as per requirements');
+        const pressureMarkersResult = true;
         
-        // Check if all markers were created successfully
-        if (tempMarkersResult && secondaryTempMarkersResult && 
-            humidityMarkersResult && pressureMarkersResult) {
+        // Check if all required markers were created successfully
+        if (tempMarkersResult && secondaryTempMarkersResult) {
             console.log('All gauges initialized successfully');
             return true;
         } else {

@@ -108,8 +108,8 @@ export function createTemperatureMarkers() {
                     markers.removeChild(markers.firstChild);
                 }
                 
-                // Create markers at 10-degree intervals
-                for (let temp = tempConfig.minTemp; temp <= tempConfig.maxTemp; temp += 10) {
+                // Create markers at 5-degree intervals
+                for (let temp = tempConfig.minTemp; temp <= tempConfig.maxTemp; temp += 5) {
                     // Calculate angle based on temperature
                     const angle = calculateAngle(
                         temp,
@@ -154,8 +154,13 @@ export function createTemperatureMarkers() {
                     // Add text to group
                     markerGroup.appendChild(text);
                     
-                    // Position and rotate the group
-                    markerGroup.setAttribute('transform', `translate(${textX}, ${textY}) rotate(${angle})`);
+                    // Calculate text rotation angle to be normal to the arc
+                    // For radial orientation, we need to adjust by 90 degrees from the angle to the center
+                    // This makes text perpendicular to the radius line (normal to the arc)
+                    const textRotationAngle = angle + 90;
+                    
+                    // Position and rotate the group - text now oriented normal to the arc
+                    markerGroup.setAttribute('transform', `translate(${textX}, ${textY}) rotate(${textRotationAngle})`);
                     
                     // Add the marker group to the markers container
                     markers.appendChild(markerGroup);
@@ -184,7 +189,7 @@ export function updateTemperatureGauge(temperature) {
         console.log(`Updating temperature gauge to ${temperature}°C`);
         
         // Get the gauge path element
-        const gaugePath = document.getElementById('temperature-gauge-path');
+        const gaugePath = document.getElementById('temperature-arc');
         const valueDisplay = document.getElementById('temperature-value');
         
         if (!gaugePath || !valueDisplay) {
@@ -195,43 +200,38 @@ export function updateTemperatureGauge(temperature) {
         // Ensure temperature is within range
         temperature = Math.max(tempConfig.minTemp, Math.min(temperature, tempConfig.maxTemp));
         
-        // Use the calculateAngle utility but adapt it to match the current behavior
-        // The temperature gauge has a unique angle calculation centered at 270 degrees
-        // with the midpoint temperature at the bottom
-        const midTemp = (tempConfig.maxTemp + tempConfig.minTemp) / 2;
-        
-        // Calculate the angle using the shared utility function
-        // We need to adjust the calculation to maintain the same behavior
-        const currentAngle = 270 + calculateAngle(
-            temperature, 
-            midTemp - (tempConfig.maxTemp - midTemp), // Adjusted min
-            midTemp + (tempConfig.maxTemp - midTemp), // Adjusted max
-            270 - (tempConfig.endAngle - 270),        // Adjusted start angle
-            270 + (tempConfig.endAngle - 270)         // Adjusted end angle
-        ) - 270;
-        
-        // Convert angle to radians
-        const radians = currentAngle * (Math.PI / 180);
+        // Calculate the angle for the current temperature using the config values
+        // This will map the temperature to an angle between startAngle and endAngle
+        const angle = calculateAngle(
+            temperature,
+            tempConfig.minTemp,
+            tempConfig.maxTemp,
+            tempConfig.startAngle,
+            tempConfig.endAngle
+        );
         
         // Get center coordinates and radius
         const centerX = config.gaugeDimensions.centerX;
         const centerY = config.gaugeDimensions.centerY;
         const radius = config.gaugeDimensions.mainRadius;
         
-        // Calculate end point of the arc
-        const endX = centerX + radius * Math.cos(radians);
-        const endY = centerY + radius * Math.sin(radians);
-        
-        // Calculate start point (always at 270 degrees, or bottom)
-        const startRad = 270 * (Math.PI / 180);
+        // For temperature gauge, we want it at the top (180° to 360°/0°)
+        // Calculate start point (always at startAngle, which is 180 degrees or left side)
+        const startRad = tempConfig.startAngle * (Math.PI / 180);
         const startX = centerX + radius * Math.cos(startRad);
         const startY = centerY + radius * Math.sin(startRad);
         
-        // Determine if we need to use the large arc flag
-        const largeArcFlag = Math.abs(currentAngle - 270) > 180 ? 1 : 0;
+        // Calculate end point based on the current temperature (moving from left toward right)
+        const endRad = angle * (Math.PI / 180);
+        const endX = centerX + radius * Math.cos(endRad);
+        const endY = centerY + radius * Math.sin(endRad);
         
-        // Create the arc path
-        const arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
+        // Determine if we need to use the large arc flag
+        const largeArcFlag = Math.abs(angle - tempConfig.startAngle) > 180 ? 1 : 0;
+        
+        // Create the SVG arc path
+        const sweepFlag = 1; // 0 for clockwise, 1 for counterclockwise - use 1 to draw in the correct direction
+        const arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
         
         // Update the path
         gaugePath.setAttribute('d', arcPath);

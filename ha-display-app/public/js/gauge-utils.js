@@ -31,7 +31,7 @@ export function createArcPath(centerX, centerY, radius, startAngle, endAngle, in
     // Determine if we need to use the large arc flag
     const largeArcFlag = sweepAngle > 180 ? 1 : 0;
     
-    // Create the arc path
+    // Create the arc path - use sweep flag 1 for counterclockwise direction to match gauge arcs
     let path = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
     
     // If includeCenter is true, add a line to the center and back to the start point
@@ -191,8 +191,37 @@ export function initGaugePath(backgroundPathClass, centerX, centerY, radius, sta
             return;
         }
         
-        // Create the arc path
-        const arcPath = createArcPath(centerX, centerY, radius, startAngle, endAngle);
+        let arcPath;
+        
+        // Special case for secondary temperature gauge background
+        // It needs to draw anticlockwise from 160° to 20° through the 90° point at the bottom
+        if (backgroundPathClass === 'secondary-temp-background') {
+            // Convert angles from degrees to radians
+            const startRad = startAngle * (Math.PI / 180);
+            const endRad = endAngle * (Math.PI / 180);
+            
+            // Calculate start and end points
+            const startX = centerX + radius * Math.cos(startRad);
+            const startY = centerY + radius * Math.sin(startRad);
+            const endX = centerX + radius * Math.cos(endRad);
+            const endY = centerY + radius * Math.sin(endRad);
+            
+            // Calculate sweep angle (from 160° to 20° going anticlockwise)
+            // Since we're going anticlockwise from 160° to 20°, we need to calculate the sweep angle correctly
+            let sweepAngle = startAngle - endAngle;
+            if (sweepAngle < 0) {
+                sweepAngle += 360;
+            }
+            
+            // Determine if we need to use the large arc flag
+            const largeArcFlag = sweepAngle > 180 ? 1 : 0;
+            
+            // For secondary temp gauge, we need to use sweep flag = 0 for anticlockwise direction
+            arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${endX} ${endY}`;
+        } else {
+            // For all other gauges, use the standard createArcPath function
+            arcPath = createArcPath(centerX, centerY, radius, startAngle, endAngle);
+        }
         
         // Set the path
         backgroundPath.setAttribute('d', arcPath);
@@ -222,6 +251,7 @@ export function initSVGPaths() {
         );
         
         // Initialize secondary temperature gauge background
+        // Secondary temp gauge goes from 160° (bottom-right) to 20° (bottom-left)
         initGaugePath(
             'secondary-temp-background',
             centerX,

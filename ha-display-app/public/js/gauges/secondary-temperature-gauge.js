@@ -114,13 +114,13 @@ export function createSecondaryTemperatureMarkers() {
                 // Create markers at 5-degree intervals
                 for (let temp = secondaryTempConfig.min; temp <= secondaryTempConfig.max; temp += 5) {
                     // Calculate angle based on temperature
-                    // Note: We swap start and end angles to maintain the reverse direction
+                    // Use the correct angle direction to match the arc
                     const angle = calculateAngle(
                         temp,
                         secondaryTempConfig.min,
                         secondaryTempConfig.max,
-                        secondaryTempConfig.endAngle,  // Swapped with startAngle
-                        secondaryTempConfig.startAngle  // Swapped with endAngle
+                        secondaryTempConfig.startAngle,  // Use correct startAngle
+                        secondaryTempConfig.endAngle     // Use correct endAngle
                     );
                     const radians = angle * (Math.PI / 180);
                     
@@ -158,8 +158,13 @@ export function createSecondaryTemperatureMarkers() {
                     // Add text to group
                     markerGroup.appendChild(text);
                     
-                    // Position and rotate the group
-                    markerGroup.setAttribute('transform', `translate(${textX}, ${textY}) rotate(${angle})`);
+                    // Calculate text rotation angle to be normal to the arc plus additional rotation
+                    // For radial orientation, we need to adjust by 90 degrees from the angle to the center
+                    // Then add 180 degrees to make the text easier to read (total 270° rotation)
+                    const textRotationAngle = angle + 90 + 180;
+                    
+                    // Position and rotate the group - text now oriented normal to the arc
+                    markerGroup.setAttribute('transform', `translate(${textX}, ${textY}) rotate(${textRotationAngle})`);
                     
                     // Add the marker group to the markers container
                     markers.appendChild(markerGroup);
@@ -188,7 +193,7 @@ export function updateSecondaryTemperatureGauge(temperature) {
         console.log(`Updating secondary temperature gauge to ${temperature}°C`);
         
         // Get the gauge path element
-        const gaugePath = document.getElementById('secondary-temp-gauge-path');
+        const gaugePath = document.getElementById('secondary-temp-arc');
         const valueDisplay = document.getElementById('secondary-temp-value');
         
         if (!gaugePath || !valueDisplay) {
@@ -199,38 +204,39 @@ export function updateSecondaryTemperatureGauge(temperature) {
         // Ensure temperature is within range
         temperature = Math.max(secondaryTempConfig.min, Math.min(temperature, secondaryTempConfig.max));
         
-        // Calculate the angle for the current temperature using the shared utility function
-        // Note: We swap start and end angles to maintain the reverse direction (decreasing angle as temperature increases)
-        const currentAngle = calculateAngle(
+        // Calculate the angle for the current temperature
+        // Use the original angles from config.js
+        const angle = calculateAngle(
             temperature,
             secondaryTempConfig.min,
             secondaryTempConfig.max,
-            secondaryTempConfig.endAngle,  // Swapped with startAngle
-            secondaryTempConfig.startAngle // Swapped with endAngle
+            secondaryTempConfig.startAngle,
+            secondaryTempConfig.endAngle
         );
-        
-        // Convert angle to radians
-        const radians = currentAngle * (Math.PI / 180);
         
         // Get center coordinates and radius
         const centerX = config.gaugeDimensions.centerX;
         const centerY = config.gaugeDimensions.centerY;
         const radius = secondaryTempConfig.arcRadius;
         
-        // Calculate end point of the arc
-        const endX = centerX + radius * Math.cos(radians);
-        const endY = centerY + radius * Math.sin(radians);
-        
-        // Calculate start point (always at the start angle)
+        // For secondary temperature gauge, it should go from 160° (bottom-right) to 20° (bottom-left)
+        // In the SVG angle system: 0°/360° is far left, 270° is top, 180° is far right, 90° is bottom
         const startRad = secondaryTempConfig.startAngle * (Math.PI / 180);
         const startX = centerX + radius * Math.cos(startRad);
         const startY = centerY + radius * Math.sin(startRad);
         
-        // Determine if we need to use the large arc flag
-        const largeArcFlag = Math.abs(currentAngle - secondaryTempConfig.startAngle) > 180 ? 1 : 0;
+        // Calculate end point based on the current temperature (moving from right toward bottom)
+        const endRad = angle * (Math.PI / 180);
+        const endX = centerX + radius * Math.cos(endRad);
+        const endY = centerY + radius * Math.sin(endRad);
         
-        // Create the arc path
-        const arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
+        // Determine if we need to use the large arc flag
+        const largeArcFlag = Math.abs(angle - secondaryTempConfig.startAngle) > 180 ? 1 : 0;
+        
+        // Create the SVG arc path
+        // For the bottom half, we need to use sweepFlag = 0 to draw from top to bottom
+        const sweepFlag = 0; // 0 for clockwise, 1 for counterclockwise
+        const arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
         
         // Update the path
         gaugePath.setAttribute('d', arcPath);

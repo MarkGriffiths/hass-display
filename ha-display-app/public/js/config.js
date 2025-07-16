@@ -38,8 +38,8 @@ export const config = {
     gauges: {
         temperature: {
             min: -10,
-            startAngle: 180,  // Start angle in degrees
-            endAngle: 0,     // End angle in degrees
+            startAngle: 180,  // Start angle in degrees (left)
+            endAngle: 360,    // End angle in degrees (bottom)
             max: 40,
             unit: '°C',
             colorStops: [
@@ -57,8 +57,8 @@ export const config = {
         temperatureSecondary: {
             min: 5,
             max: 40,
-            startAngle: 160,  // Start angle in degrees
-            endAngle: 20,    // End angle in degrees
+            startAngle: 160,    // Start angle in degrees (right)
+            endAngle: 20,    // End angle in degrees (bottom)
             unit: '°C',
             colorStops: [
                 { temp: 5, color: '#00a2ff' },   // Cold (blue)
@@ -74,8 +74,8 @@ export const config = {
         humidity: {
             min: 0,
             max: 100,
-            startAngle: 180,  // Start angle in degrees
-            endAngle: 0,     // End angle in degrees
+            startAngle: 180,  // Start angle in degrees (bottom)
+            endAngle: 360,     // End angle in degrees (right)
             unit: '%',
             colorStops: [
                 { humidity: 0, color: '#FFEB3B' },    // Very dry (yellow)
@@ -88,8 +88,8 @@ export const config = {
         pressure: {
             min: 970,
             max: 1050,
-            startAngle: 180,  // Start angle in degrees
-            endAngle: 0,     // End angle in degrees
+            startAngle: 180,  // Start angle in degrees (bottom)
+            endAngle: 360,   // End angle in degrees (left)
             unit: 'hPa',
             colorStops: [
                 { offset: 0, color: '#9C27B0' },      // Purple (very low pressure)
