@@ -101,23 +101,21 @@ export function createGradientStops(gradientId, colorStops, min, max) {
  */
 export function createScaleMarkers(markersElementId, centerX, centerY, radius, min, max, step, startAngle, endAngle, unit = '') {
     try {
-        console.log(`Creating scale markers for ${markersElementId}`);
-        
         const markers = document.getElementById(markersElementId);
         if (!markers) {
-            console.error(`Markers element ${markersElementId} not found`);
             return;
         }
         
-        // Clear any existing markers
-        while (markers.firstChild) {
-            markers.removeChild(markers.firstChild);
-        }
+        // Clear any existing markers - more efficient approach
+        markers.innerHTML = '';
         
         // Calculate angle per unit
         const valueRange = max - min;
         const angleRange = Math.abs(endAngle - startAngle);
         const degreesPerUnit = angleRange / valueRange;
+        
+        // Create a document fragment to batch DOM operations
+        const fragment = document.createDocumentFragment();
         
         // Create markers at specified step intervals
         for (let value = min; value <= max; value += step) {
@@ -126,9 +124,8 @@ export function createScaleMarkers(markersElementId, centerX, centerY, radius, m
             const radians = angle * (Math.PI / 180);
             
             // Calculate position for text label
-            const textRadius = radius;
-            const textX = centerX + Math.cos(radians) * textRadius;
-            const textY = centerY + Math.sin(radians) * textRadius;
+            const textX = centerX + Math.cos(radians) * radius;
+            const textY = centerY + Math.sin(radians) * radius;
             
             // Create a group for the marker
             const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -143,31 +140,25 @@ export function createScaleMarkers(markersElementId, centerX, centerY, radius, m
             text.setAttribute('font-size', '14');
             text.setAttribute('font-weight', 'bold');
             
-            // Hide the first and last numbers but keep their positions
-            if (value === min || value === max) {
-                text.textContent = '';
-            } else {
-                text.textContent = `${value}${unit}`;
-            }
+            // Only show values between min and max (not at the extremes)
+            text.textContent = (value === min || value === max) ? '' : `${value}${unit}`;
             
             markerGroup.appendChild(text);
             
-            // Position the group at the correct coordinates
-            markerGroup.setAttribute('transform', `translate(${textX}, ${textY})`);
-            
             // Rotate text to be readable
-            // For angles between 90° and 270°, add 180° to prevent upside-down text
             let textAngle = angle + 90;
             if (textAngle > 90 && textAngle < 270) {
                 textAngle += 180;
             }
             
-            // Apply rotation to the entire group
-            const currentTransform = markerGroup.getAttribute('transform');
-            markerGroup.setAttribute('transform', `${currentTransform} rotate(${textAngle})`);
+            // Set transform in one operation
+            markerGroup.setAttribute('transform', `translate(${textX}, ${textY}) rotate(${textAngle})`);
             
-            markers.appendChild(markerGroup);
+            fragment.appendChild(markerGroup);
         }
+        
+        // Add all markers to the DOM in one operation
+        markers.appendChild(fragment);
     } catch (error) {
         console.error(`Error creating scale markers for ${markersElementId}:`, error);
     }

@@ -131,11 +131,11 @@ export function createTemperatureMarkers() {
                     // Create text label
                     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                     text.setAttribute('x', 0);
-                    text.setAttribute('y', 0);
+                    text.setAttribute('y', 2);
                     text.setAttribute('text-anchor', 'middle');
                     text.setAttribute('dominant-baseline', 'middle');
                     text.setAttribute('fill', '#fff');
-                    text.setAttribute('font-size', '14');
+                    text.setAttribute('font-size', '1.2rem');
                     text.setAttribute('font-weight', 'bold');
                     
                     // Hide the first and last numbers but keep their positions

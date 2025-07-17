@@ -135,7 +135,7 @@ export function createSecondaryTemperatureMarkers() {
                     // Create text label
                     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                     text.setAttribute('x', 0);
-                    text.setAttribute('y', 0);
+                    text.setAttribute('y', 1);
                     text.setAttribute('text-anchor', 'middle');
                     text.setAttribute('dominant-baseline', 'middle');
                     text.setAttribute('fill', '#fff');

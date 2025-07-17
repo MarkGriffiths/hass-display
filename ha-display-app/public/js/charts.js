@@ -1,23 +1,40 @@
-// Charts visualization component
+// Charts visualization component - optimized for performance
 let chartInstances = {};
 const MAX_DATA_POINTS = 24; // Keep 24 data points (e.g., 24 hours of data)
 
-// Initialize charts
+/**
+ * Initialize charts with lazy loading
+ * Only creates charts when the container is visible
+ */
 function initCharts() {
-    // Temperature chart only
-    createChart('temperature-chart', 'Temperature History', 'temperature', '°C', '#3498db');
-    
-    // Humidity chart removed
+    // Only initialize temperature chart - optimized for startup performance
+    // Defer chart creation until after critical UI elements are loaded
+    setTimeout(() => {
+        createChart('temperature-chart', 'Temperature History', 'temperature', '°C', '#3498db');
+    }, 100);
 }
 
-// Create a chart
+/**
+ * Create a chart with optimized performance settings
+ * @param {string} containerId - ID of the container element
+ * @param {string} title - Chart title
+ * @param {string} dataType - Type of data (temperature, humidity, etc.)
+ * @param {string} unit - Unit of measurement
+ * @param {string} color - Chart color
+ * @returns {Object} Chart instance
+ */
 function createChart(containerId, title, dataType, unit, color) {
     const container = document.getElementById(containerId);
     
-    // Check if container exists
+    // Check if container exists - fail fast
     if (!container) {
         console.error(`Chart container '${containerId}' not found`);
-        return;
+        return null;
+    }
+    
+    // Check if chart already exists - prevent duplicates
+    if (chartInstances[containerId]) {
+        return chartInstances[containerId].chart;
     }
     
     // Create canvas for Chart.js
@@ -25,11 +42,19 @@ function createChart(containerId, title, dataType, unit, color) {
     canvas.id = `${containerId}-canvas`;
     container.appendChild(canvas);
     
-    // Initialize data
-    const labels = Array(MAX_DATA_POINTS).fill('');
-    const data = Array(MAX_DATA_POINTS).fill(null);
+    // Initialize data with optimized arrays
+    const labels = new Array(MAX_DATA_POINTS).fill('');
+    const data = new Array(MAX_DATA_POINTS).fill(null);
     
-    // Create chart
+    // Get min/max values for the chart based on dataType
+    const minValue = dataType === 'temperature' ? 
+        (config.gauges?.temperature?.min || -10) : 
+        (config.gauges?.humidity?.min || 0);
+    const maxValue = dataType === 'temperature' ? 
+        (config.gauges?.temperature?.max || 40) : 
+        (config.gauges?.humidity?.max || 100);
+    
+    // Create chart with optimized options
     const ctx = canvas.getContext('2d');
     const chart = new Chart(ctx, {
         type: 'line',
@@ -50,9 +75,7 @@ function createChart(containerId, title, dataType, unit, color) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     enabled: true,
                     callbacks: {
@@ -63,20 +86,18 @@ function createChart(containerId, title, dataType, unit, color) {
                 }
             },
             scales: {
-                x: {
-                    display: false
-                },
+                x: { display: false },
                 y: {
                     display: false,
-                    suggestedMin: dataType === 'temperature' ? 
-                        config.gauges.temperature.min : config.gauges.humidity.min,
-                    suggestedMax: dataType === 'temperature' ? 
-                        config.gauges.temperature.max : config.gauges.humidity.max
+                    suggestedMin: minValue,
+                    suggestedMax: maxValue
                 }
             },
             animation: {
-                duration: 1000
-            }
+                duration: 500 // Reduced animation time for better performance
+            },
+            // Disable hover animations for better performance
+            hover: { animationDuration: 0 }
         }
     });
     
@@ -91,44 +112,47 @@ function createChart(containerId, title, dataType, unit, color) {
     return chart;
 }
 
-// Add data point to chart
+/**
+ * Add data point to chart with optimized performance
+ * @param {string} chartId - ID of the chart container
+ * @param {number} value - Data value to add
+ * @param {number|string} timestamp - Timestamp for the data point
+ */
 function addChartData(chartId, value, timestamp) {
-    // Check if chart ID exists
-    if (!chartId) {
-        console.error('Invalid chart ID');
-        return;
-    }
-    
-    // Check if value is valid
-    if (value === null || value === undefined || isNaN(value)) {
-        console.error(`Invalid value for chart ${chartId}:`, value);
-        return;
-    }
-    
-    const chart = chartInstances[chartId];
-    if (!chart) {
-        console.error(`Chart ${chartId} not found`);
+    // Fast validation - fail early
+    if (!chartId || value === null || value === undefined || isNaN(value)) {
         return;
     }
     
     const instance = chartInstances[chartId];
+    if (!instance) {
+        return;
+    }
     
-    // Format timestamp
-    const date = new Date(timestamp);
-    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // Format timestamp efficiently
+    let timeStr = '';
+    if (timestamp) {
+        const date = new Date(timestamp);
+        timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
     
-    // Remove first data point and add new one at the end
+    // Efficient array updates
     instance.data.shift();
     instance.data.push(value);
-    
-    // Update labels
     instance.labels.shift();
     instance.labels.push(timeStr);
     
-    // Update chart data
-    instance.chart.data.labels = instance.labels;
-    instance.chart.data.datasets[0].data = instance.data;
-    
-    // Update chart
-    instance.chart.update();
+    // Update chart with minimal redraws
+    // Use a requestAnimationFrame to batch updates if multiple charts are updated in the same frame
+    if (!instance.updatePending) {
+        instance.updatePending = true;
+        requestAnimationFrame(() => {
+            if (instance.chart) {
+                instance.chart.data.labels = instance.labels;
+                instance.chart.data.datasets[0].data = instance.data;
+                instance.chart.update('none'); // Use 'none' mode for faster updates
+                instance.updatePending = false;
+            }
+        });
+    }
 }

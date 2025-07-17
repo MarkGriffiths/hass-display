@@ -62,43 +62,18 @@ export function createHumidityMarkers() {
         try {
             console.log('Creating humidity scale markers...');
             let retryCount = 0;
-            const maxRetries = 15; // Increased max retries
+            const maxRetries = 10;
             
             // Function to attempt to create markers
             const attemptCreate = () => {
-                // Verify document ready state
-                console.log(`Document ready state: ${document.readyState}`);
-                
                 // Try to get the markers element
                 const markers = document.getElementById('humidity-markers');
                 if (!markers) {
                     retryCount++;
-                    console.error(`Humidity markers element not found (attempt ${retryCount}/${maxRetries})`);
-                    
-                    // Check if SVG exists
-                    const svg = document.querySelector('.gauge-svg');
-                    if (!svg) {
-                        console.error('SVG container not found!');
-                    } else {
-                        console.log('SVG container found');
-                    }
-                    
-                    // Try to find any gauge markers
-                    const allMarkers = document.querySelectorAll('.gauge-markers');
-                    console.log(`Found ${allMarkers.length} elements with class 'gauge-markers':`);
-                    allMarkers.forEach(el => {
-                        console.log(`- ${el.id || 'no-id'} (${el.tagName})`);
-                    });
-                    
-                    // If we haven't exceeded max retries, try again
                     if (retryCount < maxRetries) {
-                        // Increase delay with each retry
-                        const delay = 200 * retryCount;
-                        console.log(`Retrying in ${delay}ms...`);
-                        setTimeout(attemptCreate, delay);
+                        setTimeout(attemptCreate, 100);
                         return;
                     }
-                    
                     console.error('Maximum retries reached. Could not find humidity markers element.');
                     resolve(false);
                     return;
@@ -109,8 +84,9 @@ export function createHumidityMarkers() {
                     markers.removeChild(markers.firstChild);
                 }
                 
-                // Create markers at 20% intervals
-                for (let humidity = humidityConfig.minHumidity; humidity <= humidityConfig.maxHumidity; humidity += 20) {
+                // Create markers for humidity scale
+                const step = 10; // Show every 10% humidity
+                for (let humidity = humidityConfig.minHumidity; humidity <= humidityConfig.maxHumidity; humidity += step) {
                     // Calculate angle based on humidity
                     const angle = calculateAngle(
                         humidity,
@@ -121,56 +97,79 @@ export function createHumidityMarkers() {
                     );
                     const radians = angle * (Math.PI / 180);
                     
-                    // Calculate position for text label
+                    // Calculate position for text label and scale line
                     const textRadius = config.gaugeDimensions.humidityRadius;
+                    const innerRadius = config.gaugeDimensions.humidityRadius - 8; // Inner point for scale line
+                    const outerRadius = config.gaugeDimensions.humidityRadius + 8; // Outer point for scale line
+                    
+                    // Calculate positions
                     const textX = config.gaugeDimensions.centerX + Math.cos(radians) * textRadius;
                     const textY = config.gaugeDimensions.centerY + Math.sin(radians) * textRadius;
+                    const innerX = config.gaugeDimensions.centerX + Math.cos(radians) * innerRadius;
+                    const innerY = config.gaugeDimensions.centerY + Math.sin(radians) * innerRadius;
+                    const outerX = config.gaugeDimensions.centerX + Math.cos(radians) * outerRadius;
+                    const outerY = config.gaugeDimensions.centerY + Math.sin(radians) * outerRadius;
                     
                     // Create a group for the marker
                     const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                     
+                    // Create scale line (for all humidity values)
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', innerX);
+                    line.setAttribute('y1', innerY);
+                    line.setAttribute('x2', outerX);
+                    line.setAttribute('y2', outerY);
+                    line.setAttribute('stroke', 'rgba(255, 255, 255, 0.5)');
+                    line.setAttribute('stroke-width', humidity % 50 === 0 ? '1.5' : '0.5'); // Thicker lines for major ticks
+                    
+                    // Add line to markers container
+                    markers.appendChild(line);
+                    
                     // Create text label
                     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                     text.setAttribute('x', 0);
-                    text.setAttribute('y', 0);
+                    text.setAttribute('y', 1);
                     text.setAttribute('text-anchor', 'middle');
                     text.setAttribute('dominant-baseline', 'middle');
                     text.setAttribute('fill', '#fff');
-                    text.setAttribute('font-size', '14');
-                    text.setAttribute('font-weight', 'bold');
+                    text.setAttribute('font-size', '0.6rem');
                     
-                    // Hide the first and last numbers but keep their positions
-                    if (humidity === humidityConfig.minHumidity || humidity === humidityConfig.maxHumidity) {
-                        text.setAttribute('opacity', '0');
-                    } else {
+                    // Only show certain humidity values to avoid crowding
+                    // Show every 20% but NOT the min/max values
+                    const shouldShow = humidity % 20 === 0 && 
+                                       humidity !== humidityConfig.minHumidity && 
+                                       humidity !== humidityConfig.maxHumidity;
+                    
+                    if (shouldShow) {
                         text.setAttribute('opacity', '1');
+                        // Set the text content - just the humidity value
+                        text.textContent = `${humidity}%`;
+                        
+                        // Add text shadow for better readability against gradient
+                        text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size: 0.6rem;');
+                        
+                        // Add text to group
+                        markerGroup.appendChild(text);
+                        
+                        // Position and rotate the group with 90° rotation for text
+                        // This makes the text perpendicular to the radius
+                        const textAngle = angle + 90; // Rotate text by 90°
+                        markerGroup.setAttribute('transform', `translate(${textX}, ${textY}) rotate(${textAngle})`);
+                        
+                        // Add the marker group to the markers container
+                        markers.appendChild(markerGroup);
                     }
-                    
-                    // Add text shadow for better readability against gradient
-                    text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.8);');
-                    
-                    // Set the text content
-                    text.textContent = `${humidity}%`;
-                    
-                    // Add text to group
-                    markerGroup.appendChild(text);
-                    
-                    // Position and rotate the group
-                    markerGroup.setAttribute('transform', `translate(${textX}, ${textY}) rotate(${angle})`);
-                    
-                    // Add the marker group to the markers container
-                    markers.appendChild(markerGroup);
                 }
                 
                 console.log('Humidity scale markers created successfully');
                 resolve(true);
             };
             
-            // Start the attempt process
+            // Start the creation process
             attemptCreate();
             
         } catch (error) {
-            console.error('Error creating humidity scale markers:', error);
+            console.error('Error creating humidity markers:', error);
             resolve(false);
         }
     });

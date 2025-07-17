@@ -26,101 +26,74 @@ function checkDOMElementsReady() {
         'pressure-arc'
     ];
     
-    console.log('Checking DOM elements...');
-    console.log('Document ready state:', document.readyState);
-    
-    // Log all SVG elements for debugging
-    const svgElements = document.querySelectorAll('svg *[id]');
-    console.log('Found SVG elements with IDs:');
-    svgElements.forEach(el => {
-        console.log(`- ${el.id} (${el.tagName})`);
-    });
-    
     let allElementsReady = true;
+    const missingElements = [];
     
     for (const elementId of requiredElements) {
         const element = document.getElementById(elementId);
         if (!element) {
-            console.log(`Missing DOM element: ${elementId}`);
+            missingElements.push(elementId);
             allElementsReady = false;
-        } else {
-            console.log(`Found DOM element: ${elementId}`);
         }
+    }
+    
+    if (!allElementsReady) {
+        console.log(`Missing DOM elements: ${missingElements.join(', ')}`);
     }
     
     return allElementsReady;
 }
 
 /**
- * Wait for DOM elements to be available
+ * Wait for DOM elements to be available - optimized version
  * @param {string[]} elementIds - Array of element IDs to wait for
  * @param {number} maxAttempts - Maximum number of attempts
  * @param {number} interval - Interval between attempts in ms
  * @returns {Promise<boolean>} - Promise that resolves to true if all elements are found
  */
-async function waitForDOMElements(elementIds, maxAttempts = 20, interval = 250) {
+async function waitForDOMElements(elementIds, maxAttempts = 2, interval = 50) {
     return new Promise((resolve) => {
         let attempts = 0;
         
         function checkElements() {
             attempts++;
-            console.log(`Checking for DOM elements (attempt ${attempts}/${maxAttempts})...`);
             
-            // Check if all elements exist
-            const missing = [];
-            const found = [];
-            
-            for (const id of elementIds) {
-                const element = document.getElementById(id);
-                if (!element) {
-                    missing.push(id);
-                } else {
-                    found.push(id);
-                }
-            }
+            // Use filter for a single pass through the array
+            const missing = elementIds.filter(id => !document.getElementById(id));
             
             if (missing.length === 0) {
-                console.log('All required DOM elements found!');
                 resolve(true);
                 return;
             }
             
-            console.log(`Found elements: ${found.join(', ')}`);
-            console.log(`Missing elements: ${missing.join(', ')}`);
-            
             // If we've reached max attempts, resolve with false
             if (attempts >= maxAttempts) {
-                console.error(`Failed to find all DOM elements after ${maxAttempts} attempts`);
+                console.error(`Failed to find DOM elements after ${maxAttempts} attempts`);
                 resolve(false);
                 return;
             }
             
-            // Try again after interval
+            // Try again after interval - use shorter interval for faster startup
             setTimeout(checkElements, interval);
         }
         
-        // Start checking
+        // Start checking immediately
         checkElements();
     });
 }
 
 /**
- * Ensure the DOM is fully loaded and ready
+ * Ensure the DOM is fully loaded and ready - optimized version
  * @returns {Promise<void>} Promise that resolves when DOM is ready
  */
-function ensureDOMReady() {
+async function ensureDOMReady() {
     return new Promise(resolve => {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            console.log(`Document already ready (${document.readyState})`);
-            // Still add a small delay to ensure all rendering is complete
-            setTimeout(resolve, 100);
+            // Resolve immediately if DOM is already ready
+            resolve();
         } else {
-            console.log('Waiting for DOMContentLoaded event...');
-            document.addEventListener('DOMContentLoaded', () => {
-                console.log('DOMContentLoaded fired');
-                // Add a small delay after DOMContentLoaded to ensure all rendering is complete
-                setTimeout(resolve, 100);
-            });
+            // Use a single event listener with { once: true } for automatic cleanup
+            document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
         }
     });
 }
@@ -131,23 +104,11 @@ function ensureDOMReady() {
  */
 export async function initGauges() {
     try {
-        console.log('Initializing all gauges...');
-        
-        // First, ensure DOM is fully loaded
-        console.log('Ensuring DOM is ready...');
+        // Ensure DOM is fully loaded - this is a fast check
         await ensureDOMReady();
         
-        // Log the document ready state
-        console.log('Document ready state:', document.readyState);
-        
-        // Log all SVG elements to help with debugging
-        const svgElements = document.querySelectorAll('svg *[id]');
-        console.log(`Found ${svgElements.length} SVG elements with IDs:`);
-        svgElements.forEach(el => {
-            console.log(`- ${el.id} (${el.tagName})`);
-        });
-        
         // Wait for all required DOM elements to be available
+        // Using optimized parameters (fewer attempts, shorter interval)
         const requiredElements = [
             'temperature-markers',
             'secondary-temp-markers',
@@ -159,56 +120,47 @@ export async function initGauges() {
             'pressure-arc'
         ];
         
-        console.log('Waiting for DOM elements to be available...');
-        const elementsReady = await waitForDOMElements(requiredElements, 30, 200); // More retries, shorter interval
+        const elementsReady = await waitForDOMElements(requiredElements, 2, 50);
         
         if (!elementsReady) {
-            console.error('Failed to find all required DOM elements');
+            console.error('Failed to find required DOM elements');
             return false;
         }
         
         // Initialize SVG paths
-        console.log('Initializing SVG paths...');
         initSVGPaths();
         
         // Create gradients
-        console.log('Creating gradients...');
         createTemperatureGradient();
         createSecondaryTemperatureGradient();
         createHumidityGradient();
         createPressureGradient();
         
-        // Add a small delay to ensure all DOM operations have completed
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Create scale markers with retry logic - only for temperature gauges
-        console.log('Creating temperature markers...');
+        // Create scale markers
         const tempMarkersResult = await createTemperatureMarkers();
-        console.log('Temperature markers result:', tempMarkersResult);
         
-        console.log('Creating secondary temperature markers...');
         const secondaryTempMarkersResult = await createSecondaryTemperatureMarkers();
-        console.log('Secondary temperature markers result:', secondaryTempMarkersResult);
+        const humidityMarkersResult = await createHumidityMarkers();
+        const pressureMarkersResult = await createPressureScaleMarkers();
         
-        // Skip creating humidity and pressure markers as per requirements
-        console.log('Skipping humidity markers as per requirements');
-        const humidityMarkersResult = true;
+        // Initialize gauge paths
+        const centerX = config.gaugeDimensions.centerX;
+        const centerY = config.gaugeDimensions.centerY;
         
-        console.log('Skipping pressure markers as per requirements');
-        const pressureMarkersResult = true;
+        // Use class names for all gauge paths
+        // The class names must match exactly what's in the HTML
+        // For the temperature gauge
+        initGaugePath('gauge-arc', centerX, centerY, config.gaugeDimensions.mainRadius, config.gauges.temperature.startAngle, config.gauges.temperature.endAngle);
+        // For the secondary temperature gauge
+        initGaugePath('secondary-temp-arc', centerX, centerY, config.gaugeDimensions.secondaryRadius, config.gauges.temperatureSecondary.startAngle, config.gauges.temperatureSecondary.endAngle);
+        // For the humidity gauge
+        initGaugePath('humidity-arc', centerX, centerY, config.gaugeDimensions.humidityRadius, config.gauges.humidity.startAngle, config.gauges.humidity.endAngle);
+        // For the pressure gauge
+        initGaugePath('pressure-arc', centerX, centerY, config.gaugeDimensions.pressureRadius, config.gauges.pressure.startAngle, config.gauges.pressure.endAngle);
         
-        // Check if all required markers were created successfully
-        if (tempMarkersResult && secondaryTempMarkersResult) {
-            console.log('All gauges initialized successfully');
-            return true;
-        } else {
-            console.warn('Some gauge markers could not be initialized');
-            return false;
-        }
+        return true;
     } catch (error) {
         console.error('Error initializing gauges:', error);
         return false;
     }
 }
-
-

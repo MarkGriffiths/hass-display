@@ -86,8 +86,8 @@ export const config = {
             ]
         },
         pressure: {
-            min: 970,
-            max: 1050,
+            min: 950,
+            max: 1040,
             startAngle: 180,  // Start angle in degrees (bottom)
             endAngle: 360,   // End angle in degrees (left)
             unit: 'hPa',

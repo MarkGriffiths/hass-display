@@ -5,20 +5,74 @@ import { connectToHA, addEntityListener } from './ha-connection.js';
 import { initTemperatureGauge, updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge } from './gauge-manager.js';
 import { testGauges } from './test-gauges.js';
 
-// Wait for DOM to be fully loaded and ready
+// Wait for DOM to be fully loaded and ready - optimized version
 function waitForDOMReady() {
     return new Promise(resolve => {
-        if (document.readyState === 'complete') {
-            console.log('Document already fully loaded');
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            // Resolve immediately if DOM is already ready
             resolve();
         } else {
-            console.log(`Document not fully loaded, current state: ${document.readyState}`);
-            window.addEventListener('load', () => {
-                console.log('Window load event fired, document fully loaded');
-                resolve();
-            });
+            // Use a single event listener for DOMContentLoaded
+            window.addEventListener('DOMContentLoaded', resolve, { once: true });
         }
     });
+}
+
+// Show configuration error
+function showConfigError(errorMessage) {
+    console.error('Configuration error:', errorMessage);
+    
+    // Hide the main content
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+        mainContent.style.display = 'none';
+    }
+    
+    // Show the error container
+    const errorContainer = document.getElementById('error-container');
+    if (errorContainer) {
+        errorContainer.style.display = 'flex';
+        
+        // Set the error message
+        const errorMessageElement = document.getElementById('error-message');
+        if (errorMessageElement) {
+            errorMessageElement.textContent = errorMessage;
+        }
+        
+        // Set up the setup button
+        const setupButton = document.getElementById('setup-button');
+        if (setupButton) {
+            setupButton.addEventListener('click', function() {
+                window.location.href = '/setup.html';
+            });
+        }
+    }
+}
+
+// Show general error message
+function showError(errorMessage) {
+    console.error('Error:', errorMessage);
+    
+    // Use the same error container as config errors
+    const errorContainer = document.getElementById('error-container');
+    if (errorContainer) {
+        // Hide the main content
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.style.display = 'none';
+        }
+        
+        errorContainer.style.display = 'flex';
+        
+        // Set the error message
+        const errorMessageElement = document.getElementById('error-message');
+        if (errorMessageElement) {
+            errorMessageElement.textContent = errorMessage;
+        }
+    } else {
+        // Fallback to alert if error container doesn't exist
+        alert('Error: ' + errorMessage);
+    }
 }
 
 // Initialize the application when DOM is ready
@@ -90,142 +144,44 @@ async function initApp() {
         console.log('Using temperature entity:', config.entities.temperature);
         console.log('Using humidity entity:', config.entities.humidity);
         
-        // Initialize UI components with proper DOM ready handling
-        // Make sure DOM is fully loaded before initializing gauges
+        // Initialize UI components with optimized DOM handling
         const initializeGauges = async () => {
-            console.log('Initializing gauges...');
-            
-            // First check if all required DOM elements exist
-            const requiredElements = [
-                'temperature-markers',
-                'secondary-temp-markers',
-                'humidity-markers',
-                'pressure-markers',
-                'temperature-arc',
-                'secondary-temp-arc',
-                'humidity-arc',
-                'pressure-arc'
-            ];
-            
-            // Log the presence of each required element and SVG structure
-            console.log('Checking for required DOM elements:');
-            const missingElements = [];
-            
-            // Log the entire SVG structure to help diagnose issues
+            // Fast check for SVG container - fail early if missing
             const svgElement = document.querySelector('.gauge-svg');
-            if (svgElement) {
-                console.log('Found SVG element with class .gauge-svg');
-                console.log('SVG children count:', svgElement.childNodes.length);
-                
-                // Log all elements with IDs in the SVG
-                const svgElementsWithId = svgElement.querySelectorAll('[id]');
-                console.log(`Found ${svgElementsWithId.length} SVG elements with IDs:`);
-                svgElementsWithId.forEach(el => {
-                    console.log(`- ${el.id} (${el.tagName})`);
-                });
-            } else {
-                console.error('SVG element with class .gauge-svg not found!');
-            }
-            
-            // Check for each required element
-            requiredElements.forEach(id => {
-                const element = document.getElementById(id);
-                if (!element) {
-                    console.error(`Required element #${id} not found in DOM`);
-                    missingElements.push(id);
-                } else {
-                    console.log(`Required element #${id} found in DOM`);
-                }
-            });
-            
-            if (missingElements.length > 0) {
-                console.error(`Missing ${missingElements.length} required elements: ${missingElements.join(', ')}`);
-                console.error('Cannot initialize gauges without required DOM elements');
+            if (!svgElement) {
+                console.error('SVG container not found - gauge initialization aborted');
                 return false;
             }
             
+            // We'll let the gauge initializer handle the detailed element checks
+            // This avoids redundant DOM queries and improves startup performance
+            
             try {
                 // Use the gauge initializer which now returns a Promise
-                console.log('Calling initTemperatureGauge()...');
                 const result = await initTemperatureGauge();
-                if (result) {
-                    console.log('All gauges initialized successfully');
-                    return true;
-                } else {
-                    console.error('Gauge initialization returned false');
-                    return false;
-                }
+                return result;
             } catch (error) {
                 console.error('Failed to initialize gauges:', error);
                 return false;
             }
         };
         
-        // Use a more robust approach to ensure DOM is fully loaded
-        const waitForFullLoad = () => {
-            return new Promise(resolve => {
-                // Check if document is already complete
-                if (document.readyState === 'complete') {
-                    console.log('Document already fully loaded (readyState: complete)');
-                    // Still add a small delay to ensure all rendering is complete
-                    setTimeout(resolve, 200);
-                } else {
-                    console.log(`Document not fully loaded, current state: ${document.readyState}`);
-                    
-                    // Listen for both DOMContentLoaded and load events
-                    const domContentLoadedHandler = () => {
-                        console.log('DOMContentLoaded event fired');
-                    };
-                    
-                    const loadHandler = () => {
-                        console.log('Window load event fired, document fully loaded');
-                        document.removeEventListener('DOMContentLoaded', domContentLoadedHandler);
-                        // Add a delay after load to ensure all DOM elements are processed
-                        setTimeout(resolve, 200);
-                    };
-                    
-                    document.addEventListener('DOMContentLoaded', domContentLoadedHandler);
-                    window.addEventListener('load', loadHandler);
-                }
-            });
-        };
-        
-        // Wait for full load and then initialize with retry logic
+        // Initialize gauges immediately with optimized approach
         (async () => {
             try {
-                console.log('Waiting for document to be fully loaded...');
-                await waitForFullLoad();
+                console.log('Initializing gauges...');
                 
-                // Add a delay after full load to ensure all DOM elements are processed
-                console.log('Waiting 1500ms before initializing gauges...');
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // Try to initialize gauges with retry logic
-                let success = false;
-                let attempts = 0;
-                const maxAttempts = 8; // Increased max attempts
-                
-                while (!success && attempts < maxAttempts) {
-                    attempts++;
-                    console.log(`Attempting to initialize gauges (attempt ${attempts}/${maxAttempts})...`);
-                    success = await initializeGauges();
-                    
-                    if (!success && attempts < maxAttempts) {
-                        // Exponential backoff for retries
-                        const delay = Math.min(1000 * Math.pow(1.5, attempts), 10000); // Cap at 10 seconds
-                        console.log(`Initialization failed, retrying in ${delay}ms...`);
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    }
-                }
+                // Single attempt initialization with minimal error handling
+                const success = await initializeGauges();
                 
                 if (success) {
-                    console.log('Gauge initialization completed successfully after', attempts, 'attempts');
+                    console.log('Gauge initialization completed successfully');
                 } else {
-                    console.error('Failed to initialize gauges after', maxAttempts, 'attempts');
+                    console.error('Failed to initialize gauges');
                     showError('Failed to initialize gauges. Please refresh the page.');
                 }
             } catch (error) {
-                console.error('Error during gauge initialization process:', error);
+                console.error('Error during gauge initialization:', error);
                 showError('Error initializing gauges: ' + error.message);
             }
         })();
@@ -362,35 +318,7 @@ function validateConfiguration() {
     return validateConfig(config);
 }
 
-// Show configuration error
-function showConfigError(errorMessage) {
-    // Create or update error element
-    let errorElement = document.getElementById('connection-error');
-    
-    if (!errorElement) {
-        errorElement = document.createElement('div');
-        errorElement.id = 'connection-error';
-        errorElement.className = 'error-message';
-        document.body.appendChild(errorElement);
-    }
-    
-    errorElement.innerHTML = `
-        <div class="error-content">
-            <h2>Configuration Error</h2>
-            <p>${errorMessage}</p>
-            <p>Please update your configuration settings.</p>
-            <button onclick="window.location.href='/setup.html'">Go to Setup</button>
-        </div>
-    `;
-    errorElement.style.display = 'flex';
-    
-    // Update connection status
-    const connectionStatus = document.getElementById('connection-status');
-    if (connectionStatus) {
-        connectionStatus.textContent = 'Configuration Error';
-        connectionStatus.className = 'error';
-    }
-}
+// Function removed to fix duplicate declaration
 
 // Update connection status in the UI
 function updateConnectionStatus(connected, message) {
