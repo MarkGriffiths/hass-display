@@ -8,32 +8,28 @@ import { initGauges } from './gauges/gauge-initializer.js';
 import { 
     createTemperatureGradient,
     createTemperatureMarkers,
-    updateTemperatureGauge,
-    testTemperatureGauge
+    updateTemperatureGauge
 } from './gauges/temperature-gauge.js';
 
 // Import secondary temperature gauge functions
 import { 
     createSecondaryTemperatureGradient,
     createSecondaryTemperatureMarkers,
-    updateSecondaryTemperatureGauge,
-    testSecondaryTemperatureGauge
+    updateSecondaryTemperatureGauge
 } from './gauges/secondary-temperature-gauge.js';
 
 // Import humidity gauge functions
 import { 
     createHumidityGradient,
     createHumidityMarkers,
-    updateHumidityGauge,
-    testHumidityGauge
+    updateHumidityGauge
 } from './gauges/humidity-gauge.js';
 
 // Import pressure gauge functions
 import { 
     createPressureGradient,
     createPressureScaleMarkers,
-    updatePressureGauge,
-    testPressureGauge
+    updatePressureGauge
 } from './gauges/pressure-gauge.js';
 
 /**

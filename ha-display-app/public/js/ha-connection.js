@@ -1,6 +1,6 @@
 // Home Assistant connection handling - simplified approach matching working minimal test
 import { config } from './config.js';
-import { updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge } from './temperature-gauge.js';
+import { updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge } from './gauge-manager.js';
 
 let connection = null;
 let states = {};

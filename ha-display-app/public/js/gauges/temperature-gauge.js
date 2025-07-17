@@ -245,38 +245,4 @@ export function updateTemperatureGauge(temperature) {
     }
 }
 
-/**
- * Test function to animate the temperature gauge
- */
-export function testTemperatureGauge() {
-    try {
-        console.log('Testing temperature gauge...');
-        
-        // Store the current temperature to restore later
-        const currentTemp = document.getElementById('temperature-value').textContent;
-        
-        // Test with values across the full range
-        let temp = tempConfig.minTemp;
-        const tempStep = 1;
-        const interval = 50; // milliseconds
-        
-        // Update the gauge with each value at intervals
-        const intervalId = setInterval(() => {
-            updateTemperatureGauge(temp);
-            
-            temp += tempStep;
-            if (temp > tempConfig.maxTemp) {
-                clearInterval(intervalId);
-                
-                // Restore the original temperature after a delay
-                setTimeout(() => {
-                    updateTemperatureGauge(parseFloat(currentTemp) || 20);
-                }, 1000);
-                
-                console.log('Temperature gauge test complete');
-            }
-        }, interval);
-    } catch (error) {
-        console.error('Error testing temperature gauge:', error);
-    }
-}
+// Test function removed - consolidated in test-gauges.js

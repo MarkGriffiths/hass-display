@@ -250,38 +250,4 @@ export function updateSecondaryTemperatureGauge(temperature) {
     }
 }
 
-/**
- * Test function to demonstrate the secondary temperature gauge
- */
-export function testSecondaryTemperatureGauge() {
-    try {
-        console.log('Testing secondary temperature gauge...');
-        
-        // Store the current temperature to restore later
-        const currentTemp = document.getElementById('secondary-temp-value').textContent;
-        
-        // Test with values across the full range
-        let temp = secondaryTempConfig.min;
-        const steps = 50;
-        const tempStep = (secondaryTempConfig.max - secondaryTempConfig.min) / steps;
-        
-        // Update the gauge with each value at intervals
-        const intervalId = setInterval(() => {
-            updateSecondaryTemperatureGauge(temp);
-            
-            temp += tempStep;
-            if (temp > secondaryTempConfig.max) {
-                clearInterval(intervalId);
-                
-                // Restore the original temperature after a delay
-                setTimeout(() => {
-                    updateSecondaryTemperatureGauge(parseFloat(currentTemp) || 20);
-                }, 1000);
-                
-                console.log('Secondary temperature gauge test complete');
-            }
-        }, 100);
-    } catch (error) {
-        console.error('Error testing secondary temperature gauge:', error);
-    }
-}
+// Test function removed - consolidated in test-gauges.js

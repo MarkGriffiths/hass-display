@@ -269,44 +269,4 @@ export function updateHumidityGauge(humidity) {
     });
 }
 
-/**
- * Test function to animate the humidity gauge
- * @returns {Promise<boolean>} Promise that resolves to true if successful, false otherwise
- */
-export async function testHumidityGauge() {
-    try {
-        console.log('Testing humidity gauge...');
-        
-        // Store the current humidity to restore later
-        const valueElement = document.getElementById('humidity-value');
-        const currentHumidity = valueElement ? valueElement.textContent : '50';
-        
-        // Test with values across the full range
-        let humidity = humidityConfig.minHumidity;
-        const steps = 50;
-        const humidityStep = (humidityConfig.maxHumidity - humidityConfig.minHumidity) / steps;
-        
-        // Create a promise that resolves when the animation is complete
-        return new Promise((resolve) => {
-            // Update the gauge with each value at intervals
-            const intervalId = setInterval(async () => {
-                await updateHumidityGauge(humidity);
-                
-                humidity += humidityStep;
-                if (humidity > humidityConfig.maxHumidity) {
-                    clearInterval(intervalId);
-                    
-                    // Restore the original humidity after a delay
-                    setTimeout(async () => {
-                        await updateHumidityGauge(parseFloat(currentHumidity) || 50);
-                        console.log('Humidity gauge test complete');
-                        resolve(true);
-                    }, 1000);
-                }
-            }, 50);
-        });
-    } catch (error) {
-        console.error('Error testing humidity gauge:', error);
-        return false;
-    }
-}
+// Test function removed - consolidated in test-gauges.js

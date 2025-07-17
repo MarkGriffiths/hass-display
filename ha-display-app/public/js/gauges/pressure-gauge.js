@@ -269,44 +269,4 @@ export function updatePressureGauge(pressure) {
     });
 }
 
-/**
- * Test function to animate the pressure gauge
- * @returns {Promise<boolean>} Promise that resolves to true if successful, false otherwise
- */
-export async function testPressureGauge() {
-    try {
-        console.log('Testing pressure gauge...');
-        
-        // Store the current pressure to restore later
-        const valueElement = document.getElementById('pressure-value');
-        const currentPressure = valueElement ? valueElement.textContent : '1013';
-        
-        // Test with values across the full range
-        let pressure = pressureConfig.minPressure;
-        const steps = 50;
-        const pressureStep = (pressureConfig.maxPressure - pressureConfig.minPressure) / steps;
-        
-        // Create a promise that resolves when the animation is complete
-        return new Promise((resolve) => {
-            // Update the gauge with each value at intervals
-            const intervalId = setInterval(async () => {
-                await updatePressureGauge(pressure);
-                
-                pressure += pressureStep;
-                if (pressure > pressureConfig.maxPressure) {
-                    clearInterval(intervalId);
-                    
-                    // Restore the original pressure after a delay
-                    setTimeout(async () => {
-                        await updatePressureGauge(parseFloat(currentPressure) || 1013);
-                        console.log('Pressure gauge test complete');
-                        resolve(true);
-                    }, 1000);
-                }
-            }, 50);
-        });
-    } catch (error) {
-        console.error('Error testing pressure gauge:', error);
-        return false;
-    }
-}
+// Test function removed - consolidated in test-gauges.js
