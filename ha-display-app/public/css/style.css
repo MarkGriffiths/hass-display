@@ -162,50 +162,102 @@ body {
 /* Center content */
 .gauge-center {
     position: absolute;
-    top: 50%;
+    top: 58%;
     left: 50%;
     transform: translate(-50%, -50%);
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
+.conditions-center {
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    align-items: center;
+    font-size: 6rem;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.outdoor-display {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.indoor-display {
+    margin-top: 0.3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.temperature-container {
+    margin-right: 1rem;
+}
+
+.other-container {
+    line-height: 1.2rem;
+    font-size: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+/* Temperature display */
 .temperature-display {
-    text-align: center;
-    line-height: 1;
+    margin-bottom: 10px;
 }
 
 .temperature-value {
     font-size: 4rem;
+    line-height: 4rem;
     font-weight: bold;
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .temperature-unit {
     font-size: 2rem;
     font-weight: normal;
     color: #cccccc;
-    vertical-align: top;
-    margin-left: 0.2rem;
+    margin-left: 5px;
 }
 
-/* Temperature display */
-.temperature-display {
-    font-size: 72px;
+.temperature-trend {
+    font-size: 2rem;
+    color: #ccc;
+}
+
+/* Secondary Temperature display */
+.secondary-temp-display {
+
+}
+
+.secondary-temp-value {
+    font-size: 3rem;
     font-weight: bold;
     color: #fff;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-.temperature-unit {
-    font-size: 36px;
+.secondary-temp-unit {
+    font-size: 1.5rem;
     font-weight: normal;
-    margin-left: 5px;
+    color: #cccccc;
+    margin-left: 3px;
+}
+
+.secondary-temp-trend {
+    font-size: 1.5rem;
+    color: #ccc;
 }
 
 /* Humidity display */
 .humidity-display {
-    font-size: 36px;
     font-weight: bold;
     color: #fff;
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -213,48 +265,28 @@ body {
 }
 
 .humidity-unit {
-    font-size: 24px;
     font-weight: normal;
+    color: #cccccc;
     margin-left: 3px;
 }
 
 /* Pressure display */
 .pressure-display {
-    font-size: 28px;
     font-weight: bold;
     color: #fff;
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .pressure-unit {
-    font-size: 18px;
     font-weight: normal;
+    color: #cccccc;
     margin-left: 3px;
 }
 
-/* Secondary Temperature display */
-.secondary-temp-display {
-    position: absolute;
-    bottom: 60px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    font-size: 24px;
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+.pressure-trend {
+    color: #aaa;
 }
 
-.secondary-temp-value {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.secondary-temp-unit {
-    font-size: 16px;
-    font-weight: normal;
-    margin-left: 2px;
-}
 
 /* Scale labels */
 .scale-labels {
@@ -267,7 +299,7 @@ body {
 .scale-label {
     position: absolute;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: bold;
     transform: translate(-50%, -50%);
 }
@@ -314,7 +346,7 @@ body {
     .container {
         padding: 10px;
     }
-    
+
     .round-display {
         width: 100vw;
         height: 100vw;

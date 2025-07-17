@@ -7,23 +7,28 @@ export const config = {
         // Go to your profile in Home Assistant -> Long-Lived Access Tokens
         accessToken: '', // Will be loaded from localStorage after setup
     },
-    
+
     // Entities to monitor - add your entity IDs here
     entities: {
         temperature: 'sensor.netatmo_ivy_cottage_living_room_temperature',
+        temperatureTrend: 'sensor.netatmo_ivy_cottage_living_room_outdoor_module_temperature_trend',
         humidity: 'sensor.netatmo_ivy_cottage_living_room_humidity',
         pressure: 'sensor.netatmo_ivy_cottage_living_room_pressure',
+        pressureTrend: 'sensor.netatmo_ivy_cottage_living_room_pressure_trend',
         temperatureSecondary: 'sensor.netatmo_ivy_cottage_living_room_studio_temperature',
+        temperatureSecondaryTrend: 'sensor.netatmo_ivy_cottage_living_room_studio_temperature_trend',
+        weather: 'sensor.met_office_fareham_weather',
+        sun: 'sun.sun',
         // Add more entities as needed
     },
-    
+
     // Display settings
     display: {
         width: 720,
         height: 720,
         refreshInterval: 30000, // Update interval in milliseconds (30 seconds)
     },
-    
+
     // Common gauge dimensions and parameters
     gaugeDimensions: {
         centerX: 360,
@@ -33,7 +38,7 @@ export const config = {
         humidityRadius: 250,   // Humidity gauge radius
         pressureRadius: 223,   // Pressure gauge radius
     },
-    
+
     // Gauge settings
     gauges: {
         temperature: {
@@ -92,11 +97,11 @@ export const config = {
             endAngle: 360,   // End angle in degrees (left)
             unit: 'hPa',
             colorStops: [
-                { offset: 0, color: '#9C27B0' },      // Purple (very low pressure)
-                { offset: 0.25, color: '#3F51B5' },  // Blue (low pressure)
-                { offset: 0.5, color: '#4CAF50' },   // Green (normal pressure)
-                { offset: 0.75, color: '#FF9800' },  // Orange (high pressure)
-                { offset: 1, color: '#F44336' }      // Red (very high pressure)
+                { pressure: 950, color: '#9C27B0' },      // Purple (very low pressure)
+                { pressure: 975, color: '#3F51B5' },  // Blue (low pressure)
+                { pressure: 1000, color: '#4CAF50' },   // Green (normal pressure)
+                { pressure: 1025, color: '#FF9800' },  // Orange (high pressure)
+                { pressure: 1040, color: '#F44336' }      // Red (very high pressure)
             ]
         }
     }

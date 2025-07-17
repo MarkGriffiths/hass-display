@@ -101,6 +101,25 @@ waitForDOMReady().then(() => {
     }
 });
 
+// Weather icon mapping based on weather condition and sun position
+const weatherIconMapping = {
+    'clear-night': { day: 'wi-stars', night: 'wi-stars' },
+    'cloudy': { day: 'wi-cloudy', night: 'wi-night-alt-cloudy' },
+    'exceptional': { day: 'wi-day-sunny', night: 'wi-night-clear' },
+    'fog': { day: 'wi-day-fog', night: 'wi-night-fog' },
+    'hail': { day: 'wi-day-hail', night: 'wi-night-alt-hail' },
+    'lightning': { day: 'wi-day-lightning', night: 'wi-night-alt-lightning' },
+    'lightning-rainy': { day: 'wi-day-thunderstorm', night: 'wi-night-alt-thunderstorm' },
+    'partlycloudy': { day: 'wi-day-cloudy', night: 'wi-night-alt-cloudy' },
+    'pouring': { day: 'wi-rain', night: 'wi-night-alt-rain' },
+    'rainy': { day: 'wi-sprinkle', night: 'wi-night-alt-sprinkle' },
+    'snowy': { day: 'wi-snow', night: 'wi-night-snow' },
+    'snowy-rainy': { day: 'wi-sleet', night: 'wi-night-sleet' },
+    'sunny': { day: 'wi-day-sunny', night: 'wi-night-clear' },
+    'windy': { day: 'wi-windy', night: 'wi-night-alt-cloudy-windy' },
+    'windy-variant': { day: 'wi-cloudy-gusts', night: 'wi-night-alt-cloudy-gusts' }
+};
+
 // Initialize the application
 async function initApp() {
     // Load configuration from localStorage
@@ -234,6 +253,36 @@ function setupEntityListeners() {
         connectionStatus.classList.add('connected');
     }
     
+    // Variables to store weather and sun state
+    let currentWeatherState = '';
+    let isSunUp = false;
+    
+    // Function to update the weather icon based on current states
+    function updateWeatherIcon() {
+        const weatherIcon = document.querySelector('.conditions-center i');
+        if (!weatherIcon) {
+            console.error('Weather icon element not found');
+            return;
+        }
+        
+        console.log('Updating weather icon with weather:', currentWeatherState, 'sun up:', isSunUp);
+        
+        // Remove all existing weather classes
+        weatherIcon.className = 'wi'; // Reset to base class
+        
+        // Set the appropriate icon based on weather and sun position
+        if (currentWeatherState && weatherIconMapping[currentWeatherState]) {
+            const timeOfDay = isSunUp ? 'day' : 'night';
+            const iconClass = weatherIconMapping[currentWeatherState][timeOfDay];
+            console.log('Selected icon class:', iconClass);
+            weatherIcon.classList.add(iconClass);
+        } else {
+            // Default icon if weather state is unknown
+            weatherIcon.classList.add(isSunUp ? 'wi-day-sunny' : 'wi-night-clear');
+            console.warn('Unknown weather state:', currentWeatherState);
+        }
+    }
+    
     // Listen for temperature changes
     addEntityListener(config.entities.temperature, (state) => {
         console.log('Temperature state received:', state);
@@ -252,6 +301,43 @@ function setupEntityListeners() {
             // Entity name update removed
         } else {
             console.warn('Invalid temperature value:', state.state);
+        }
+    });
+    
+    // Listen for temperature trend changes
+    addEntityListener(config.entities.temperatureTrend, (state) => {
+        console.log('Temperature trend state received:', state);
+        if (!state) {
+            console.error('Temperature trend state is undefined');
+            return;
+        }
+        
+        // Get the temperature trend icon element
+        const temperatureTrendIcon = document.querySelector('.temperature-trend i');
+        if (!temperatureTrendIcon) {
+            console.error('Temperature trend icon element not found');
+            return;
+        }
+        
+        // Update the icon based on the trend value
+        const trend = state.state.toLowerCase();
+        console.log('Temperature trend value:', trend);
+        
+        // Remove all existing direction classes
+        temperatureTrendIcon.classList.remove('wi-direction-up');
+        temperatureTrendIcon.classList.remove('wi-direction-down');
+        temperatureTrendIcon.style.display = 'inline';
+        
+        // Set the appropriate icon based on the trend
+        if (trend === 'up' || trend === 'rising') {
+            temperatureTrendIcon.classList.add('wi-direction-up');
+            temperatureTrendIcon.style.color = '#ff0000'; // Red for upward trend
+        } else if (trend === 'down' || trend === 'falling') {
+            temperatureTrendIcon.classList.add('wi-direction-down');
+            temperatureTrendIcon.style.color = '#00a2ff'; // Blue for downward trend
+        } else {
+            // Hide the icon if stable or unknown
+            temperatureTrendIcon.style.display = 'none';
         }
     });
     
@@ -291,6 +377,41 @@ function setupEntityListeners() {
         }
     });
     
+    // Listen for pressure trend changes
+    addEntityListener(config.entities.pressureTrend, (state) => {
+        console.log('Pressure trend state received:', state);
+        if (!state) {
+            console.error('Pressure trend state is undefined');
+            return;
+        }
+        
+        // Get the pressure trend icon element
+        const pressureTrendIcon = document.querySelector('.pressure-trend i');
+        if (!pressureTrendIcon) {
+            console.error('Pressure trend icon element not found');
+            return;
+        }
+        
+        // Update the icon based on the trend value
+        const trend = state.state.toLowerCase();
+        console.log('Pressure trend value:', trend);
+        
+        // Remove all existing direction classes
+        pressureTrendIcon.classList.remove('wi-direction-up');
+        pressureTrendIcon.classList.remove('wi-direction-down');
+        pressureTrendIcon.style.display = 'inline';
+        
+        // Set the appropriate icon based on the trend
+        if (trend === 'up' || trend === 'rising') {
+            pressureTrendIcon.classList.add('wi-direction-up');
+        } else if (trend === 'down' || trend === 'falling') {
+            pressureTrendIcon.classList.add('wi-direction-down');
+        } else {
+            // Hide the icon if stable or unknown
+            pressureTrendIcon.style.display = 'none';
+        }
+    });
+    
     // Listen for secondary temperature changes
     if (config.entities.temperatureSecondary) {
         addEntityListener(config.entities.temperatureSecondary, (state) => {
@@ -308,6 +429,81 @@ function setupEntityListeners() {
             } else {
                 console.warn('Invalid secondary temperature value:', state.state);
             }
+        });
+    }
+    
+    // Listen for secondary temperature trend changes
+    if (config.entities.temperatureSecondaryTrend) {
+        addEntityListener(config.entities.temperatureSecondaryTrend, (state) => {
+            console.log('Secondary temperature trend state received:', state);
+            if (!state) {
+                console.error('Secondary temperature trend state is undefined');
+                return;
+            }
+            
+            // Get the secondary temperature trend icon element
+            const secondaryTempTrendIcon = document.querySelector('.secondary-temp-trend i');
+            if (!secondaryTempTrendIcon) {
+                console.error('Secondary temperature trend icon element not found');
+                return;
+            }
+            
+            // Update the icon based on the trend value
+            const trend = state.state.toLowerCase();
+            console.log('Secondary temperature trend value:', trend);
+            
+            // Remove all existing direction classes
+            secondaryTempTrendIcon.classList.remove('wi-direction-up');
+            secondaryTempTrendIcon.classList.remove('wi-direction-down');
+            secondaryTempTrendIcon.style.display = 'inline';
+            
+            // Set the appropriate icon based on the trend
+            if (trend === 'up' || trend === 'rising') {
+                secondaryTempTrendIcon.classList.add('wi-direction-up');
+                secondaryTempTrendIcon.style.color = '#ff0000'; // Red for upward trend
+            } else if (trend === 'down' || trend === 'falling') {
+                secondaryTempTrendIcon.classList.add('wi-direction-down');
+                secondaryTempTrendIcon.style.color = '#00a2ff'; // Blue for downward trend
+            } else {
+                // Hide the icon if stable or unknown
+                secondaryTempTrendIcon.style.display = 'none';
+            }
+        });
+    }
+    
+    // Listen for weather condition changes
+    if (config.entities.weather) {
+        addEntityListener(config.entities.weather, (state) => {
+            console.log('Weather state received:', state);
+            if (!state) {
+                console.error('Weather state is undefined');
+                return;
+            }
+            
+            // Update the current weather state
+            currentWeatherState = state.state.toLowerCase();
+            console.log('Current weather state:', currentWeatherState);
+            
+            // Update the weather icon
+            updateWeatherIcon();
+        });
+    }
+    
+    // Listen for sun position changes
+    if (config.entities.sun) {
+        addEntityListener(config.entities.sun, (state) => {
+            console.log('Sun state received:', state);
+            if (!state) {
+                console.error('Sun state is undefined');
+                return;
+            }
+            
+            // Check if the sun is above the horizon
+            isSunUp = state.state.toLowerCase() === 'above_horizon';
+            console.log('Sun is up:', isSunUp);
+            
+            // Update the weather icon
+            updateWeatherIcon();
         });
     }
 }

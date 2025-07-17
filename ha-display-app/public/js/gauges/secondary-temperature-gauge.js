@@ -139,7 +139,7 @@ export function createSecondaryTemperatureMarkers() {
                     text.setAttribute('text-anchor', 'middle');
                     text.setAttribute('dominant-baseline', 'middle');
                     text.setAttribute('fill', '#fff');
-                    text.setAttribute('font-size', '14');
+                    text.setAttribute('font-size', '12px');
                     text.setAttribute('font-weight', 'bold');
                     
                     // Hide the first and last numbers but keep their positions

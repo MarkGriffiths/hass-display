@@ -257,6 +257,37 @@ export function updatePressureGauge(pressure) {
             // Update the value display if it exists
             if (valueDisplay) {
                 valueDisplay.textContent = pressure.toFixed(0);
+                
+                // Update the pressure icon color to match the current pressure value
+                const pressureIcon = document.querySelector('.pressure-display i.wi-barometer');
+                if (pressureIcon) {
+                    // Calculate color based on pressure value
+                    const colorStops = pressureConfig.colorStops;
+                    let iconColor = '#FFFFFF'; // Default white
+                    
+                    // Find the nearest color stop based on pressure value
+                    let closestStop = null;
+                    let minDistance = Number.MAX_VALUE;
+                    
+                    // Find the closest color stop to the current pressure value
+                    for (let i = 0; i < colorStops.length; i++) {
+                        const stop = colorStops[i];
+                        const distance = Math.abs(pressure - stop.pressure);
+                        
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestStop = stop;
+                        }
+                    }
+                    
+                    // Use the color from the closest stop
+                    if (closestStop) {
+                        iconColor = closestStop.color;
+                    }
+                    
+                    // Apply the color to the icon
+                    pressureIcon.style.color = iconColor;
+                }
             }
             
             console.log('Pressure gauge updated successfully');
