@@ -180,10 +180,10 @@ export function createHumidityMarkers() {
  * @param {number} humidity - The humidity value to display
  * @returns {Promise<boolean>} Promise that resolves to true if successful, false otherwise
  */
-export function updateHumidityGauge(humidity) {
+export function updateHumidityGauge(humidity, initializing = false) {
     return new Promise((resolve) => {
         try {
-            console.log(`Updating humidity gauge to ${humidity}%`);
+            console.log(`Updating humidity gauge to ${humidity}%${initializing ? ' (initializing)' : ''}`);
 
             // Verify document ready state
             console.log(`Document ready state: ${document.readyState}`);
@@ -191,6 +191,9 @@ export function updateHumidityGauge(humidity) {
             // Get the gauge path element
             const gaugePath = document.getElementById('humidity-arc');
             const valueDisplay = document.getElementById('humidity-value');
+            
+            // If initializing, use the minimum humidity value to prevent flash of color
+            const displayHumidity = initializing ? humidityConfig.minHumidity : humidity;
 
             if (!gaugePath) {
                 console.error('Humidity gauge arc element not found');
@@ -217,11 +220,11 @@ export function updateHumidityGauge(humidity) {
             }
 
             // Ensure humidity is within range
-            humidity = Math.max(humidityConfig.minHumidity, Math.min(humidity, humidityConfig.maxHumidity));
+            const safeHumidity = Math.max(humidityConfig.minHumidity, Math.min(displayHumidity, humidityConfig.maxHumidity));
 
             // Calculate the angle for the current humidity using the shared utility function
             const angle = calculateAngle(
-                humidity,
+                safeHumidity,
                 humidityConfig.minHumidity,
                 humidityConfig.maxHumidity,
                 humidityConfig.startAngle,
@@ -233,13 +236,13 @@ export function updateHumidityGauge(humidity) {
             const centerY = config.gaugeDimensions.centerY;
             const radius = humidityConfig.arcRadius;
 
-            // For humidity gauge, we want it at the top (180° to 360°/0°)
-            // Calculate start point (always at startAngle, which is 180 degrees or left side)
+            // For humidity gauge, we want it at the bottom-right (0°/360° to 180°)
+            // Calculate start point (always at startAngle)
             const startRad = humidityConfig.startAngle * (Math.PI / 180);
             const startX = centerX + radius * Math.cos(startRad);
             const startY = centerY + radius * Math.sin(startRad);
 
-            // Calculate end point based on the current humidity (moving from left toward right)
+            // Calculate end point based on the current humidity
             const endRad = angle * (Math.PI / 180);
             const endX = centerX + radius * Math.cos(endRad);
             const endY = centerY + radius * Math.sin(endRad);
@@ -248,7 +251,7 @@ export function updateHumidityGauge(humidity) {
             const largeArcFlag = Math.abs(angle - humidityConfig.startAngle) > 180 ? 1 : 0;
 
             // Create the SVG arc path
-            const sweepFlag = 1; // 0 for clockwise, 1 for counterclockwise - use 1 to draw in the correct direction
+            const sweepFlag = 1; // 0 for clockwise, 1 for counterclockwise
             const arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
 
             // Update the path
@@ -256,14 +259,14 @@ export function updateHumidityGauge(humidity) {
 
             // Update the value display if it exists
             if (valueDisplay) {
-                valueDisplay.textContent = humidity.toFixed(0);
+                valueDisplay.textContent = initializing ? '--' : Math.round(humidity);
 
                 // Update the humidity icon color to match the current humidity value
                 const humidityIcon = document.querySelector('.humidity-display i.wi-humidity');
                 if (humidityIcon) {
-                    // Calculate color based on humidity value
+                    // Calculate color based on humidity value (use actual humidity, not displayHumidity)
                     const colorStops = humidityConfig.colorStops;
-                    let iconColor = '#FF00FF'; // Default white
+                    let iconColor = '#FFFFFF'; // Default white
 
                     // Find the nearest color stop based on humidity value
                     let closestStop = null;

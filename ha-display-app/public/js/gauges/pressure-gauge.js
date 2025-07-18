@@ -178,12 +178,13 @@ export function createPressureScaleMarkers() {
 /**
  * Update the pressure gauge with a new value
  * @param {number} pressure - The pressure value to display
+ * @param {boolean} initializing - Whether this is the initial update (to use minimal values)
  * @returns {Promise<boolean>} Promise that resolves to true if successful, false otherwise
  */
-export function updatePressureGauge(pressure) {
+export function updatePressureGauge(pressure, initializing = false) {
     return new Promise((resolve) => {
         try {
-            console.log(`Updating pressure gauge to ${pressure} hPa`);
+            console.log(`Updating pressure gauge to ${pressure} hPa${initializing ? ' (initializing)' : ''}`);
             
             // Verify document ready state
             console.log(`Document ready state: ${document.readyState}`);
@@ -191,6 +192,9 @@ export function updatePressureGauge(pressure) {
             // Get the gauge path element
             const gaugePath = document.getElementById('pressure-arc');
             const valueDisplay = document.getElementById('pressure-value');
+            
+            // If initializing, use the minimum pressure value to prevent flash of color
+            const displayPressure = initializing ? pressureConfig.minPressure : pressure;
             
             if (!gaugePath) {
                 console.error('Pressure gauge arc element not found');
@@ -217,11 +221,11 @@ export function updatePressureGauge(pressure) {
             }
             
             // Ensure pressure is within range
-            pressure = Math.max(pressureConfig.minPressure, Math.min(pressure, pressureConfig.maxPressure));
+            const safePressure = Math.max(pressureConfig.minPressure, Math.min(displayPressure, pressureConfig.maxPressure));
             
             // Calculate the angle for the current pressure using the shared utility function
             const angle = calculateAngle(
-                pressure,
+                safePressure,
                 pressureConfig.minPressure,
                 pressureConfig.maxPressure,
                 pressureConfig.startAngle,
@@ -256,7 +260,7 @@ export function updatePressureGauge(pressure) {
             
             // Update the value display if it exists
             if (valueDisplay) {
-                valueDisplay.textContent = pressure.toFixed(0);
+                valueDisplay.textContent = initializing ? '----' : pressure.toFixed(0);
                 
                 // Update the pressure icon color to match the current pressure value
                 const pressureIcon = document.querySelector('.pressure-display i.wi-barometer');

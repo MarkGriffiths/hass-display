@@ -183,10 +183,11 @@ export function createTemperatureMarkers() {
 /**
  * Update the temperature gauge with a new value
  * @param {number} temperature - The temperature value to display
+ * @param {boolean} initializing - Whether this is the initial update (to use minimal values)
  */
-export function updateTemperatureGauge(temperature) {
+export function updateTemperatureGauge(temperature, initializing = false) {
     try {
-        console.log(`Updating temperature gauge to ${temperature}°C`);
+        console.log(`Updating temperature gauge to ${temperature}°C${initializing ? ' (initializing)' : ''}`);
         
         // Get the gauge path element
         const gaugePath = document.getElementById('temperature-arc');
@@ -197,13 +198,16 @@ export function updateTemperatureGauge(temperature) {
             return;
         }
         
+        // If initializing, use the minimum temperature value to prevent flash of color
+        const displayTemp = initializing ? tempConfig.minTemp : temperature;
+        
         // Ensure temperature is within range
-        temperature = Math.max(tempConfig.minTemp, Math.min(temperature, tempConfig.maxTemp));
+        const safeTemp = Math.max(tempConfig.minTemp, Math.min(displayTemp, tempConfig.maxTemp));
         
         // Calculate the angle for the current temperature using the config values
         // This will map the temperature to an angle between startAngle and endAngle
         const angle = calculateAngle(
-            temperature,
+            safeTemp,
             tempConfig.minTemp,
             tempConfig.maxTemp,
             tempConfig.startAngle,
@@ -236,8 +240,8 @@ export function updateTemperatureGauge(temperature) {
         // Update the path
         gaugePath.setAttribute('d', arcPath);
         
-        // Update the value display
-        valueDisplay.textContent = temperature.toFixed(1);
+        // Update the value display - show actual temperature even during initialization
+        valueDisplay.textContent = initializing ? '--.-' : temperature.toFixed(1);
         
         console.log('Temperature gauge updated successfully');
     } catch (error) {

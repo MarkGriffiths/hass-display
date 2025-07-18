@@ -187,10 +187,11 @@ export function createSecondaryTemperatureMarkers() {
 /**
  * Update the secondary temperature gauge with a new value
  * @param {number} temperature - The temperature value to display
+ * @param {boolean} initializing - Whether this is the initial update (to use minimal values)
  */
-export function updateSecondaryTemperatureGauge(temperature) {
+export function updateSecondaryTemperatureGauge(temperature, initializing = false) {
     try {
-        console.log(`Updating secondary temperature gauge to ${temperature}°C`);
+        console.log(`Updating secondary temperature gauge to ${temperature}°C${initializing ? ' (initializing)' : ''}`);
         
         // Get the gauge path element
         const gaugePath = document.getElementById('secondary-temp-arc');
@@ -201,13 +202,16 @@ export function updateSecondaryTemperatureGauge(temperature) {
             return;
         }
         
-        // Ensure temperature is within range
-        temperature = Math.max(secondaryTempConfig.min, Math.min(temperature, secondaryTempConfig.max));
+        // If initializing, use the minimum temperature value to prevent flash of color
+        const displayTemp = initializing ? secondaryTempConfig.min : temperature;
         
-        // Calculate the angle for the current temperature
-        // Use the original angles from config.js
+        // Ensure temperature is within range
+        const safeTemp = Math.max(secondaryTempConfig.min, Math.min(displayTemp, secondaryTempConfig.max));
+        
+        // Calculate the angle for the current temperature using the config values
+        // This will map the temperature to an angle between startAngle and endAngle
         const angle = calculateAngle(
-            temperature,
+            safeTemp,
             secondaryTempConfig.min,
             secondaryTempConfig.max,
             secondaryTempConfig.startAngle,
@@ -219,13 +223,13 @@ export function updateSecondaryTemperatureGauge(temperature) {
         const centerY = config.gaugeDimensions.centerY;
         const radius = secondaryTempConfig.arcRadius;
         
-        // For secondary temperature gauge, it should go from 160° (bottom-right) to 20° (bottom-left)
-        // In the SVG angle system: 0°/360° is far left, 270° is top, 180° is far right, 90° is bottom
+        // For secondary temperature gauge, we want it at the bottom (160° to 20°)
+        // Calculate start point (always at startAngle, which is 160 degrees)
         const startRad = secondaryTempConfig.startAngle * (Math.PI / 180);
         const startX = centerX + radius * Math.cos(startRad);
         const startY = centerY + radius * Math.sin(startRad);
         
-        // Calculate end point based on the current temperature (moving from right toward bottom)
+        // Calculate end point based on the current temperature (moving from right toward left)
         const endRad = angle * (Math.PI / 180);
         const endX = centerX + radius * Math.cos(endRad);
         const endY = centerY + radius * Math.sin(endRad);
@@ -234,15 +238,15 @@ export function updateSecondaryTemperatureGauge(temperature) {
         const largeArcFlag = Math.abs(angle - secondaryTempConfig.startAngle) > 180 ? 1 : 0;
         
         // Create the SVG arc path
-        // For the bottom half, we need to use sweepFlag = 0 to draw from top to bottom
-        const sweepFlag = 0; // 0 for clockwise, 1 for counterclockwise
+        // For secondary temperature gauge, we need to use sweep flag = 0 for anticlockwise direction
+        const sweepFlag = 0;
         const arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
         
         // Update the path
         gaugePath.setAttribute('d', arcPath);
         
-        // Update the value display
-        valueDisplay.textContent = temperature.toFixed(1);
+        // Update the value display - show actual temperature even during initialization
+        valueDisplay.textContent = initializing ? '--.-' : temperature.toFixed(1);
         
         console.log('Secondary temperature gauge updated successfully');
     } catch (error) {

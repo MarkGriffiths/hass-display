@@ -5,10 +5,10 @@ import { config } from '../config.js';
 import { initGaugePath, initSVGPaths } from '../gauge-utils.js';
 
 // Import individual gauge functions
-import { createTemperatureGradient, createTemperatureMarkers } from './temperature-gauge.js';
-import { createSecondaryTemperatureGradient, createSecondaryTemperatureMarkers } from './secondary-temperature-gauge.js';
-import { createHumidityGradient, createHumidityMarkers } from './humidity-gauge.js';
-import { createPressureGradient, createPressureScaleMarkers } from './pressure-gauge.js';
+import { createTemperatureGradient, createTemperatureMarkers, updateTemperatureGauge } from './temperature-gauge.js';
+import { createSecondaryTemperatureGradient, createSecondaryTemperatureMarkers, updateSecondaryTemperatureGauge } from './secondary-temperature-gauge.js';
+import { createHumidityGradient, createHumidityMarkers, updateHumidityGauge } from './humidity-gauge.js';
+import { createPressureGradient, createPressureScaleMarkers, updatePressureGauge } from './pressure-gauge.js';
 
 /**
  * Check if all required DOM elements are available
@@ -157,6 +157,21 @@ export async function initGauges() {
         initGaugePath('humidity-arc', centerX, centerY, config.gaugeDimensions.humidityRadius, config.gauges.humidity.startAngle, config.gauges.humidity.endAngle);
         // For the pressure gauge
         initGaugePath('pressure-arc', centerX, centerY, config.gaugeDimensions.pressureRadius, config.gauges.pressure.startAngle, config.gauges.pressure.endAngle);
+        
+        // Initialize all gauges with minimal values to prevent flash of color
+        console.log('Initializing gauges with minimal values to prevent flash of color');
+        
+        // Use default values for initial display
+        const defaultTemp = config.gauges.temperature.min;
+        const defaultSecondaryTemp = config.gauges.temperatureSecondary.min;
+        const defaultHumidity = config.gauges.humidity.min;
+        const defaultPressure = config.gauges.pressure.min;
+        
+        // Call update functions with initializing=true
+        updateTemperatureGauge(defaultTemp, true);
+        updateSecondaryTemperatureGauge(defaultSecondaryTemp, true);
+        updateHumidityGauge(defaultHumidity, true);
+        updatePressureGauge(defaultPressure, true);
         
         return true;
     } catch (error) {
