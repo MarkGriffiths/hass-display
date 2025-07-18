@@ -178,6 +178,23 @@
 									>--</span
 								><span class="secondary-temp-unit">°C</span>
 							</div>
+							<div class="rain-display">
+								<i class="wi wi-raindrops"></i>
+								<span id="rain-value">--</span>
+								<span class="rain-unit">mm</span>
+							</div>
+							<div class="rain-details">
+								<div class="rain-last-hour">
+									<span>1h: </span>
+									<span id="rain-last-hour-value">--</span>
+									<span class="rain-unit">mm</span>
+								</div>
+								<div class="rain-today">
+									<span>Today: </span>
+									<span id="rain-today-value">--</span>
+									<span class="rain-unit">mm</span>
+								</div>
+							</div>
 						</div>
 					</div>
 
@@ -186,7 +203,7 @@
 					Connecting to Home Assistant...
 				</div>
 			</div>
-
+		</div>
 			<!-- Admin Controls (outside the circle) -->
 			<div class="admin-controls top-left">
 				<button id="test-button" class="admin-button test-button">
@@ -199,7 +216,7 @@
 			</div>
 
 			<!-- Charts section removed -->
-		</div>
+
 
 		<!-- Load libraries -->
 		<script src="https://cdn.jsdelivr.net/npm/home-assistant-js-websocket@8.2.0/dist/haws.umd.js"></script>

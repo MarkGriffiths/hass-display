@@ -122,12 +122,36 @@ const weatherIconMapping = {
 
 // Initialize the application
 async function initApp() {
-    // Load configuration from localStorage
-    const loadedConfig = loadConfig();
-    
-    if (!loadedConfig) {
-        // No configuration found, redirect to setup page
-        window.location.href = '/setup.html';
+    try {
+        // Fetch configuration from backend
+        console.log('Fetching configuration from backend...');
+        const response = await fetch('/api/env-config');
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch environment config: ${response.status} ${response.statusText}`);
+        }
+        
+        const envConfig = await response.json();
+        console.log('Received environment config:', envConfig);
+        
+        // Update config with values from backend
+        config.homeAssistant.url = envConfig.haUrl;
+        
+        // Load access token from localStorage or use the one from backend
+        const storedToken = localStorage.getItem('haAccessToken');
+        config.homeAssistant.accessToken = storedToken || envConfig.accessToken;
+        
+        // Update entity IDs from backend
+        Object.keys(envConfig.entities).forEach(key => {
+            if (config.entities.hasOwnProperty(key)) {
+                config.entities[key] = envConfig.entities[key];
+            }
+        });
+        
+        console.log('Updated config with backend values:', config);
+    } catch (error) {
+        console.error('Error loading environment config:', error);
+        showError(`Failed to load configuration from backend: ${error.message}`);
         return;
     }
     
@@ -504,6 +528,69 @@ function setupEntityListeners() {
             
             // Update the weather icon
             updateWeatherIcon();
+        });
+    }
+    
+    // Listen for rain sensor changes
+    if (config.entities.rain) {
+        addEntityListener(config.entities.rain, (state) => {
+            console.log('Rain state received:', state);
+            if (!state) {
+                console.error('Rain state is undefined');
+                return;
+            }
+            
+            const value = parseFloat(state.state);
+            console.log('Parsed rain value:', value, 'isNaN:', isNaN(value));
+            if (!isNaN(value)) {
+                // Update the rain value display
+                const rainValueElement = document.getElementById('rain-value');
+                if (rainValueElement) {
+                    rainValueElement.textContent = value.toFixed(1);
+                }
+            }
+        });
+    }
+    
+    // Listen for rain last hour changes
+    if (config.entities.rainLastHour) {
+        addEntityListener(config.entities.rainLastHour, (state) => {
+            console.log('Rain last hour state received:', state);
+            if (!state) {
+                console.error('Rain last hour state is undefined');
+                return;
+            }
+            
+            const value = parseFloat(state.state);
+            console.log('Parsed rain last hour value:', value, 'isNaN:', isNaN(value));
+            if (!isNaN(value)) {
+                // Update the rain last hour value display
+                const rainLastHourValueElement = document.getElementById('rain-last-hour-value');
+                if (rainLastHourValueElement) {
+                    rainLastHourValueElement.textContent = value.toFixed(1);
+                }
+            }
+        });
+    }
+    
+    // Listen for rain today changes
+    if (config.entities.rainToday) {
+        addEntityListener(config.entities.rainToday, (state) => {
+            console.log('Rain today state received:', state);
+            if (!state) {
+                console.error('Rain today state is undefined');
+                return;
+            }
+            
+            const value = parseFloat(state.state);
+            console.log('Parsed rain today value:', value, 'isNaN:', isNaN(value));
+            if (!isNaN(value)) {
+                // Update the rain today value display
+                const rainTodayValueElement = document.getElementById('rain-today-value');
+                if (rainTodayValueElement) {
+                    rainTodayValueElement.textContent = value.toFixed(1);
+                }
+            }
         });
     }
 }

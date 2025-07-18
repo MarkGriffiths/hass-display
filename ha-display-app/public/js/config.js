@@ -2,23 +2,24 @@
 export const config = {
     // Home Assistant connection settings
     homeAssistant: {
-        url: 'http://10.0.0.127:8123', // Using HTTP instead of HTTPS to avoid SSL issues
-        // You'll need to generate a long-lived access token in Home Assistant
-        // Go to your profile in Home Assistant -> Long-Lived Access Tokens
-        accessToken: '', // Will be loaded from localStorage after setup
+        url: '', // Will be loaded from backend
+        accessToken: '', // Will be loaded from backend
     },
 
-    // Entities to monitor - add your entity IDs here
+    // Entities to monitor - will be loaded from backend
     entities: {
-        temperature: 'sensor.netatmo_ivy_cottage_living_room_temperature',
-        temperatureTrend: 'sensor.netatmo_ivy_cottage_living_room_outdoor_module_temperature_trend',
-        humidity: 'sensor.netatmo_ivy_cottage_living_room_humidity',
-        pressure: 'sensor.netatmo_ivy_cottage_living_room_pressure',
-        pressureTrend: 'sensor.netatmo_ivy_cottage_living_room_pressure_trend',
-        temperatureSecondary: 'sensor.netatmo_ivy_cottage_living_room_studio_temperature',
-        temperatureSecondaryTrend: 'sensor.netatmo_ivy_cottage_living_room_studio_temperature_trend',
-        weather: 'sensor.met_office_fareham_weather',
-        sun: 'sun.sun',
+        temperature: '',
+        temperatureTrend: '',
+        humidity: '',
+        pressure: '',
+        pressureTrend: '',
+        temperatureSecondary: '',
+        temperatureSecondaryTrend: '',
+        weather: '',
+        sun: '',
+        rain: '',
+        rainLastHour: '',
+        rainToday: '',
         // Add more entities as needed
     },
 

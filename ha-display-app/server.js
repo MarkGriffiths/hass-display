@@ -147,9 +147,17 @@ app.get('/api/env-config', (req, res) => {
     accessToken: process.env.HA_ACCESS_TOKEN || '',
     entities: {
       temperature: process.env.ENTITY_TEMP_MAIN || '',
+      temperatureTrend: process.env.ENTITY_TEMP_MAIN_TREND || '',
       humidity: process.env.ENTITY_HUMIDITY || '',
       pressure: process.env.ENTITY_PRESSURE || '',
-      temperatureSecondary: process.env.ENTITY_TEMP_SECONDARY || ''
+      pressureTrend: process.env.ENTITY_PRESSURE_TREND || '',
+      temperatureSecondary: process.env.ENTITY_TEMP_SECONDARY || '',
+      temperatureSecondaryTrend: process.env.ENTITY_TEMP_SECONDARY_TREND || '',
+      weather: process.env.ENTITY_WEATHER || '',
+      sun: process.env.ENTITY_SUN || '',
+      rain: process.env.ENTITY_RAIN || '',
+      rainLastHour: process.env.ENTITY_RAIN_LAST_HOUR || '',
+      rainToday: process.env.ENTITY_RAIN_TODAY || ''
     }
   });
 });

@@ -94,19 +94,67 @@
                 <input type="text" id="access-token" name="access-token" placeholder="Paste your token here" required>
             </div>
             
+            <h3>Entity Configuration</h3>
+            <p class="note">Note: These values are loaded from the server's .env file. Changes here will only affect the local browser storage.</p>
+            
             <div>
                 <label for="temperature-entity">Temperature Entity ID:</label>
-                <input type="text" id="temperature-entity" name="temperature-entity" placeholder="sensor.netatmo_ivy_cottage_living_room_temperature" required>
+                <input type="text" id="temperature-entity" name="temperature-entity" placeholder="sensor.temperature" required>
+            </div>
+            
+            <div>
+                <label for="temperature-trend-entity">Temperature Trend Entity ID:</label>
+                <input type="text" id="temperature-trend-entity" name="temperature-trend-entity" placeholder="sensor.temperature_trend" required>
             </div>
             
             <div>
                 <label for="humidity-entity">Humidity Entity ID:</label>
-                <input type="text" id="humidity-entity" name="humidity-entity" placeholder="sensor.netatmo_ivy_cottage_living_room_humidity" required>
+                <input type="text" id="humidity-entity" name="humidity-entity" placeholder="sensor.humidity" required>
             </div>
             
             <div>
                 <label for="pressure-entity">Pressure Entity ID:</label>
-                <input type="text" id="pressure-entity" name="pressure-entity" placeholder="sensor.netatmo_ivy_cottage_living_room_pressure" required>
+                <input type="text" id="pressure-entity" name="pressure-entity" placeholder="sensor.pressure" required>
+            </div>
+            
+            <div>
+                <label for="pressure-trend-entity">Pressure Trend Entity ID:</label>
+                <input type="text" id="pressure-trend-entity" name="pressure-trend-entity" placeholder="sensor.pressure_trend" required>
+            </div>
+            
+            <div>
+                <label for="temperature-secondary-entity">Secondary Temperature Entity ID:</label>
+                <input type="text" id="temperature-secondary-entity" name="temperature-secondary-entity" placeholder="sensor.secondary_temperature" required>
+            </div>
+            
+            <div>
+                <label for="temperature-secondary-trend-entity">Secondary Temperature Trend Entity ID:</label>
+                <input type="text" id="temperature-secondary-trend-entity" name="temperature-secondary-trend-entity" placeholder="sensor.secondary_temperature_trend" required>
+            </div>
+            
+            <div>
+                <label for="weather-entity">Weather Entity ID:</label>
+                <input type="text" id="weather-entity" name="weather-entity" required>
+            </div>
+            
+            <div>
+                <label for="sun-entity">Sun Entity ID:</label>
+                <input type="text" id="sun-entity" name="sun-entity" required>
+            </div>
+            
+            <div>
+                <label for="rain-entity">Rain Entity ID:</label>
+                <input type="text" id="rain-entity" name="rain-entity" required>
+            </div>
+            
+            <div>
+                <label for="rain-last-hour-entity">Rain Last Hour Entity ID:</label>
+                <input type="text" id="rain-last-hour-entity" name="rain-last-hour-entity" required>
+            </div>
+            
+            <div>
+                <label for="rain-today-entity">Rain Today Entity ID:</label>
+                <input type="text" id="rain-today-entity" name="rain-today-entity" required>
             </div>
             
             <button type="submit">Save Configuration</button>
@@ -128,9 +176,20 @@
                     // Prefill form fields with values from server
                     document.getElementById('ha-url').value = data.haUrl || 'http://10.0.0.127:8123';
                     document.getElementById('access-token').value = data.accessToken || '';
+                    
+                    // Prefill all entity fields
                     document.getElementById('temperature-entity').value = data.entities.temperature || '';
+                    document.getElementById('temperature-trend-entity').value = data.entities.temperatureTrend || '';
                     document.getElementById('humidity-entity').value = data.entities.humidity || '';
                     document.getElementById('pressure-entity').value = data.entities.pressure || '';
+                    document.getElementById('pressure-trend-entity').value = data.entities.pressureTrend || '';
+                    document.getElementById('temperature-secondary-entity').value = data.entities.temperatureSecondary || '';
+                    document.getElementById('temperature-secondary-trend-entity').value = data.entities.temperatureSecondaryTrend || '';
+                    document.getElementById('weather-entity').value = data.entities.weather || '';
+                    document.getElementById('sun-entity').value = data.entities.sun || '';
+                    document.getElementById('rain-entity').value = data.entities.rain || '';
+                    document.getElementById('rain-last-hour-entity').value = data.entities.rainLastHour || '';
+                    document.getElementById('rain-today-entity').value = data.entities.rainToday || '';
                     
                     console.log('Configuration loaded from server:', data);
                 })
@@ -144,9 +203,20 @@
                 // Get form values
                 const haUrl = document.getElementById('ha-url').value;
                 const accessToken = document.getElementById('access-token').value;
+                
+                // Get all entity values
                 const temperatureEntity = document.getElementById('temperature-entity').value;
+                const temperatureTrendEntity = document.getElementById('temperature-trend-entity').value;
                 const humidityEntity = document.getElementById('humidity-entity').value;
                 const pressureEntity = document.getElementById('pressure-entity').value;
+                const pressureTrendEntity = document.getElementById('pressure-trend-entity').value;
+                const temperatureSecondaryEntity = document.getElementById('temperature-secondary-entity').value;
+                const temperatureSecondaryTrendEntity = document.getElementById('temperature-secondary-trend-entity').value;
+                const weatherEntity = document.getElementById('weather-entity').value;
+                const sunEntity = document.getElementById('sun-entity').value;
+                const rainEntity = document.getElementById('rain-entity').value;
+                const rainLastHourEntity = document.getElementById('rain-last-hour-entity').value;
+                const rainTodayEntity = document.getElementById('rain-today-entity').value;
                 
                 // Create configuration object
                 const configuration = {
@@ -156,8 +226,17 @@
                     },
                     entities: {
                         temperature: temperatureEntity,
+                        temperatureTrend: temperatureTrendEntity,
                         humidity: humidityEntity,
-                        pressure: pressureEntity
+                        pressure: pressureEntity,
+                        pressureTrend: pressureTrendEntity,
+                        temperatureSecondary: temperatureSecondaryEntity,
+                        temperatureSecondaryTrend: temperatureSecondaryTrendEntity,
+                        weather: weatherEntity,
+                        sun: sunEntity,
+                        rain: rainEntity,
+                        rainLastHour: rainLastHourEntity,
+                        rainToday: rainTodayEntity
                     }
                 };
                 

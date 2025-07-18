@@ -248,6 +248,44 @@ body {
     font-size: 1.5rem;
     font-weight: normal;
     color: #cccccc;
+}
+
+/* Rain display */
+.rain-display {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+    font-size: 1.8rem;
+    color: #03A9F4;
+}
+
+.rain-display i {
+    margin-right: 0.5rem;
+}
+
+.rain-unit {
+    font-size: 1rem;
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 2px;
+}
+
+.rain-details {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 0.3rem;
+    font-size: 0.9rem;
+    color: #cccccc;
+}
+
+.rain-last-hour, .rain-today {
+    display: flex;
+    align-items: center;
+    margin: 0 0.5rem;
+}
+
+.secondary-temp-trend {
     margin-left: 3px;
 }
 
