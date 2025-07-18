@@ -181,6 +181,27 @@ body {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
+.rain-center {
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    align-items: center;
+    font-size: 6rem;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.rain-center.active {
+    display: flex;
+}
+
+.conditions-center.inactive {
+    display: none;
+}
+
 .outdoor-display {
     display: flex;
     flex-direction: row;
@@ -191,7 +212,7 @@ body {
 .indoor-display {
     margin-top: 0.3rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
 }
 
@@ -232,9 +253,23 @@ body {
     color: #ccc;
 }
 
+/* Secondary display containers */
+.secondary-temp-container {
+    margin-right: 1rem;
+}
+
+.secondary-other-container {
+    line-height: 1rem;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
 /* Secondary Temperature display */
 .secondary-temp-display {
-
+    display: flex;
+    align-items: baseline;
 }
 
 .secondary-temp-value {
@@ -248,6 +283,7 @@ body {
     font-size: 1.5rem;
     font-weight: normal;
     color: #cccccc;
+    margin-left: 6px;
 }
 
 /* Rain display */
@@ -283,6 +319,141 @@ body {
     display: flex;
     align-items: center;
     margin: 0 0.5rem;
+}
+
+/* Secondary humidity display */
+.secondary-humidity-display {
+    display: flex;
+    align-items: baseline;
+    font-size: 1rem;
+}
+
+.secondary-humidity-display i,
+.secondary-humidity-display svg {
+    margin-right: 0.3rem;
+    /* Color will be set dynamically in JS */
+}
+
+#secondary-humidity-value {
+    color: white;
+    font-weight: bold;
+}
+
+.secondary-humidity-unit {
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 2px;
+}
+
+/* Secondary CO2 display */
+.secondary-co2-display {
+    display: flex;
+    align-items: baseline;
+    font-size: 1rem;
+}
+
+.secondary-co2-display svg {
+    /* Color will be set dynamically in JS */
+    color: #8BC34A; /* Default color before JS updates it */
+}
+
+#secondary-co2-value {
+    color: white;
+    font-weight: bold;
+}
+
+.secondary-co2-unit {
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 2px;
+}
+
+/* Toggle Switch */
+.toggle-switch-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.toggle-switch-container label:first-child {
+    margin-right: 1rem;
+}
+
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* Entity display styling */
+.entity-display {
+    margin-bottom: 1rem;
+}
+
+.entity-display code {
+    display: inline-block;
+    padding: 0.5rem;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    min-width: 300px;
+    font-family: monospace;
+    color: #03a9f4;
 }
 
 .secondary-temp-trend {

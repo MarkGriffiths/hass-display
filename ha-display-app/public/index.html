@@ -147,6 +147,28 @@
 					<div class="conditions-center">
 						<i class="wi wi-day-sunny"></i>
 					</div>
+
+					<div class="rain-center">
+						<i class="wi wi-rain"></i>
+						<div class="rain-display">
+							<i class="wi wi-raindrops"></i>
+							<span id="rain-value">--</span>
+							<span class="rain-unit">mm</span>
+						</div>
+						<div class="rain-details">
+							<div class="rain-last-hour">
+								<span>1h: </span>
+								<span id="rain-last-hour-value">--</span>
+								<span class="rain-unit">mm</span>
+							</div>
+							<div class="rain-today">
+								<span>Today: </span>
+								<span id="rain-today-value">--</span>
+								<span class="rain-unit">mm</span>
+							</div>
+						</div>
+					</div>
+
 					<!-- Center content -->
 					<div class="gauge-center">
 						<div class="outdoor-display">
@@ -172,27 +194,28 @@
 							</div>
 						</div>
 						<div class="indoor-display">
-							<div class="secondary-temp-display">
-								<span class="secondary-temp-trend"><i class="wi wi-direction-up"></i></span>
-								<span class="secondary-temp-value" id="secondary-temp-value"
-									>--</span
-								><span class="secondary-temp-unit">°C</span>
-							</div>
-							<div class="rain-display">
-								<i class="wi wi-raindrops"></i>
-								<span id="rain-value">--</span>
-								<span class="rain-unit">mm</span>
-							</div>
-							<div class="rain-details">
-								<div class="rain-last-hour">
-									<span>1h: </span>
-									<span id="rain-last-hour-value">--</span>
-									<span class="rain-unit">mm</span>
+							<div class="secondary-temp-container">
+								<div class="secondary-temp-display">
+									<span class="secondary-temp-trend"><i class="wi wi-direction-up"></i></span>
+									<span class="secondary-temp-value" id="secondary-temp-value"
+										>--</span
+									><span class="secondary-temp-unit">°C</span>
 								</div>
-								<div class="rain-today">
-									<span>Today: </span>
-									<span id="rain-today-value">--</span>
-									<span class="rain-unit">mm</span>
+							</div>
+							<div class="secondary-other-container">
+								<div class="secondary-humidity-display">
+									<i class="wi wi-humidity"></i>
+									<span id="secondary-humidity-value">--</span
+									><span class="secondary-humidity-unit">%</span>
+								</div>
+								<div class="secondary-co2-display">
+									<svg style="height: 0.8rem; width: auto; margin-right: 3px;" viewBox="0 0 22 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+										<g transform="translate(-4, -7)" fill="currentColor" fill-rule="nonzero">
+											<path d="M14.3,7.39 C15.68,7.39 16.91,7.82 17.99,8.67 C19.07,9.52 19.77,10.62 20.09,11.96 L20.42,11.96 C21.32,11.96 22.15,12.18 22.91,12.61 C23.67,13.04 24.28,13.64 24.72,14.4 C25.16,15.16 25.39,15.98 25.39,16.88 C25.39,17.76 25.18,18.58 24.76,19.33 C24.34,20.08 23.76,20.68 23.03,21.13 C22.3,21.58 21.49,21.82 20.62,21.85 L9.41,21.85 C8.07,21.79 6.94,21.28 6.01,20.32 C5.08,19.37 4.61,18.22 4.61,16.88 C4.61,15.73 4.97,14.71 5.69,13.81 C6.41,12.91 7.32,12.33 8.43,12.08 C8.74,10.71 9.45,9.59 10.54,8.71 C11.63,7.83 12.89,7.39 14.3,7.39 Z M20.4488622,16.7826726 C19.6832379,16.7826726 19.1363635,17.1704563 19.1363635,17.8565352 L20.0113626,17.8565352 C20.0113626,17.6079559 20.1803966,17.498581 20.438919,17.498581 C20.6775552,17.498581 20.8764186,17.5980127 20.8764186,17.7968761 C20.8764186,17.9460237 20.7851038,18.0495139 20.6495809,18.1580771 L19.225852,19.2187498 L19.225852,19.8749992 L21.7414746,19.8749992 L21.7414746,19.1292612 L20.5383508,19.1292612 L20.5383508,19.0994317 L20.8465891,18.9303978 C21.4630658,18.5923299 21.7414746,18.2443189 21.7414746,17.786933 C21.7414746,17.2301153 21.244316,16.7826726 20.4488622,16.7826726 Z M10.7642019,13.8394936 C9.39204413,13.8394936 8.30823834,14.7542654 8.30823834,16.4545479 C8.30823834,18.147373 9.36221461,19.0696022 10.7642019,19.0696022 C12.2556778,19.0696022 13.0113589,18.0355123 13.0809611,17.1704563 L11.6789738,17.1605131 C11.6093716,17.5955269 11.3011332,17.8664784 10.7940314,17.8664784 C10.1203815,17.8664784 9.73011199,17.3892061 9.73011199,16.4545479 C9.73011199,15.5696055 10.1079525,15.0426174 10.8039746,15.0426174 C11.3359343,15.0426174 11.6392011,15.3558273 11.6789738,15.8181849 L13.0809611,15.8181849 C12.9715862,14.555402 12.0468711,13.8394936 10.7642019,13.8394936 Z M16.1633496,13.8394936 C14.7713055,13.8394936 13.6874997,14.7542654 13.6874997,16.4545479 C13.6874997,18.1448872 14.7713055,19.0696022 16.1633496,19.0696022 C17.5454506,19.0696022 18.6391995,18.1548304 18.6391995,16.4545479 C18.6391995,14.7542654 17.5454506,13.8394936 16.1633496,13.8394936 Z M16.1633496,15.0426174 C16.8494285,15.0426174 17.2173259,15.539776 17.2173259,16.4545479 C17.2173259,17.3693197 16.8494285,17.8664784 16.1633496,17.8664784 C15.4772707,17.8664784 15.1093734,17.3693197 15.1093734,16.4545479 C15.1093734,15.539776 15.4772707,15.0426174 16.1633496,15.0426174 Z"></path>
+										</g>
+									</svg>
+									<span id="secondary-co2-value">--</span>
+									<span class="secondary-co2-unit">ppm</span>
 								</div>
 							</div>
 						</div>
@@ -213,6 +236,10 @@
 
 			<div class="admin-controls top-right">
 				<button id="admin-button" class="admin-button">Admin Settings</button>
+			</div>
+
+			<div class="admin-controls bottom-right">
+				<button id="rain-button" class="admin-button">Toggle Rain View</button>
 			</div>
 
 			<!-- Charts section removed -->

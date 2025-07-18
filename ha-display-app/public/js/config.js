@@ -15,6 +15,8 @@ export const config = {
         pressureTrend: '',
         temperatureSecondary: '',
         temperatureSecondaryTrend: '',
+        humiditySecondary: '',
+        co2: '',
         weather: '',
         sun: '',
         rain: '',
@@ -28,6 +30,7 @@ export const config = {
         width: 720,
         height: 720,
         refreshInterval: 30000, // Update interval in milliseconds (30 seconds)
+        showRainView: false,    // Toggle between rain and normal conditions view
     },
 
     // Common gauge dimensions and parameters

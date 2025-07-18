@@ -153,6 +153,8 @@ app.get('/api/env-config', (req, res) => {
       pressureTrend: process.env.ENTITY_PRESSURE_TREND || '',
       temperatureSecondary: process.env.ENTITY_TEMP_SECONDARY || '',
       temperatureSecondaryTrend: process.env.ENTITY_TEMP_SECONDARY_TREND || '',
+      humiditySecondary: process.env.ENTITY_HUMIDITY_SECONDARY || '',
+      co2: process.env.ENTITY_CO2_SECONDARY || '',
       weather: process.env.ENTITY_WEATHER || '',
       sun: process.env.ENTITY_SUN || '',
       rain: process.env.ENTITY_RAIN || '',

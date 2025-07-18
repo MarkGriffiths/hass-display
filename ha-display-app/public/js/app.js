@@ -21,24 +21,24 @@ function waitForDOMReady() {
 // Show configuration error
 function showConfigError(errorMessage) {
     console.error('Configuration error:', errorMessage);
-    
+
     // Hide the main content
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
         mainContent.style.display = 'none';
     }
-    
+
     // Show the error container
     const errorContainer = document.getElementById('error-container');
     if (errorContainer) {
         errorContainer.style.display = 'flex';
-        
+
         // Set the error message
         const errorMessageElement = document.getElementById('error-message');
         if (errorMessageElement) {
             errorMessageElement.textContent = errorMessage;
         }
-        
+
         // Set up the setup button
         const setupButton = document.getElementById('setup-button');
         if (setupButton) {
@@ -52,7 +52,7 @@ function showConfigError(errorMessage) {
 // Show general error message
 function showError(errorMessage) {
     console.error('Error:', errorMessage);
-    
+
     // Use the same error container as config errors
     const errorContainer = document.getElementById('error-container');
     if (errorContainer) {
@@ -61,9 +61,9 @@ function showError(errorMessage) {
         if (mainContent) {
             mainContent.style.display = 'none';
         }
-        
+
         errorContainer.style.display = 'flex';
-        
+
         // Set the error message
         const errorMessageElement = document.getElementById('error-message');
         if (errorMessageElement) {
@@ -78,10 +78,10 @@ function showError(errorMessage) {
 // Initialize the application when DOM is ready
 waitForDOMReady().then(() => {
     console.log('DOM is fully ready, initializing application...');
-    
+
     // Initialize the application
     initApp();
-    
+
     // Set up test button event listener
     const testButton = document.getElementById('test-button');
     if (testButton) {
@@ -90,13 +90,35 @@ waitForDOMReady().then(() => {
             testGauges();
         });
     }
-    
+
     // Set up admin button event listener
     const adminButton = document.getElementById('admin-button');
     if (adminButton) {
         adminButton.addEventListener('click', function() {
             // Redirect to admin page
             window.location.href = '/admin.html';
+        });
+    }
+    
+    // Set up rain button event listener
+    const rainButton = document.getElementById('rain-button');
+    if (rainButton) {
+        rainButton.addEventListener('click', function() {
+            // Toggle the rain view setting
+            config.display.showRainView = !config.display.showRainView;
+            
+            // Update the display
+            updateRainViewDisplay();
+            
+            // Save the setting to localStorage
+            const configToSave = {
+                display: {
+                    showRainView: config.display.showRainView
+                }
+            };
+            localStorage.setItem('haDisplayConfig', JSON.stringify(configToSave));
+            
+            console.log('Rain view toggled:', config.display.showRainView);
         });
     }
 });
@@ -120,41 +142,78 @@ const weatherIconMapping = {
     'windy-variant': { day: 'wi-cloudy-gusts', night: 'wi-night-alt-cloudy-gusts' }
 };
 
+// Function to update the rain view display based on config setting
+function updateRainViewDisplay() {
+    const rainCenter = document.querySelector('.rain-center');
+    const conditionsCenter = document.querySelector('.conditions-center');
+
+    if (!rainCenter || !conditionsCenter) {
+        console.error('Could not find rain-center or conditions-center elements');
+        return;
+    }
+
+    console.log('Updating rain view display, showRainView:', config.display.showRainView);
+
+    if (config.display.showRainView) {
+        rainCenter.classList.add('active');
+        conditionsCenter.classList.add('inactive');
+    } else {
+        rainCenter.classList.remove('active');
+        conditionsCenter.classList.remove('inactive');
+    }
+}
+
 // Initialize the application
 async function initApp() {
     try {
         // Fetch configuration from backend
         console.log('Fetching configuration from backend...');
         const response = await fetch('/api/env-config');
-        
+
         if (!response.ok) {
             throw new Error(`Failed to fetch environment config: ${response.status} ${response.statusText}`);
         }
-        
+
         const envConfig = await response.json();
         console.log('Received environment config:', envConfig);
-        
+
         // Update config with values from backend
         config.homeAssistant.url = envConfig.haUrl;
-        
+
         // Load access token from localStorage or use the one from backend
         const storedToken = localStorage.getItem('haAccessToken');
         config.homeAssistant.accessToken = storedToken || envConfig.accessToken;
-        
+
         // Update entity IDs from backend
         Object.keys(envConfig.entities).forEach(key => {
             if (config.entities.hasOwnProperty(key)) {
                 config.entities[key] = envConfig.entities[key];
             }
         });
-        
-        console.log('Updated config with backend values:', config);
+
+        // Load display settings from localStorage
+        const storedConfig = localStorage.getItem('haDisplayConfig');
+        if (storedConfig) {
+            try {
+                const parsedConfig = JSON.parse(storedConfig);
+                if (parsedConfig.display && parsedConfig.display.showRainView !== undefined) {
+                    config.display.showRainView = parsedConfig.display.showRainView;
+                }
+            } catch (e) {
+                console.error('Error parsing stored config:', e);
+            }
+        }
+
+        console.log('Updated config with backend values and stored settings:', config);
+
+        // Apply rain view setting
+        updateRainViewDisplay();
     } catch (error) {
         console.error('Error loading environment config:', error);
         showError(`Failed to load configuration from backend: ${error.message}`);
         return;
     }
-    
+
     // Validate configuration
     const validationResult = validateConfig(config);
     if (!validationResult.valid) {
@@ -162,7 +221,7 @@ async function initApp() {
         showError(validationResult.error);
         return;
     }
-    
+
     console.log('Loaded entities:', config.entities);
 
     // Add connection error element
@@ -186,7 +245,7 @@ async function initApp() {
         console.log('Connecting to Home Assistant at:', config.homeAssistant.url);
         console.log('Using temperature entity:', config.entities.temperature);
         console.log('Using humidity entity:', config.entities.humidity);
-        
+
         // Initialize UI components with optimized DOM handling
         const initializeGauges = async () => {
             // Fast check for SVG container - fail early if missing
@@ -195,10 +254,10 @@ async function initApp() {
                 console.error('SVG container not found - gauge initialization aborted');
                 return false;
             }
-            
+
             // We'll let the gauge initializer handle the detailed element checks
             // This avoids redundant DOM queries and improves startup performance
-            
+
             try {
                 // Use the gauge initializer which now returns a Promise
                 const result = await initTemperatureGauge();
@@ -208,15 +267,15 @@ async function initApp() {
                 return false;
             }
         };
-        
+
         // Initialize gauges immediately with optimized approach
         (async () => {
             try {
                 console.log('Initializing gauges...');
-                
+
                 // Single attempt initialization with minimal error handling
                 const success = await initializeGauges();
-                
+
                 if (success) {
                     console.log('Gauge initialization completed successfully');
                 } else {
@@ -228,12 +287,12 @@ async function initApp() {
                 showError('Error initializing gauges: ' + error.message);
             }
         })();
-        
+
         // Connect to Home Assistant using simplified logic
         try {
             await connectToHA();
             console.log('Successfully connected to Home Assistant');
-            
+
             // Hide error message if it was previously shown
             const connectionErrorElement = document.getElementById('connection-error');
             if (connectionErrorElement) {
@@ -242,17 +301,17 @@ async function initApp() {
         } catch (error) {
             console.error('Error connecting to Home Assistant:', error);
         }
-        
+
         // Set up entity listeners after successful connection
         setupEntityListeners();
-        
+
         // Update connection status
         updateConnectionStatus(true);
-        
+
     } catch (error) {
         const errorMessage = error.message || 'Unknown connection error';
         console.error('Connection failed:', errorMessage);
-        
+
         // Update error message with specific details
         const errorElement = document.getElementById('connection-error');
         const errorContentElement = errorElement.querySelector('.error-content p:first-of-type');
@@ -260,7 +319,7 @@ async function initApp() {
             errorContentElement.textContent = `Could not connect to Home Assistant: ${errorMessage}`;
         }
         errorElement.style.display = 'flex';
-        
+
         // Update connection status
         updateConnectionStatus(false, errorMessage);
     }
@@ -269,18 +328,18 @@ async function initApp() {
 // Setup entity listeners
 function setupEntityListeners() {
     // Entity name display removed
-    
+
     // Update connection status
     const connectionStatus = document.getElementById('connection-status');
     if (connectionStatus) {
         connectionStatus.textContent = 'Connected to Home Assistant';
         connectionStatus.classList.add('connected');
     }
-    
+
     // Variables to store weather and sun state
     let currentWeatherState = '';
     let isSunUp = false;
-    
+
     // Function to update the weather icon based on current states
     function updateWeatherIcon() {
         const weatherIcon = document.querySelector('.conditions-center i');
@@ -288,12 +347,12 @@ function setupEntityListeners() {
             console.error('Weather icon element not found');
             return;
         }
-        
+
         console.log('Updating weather icon with weather:', currentWeatherState, 'sun up:', isSunUp);
-        
+
         // Remove all existing weather classes
         weatherIcon.className = 'wi'; // Reset to base class
-        
+
         // Set the appropriate icon based on weather and sun position
         if (currentWeatherState && weatherIconMapping[currentWeatherState]) {
             const timeOfDay = isSunUp ? 'day' : 'night';
@@ -306,7 +365,7 @@ function setupEntityListeners() {
             console.warn('Unknown weather state:', currentWeatherState);
         }
     }
-    
+
     // Listen for temperature changes
     addEntityListener(config.entities.temperature, (state) => {
         console.log('Temperature state received:', state);
@@ -314,20 +373,20 @@ function setupEntityListeners() {
             console.error('Temperature state is undefined');
             return;
         }
-        
+
         const value = parseFloat(state.state);
         console.log('Parsed temperature value:', value, 'isNaN:', isNaN(value));
         if (!isNaN(value)) {
             // Update custom temperature gauge
             updateTemperatureGauge(value);
-            
+
             // Temperature chart update removed
             // Entity name update removed
         } else {
             console.warn('Invalid temperature value:', state.state);
         }
     });
-    
+
     // Listen for temperature trend changes
     addEntityListener(config.entities.temperatureTrend, (state) => {
         console.log('Temperature trend state received:', state);
@@ -335,23 +394,23 @@ function setupEntityListeners() {
             console.error('Temperature trend state is undefined');
             return;
         }
-        
+
         // Get the temperature trend icon element
         const temperatureTrendIcon = document.querySelector('.temperature-trend i');
         if (!temperatureTrendIcon) {
             console.error('Temperature trend icon element not found');
             return;
         }
-        
+
         // Update the icon based on the trend value
         const trend = state.state.toLowerCase();
         console.log('Temperature trend value:', trend);
-        
+
         // Remove all existing direction classes
         temperatureTrendIcon.classList.remove('wi-direction-up');
         temperatureTrendIcon.classList.remove('wi-direction-down');
         temperatureTrendIcon.style.display = 'inline';
-        
+
         // Set the appropriate icon based on the trend
         if (trend === 'up' || trend === 'rising') {
             temperatureTrendIcon.classList.add('wi-direction-up');
@@ -364,7 +423,7 @@ function setupEntityListeners() {
             temperatureTrendIcon.style.display = 'none';
         }
     });
-    
+
     // Listen for humidity changes
     addEntityListener(config.entities.humidity, (state) => {
         console.log('Humidity state received:', state);
@@ -372,7 +431,7 @@ function setupEntityListeners() {
             console.error('Humidity state is undefined');
             return;
         }
-        
+
         const value = parseFloat(state.state);
         console.log('Parsed humidity value:', value, 'isNaN:', isNaN(value));
         if (!isNaN(value)) {
@@ -382,7 +441,7 @@ function setupEntityListeners() {
             console.warn('Invalid humidity value:', state.state);
         }
     });
-    
+
     // Listen for pressure changes
     addEntityListener(config.entities.pressure, (state) => {
         console.log('Pressure state received:', state);
@@ -390,7 +449,7 @@ function setupEntityListeners() {
             console.error('Pressure state is undefined');
             return;
         }
-        
+
         const value = parseFloat(state.state);
         console.log('Parsed pressure value:', value, 'isNaN:', isNaN(value));
         if (!isNaN(value)) {
@@ -400,7 +459,7 @@ function setupEntityListeners() {
             console.warn('Invalid pressure value:', state.state);
         }
     });
-    
+
     // Listen for pressure trend changes
     addEntityListener(config.entities.pressureTrend, (state) => {
         console.log('Pressure trend state received:', state);
@@ -408,23 +467,23 @@ function setupEntityListeners() {
             console.error('Pressure trend state is undefined');
             return;
         }
-        
+
         // Get the pressure trend icon element
         const pressureTrendIcon = document.querySelector('.pressure-trend i');
         if (!pressureTrendIcon) {
             console.error('Pressure trend icon element not found');
             return;
         }
-        
+
         // Update the icon based on the trend value
         const trend = state.state.toLowerCase();
         console.log('Pressure trend value:', trend);
-        
+
         // Remove all existing direction classes
         pressureTrendIcon.classList.remove('wi-direction-up');
         pressureTrendIcon.classList.remove('wi-direction-down');
         pressureTrendIcon.style.display = 'inline';
-        
+
         // Set the appropriate icon based on the trend
         if (trend === 'up' || trend === 'rising') {
             pressureTrendIcon.classList.add('wi-direction-up');
@@ -435,7 +494,7 @@ function setupEntityListeners() {
             pressureTrendIcon.style.display = 'none';
         }
     });
-    
+
     // Listen for secondary temperature changes
     if (config.entities.temperatureSecondary) {
         addEntityListener(config.entities.temperatureSecondary, (state) => {
@@ -444,7 +503,7 @@ function setupEntityListeners() {
                 console.error('Secondary temperature state is undefined');
                 return;
             }
-            
+
             const value = parseFloat(state.state);
             console.log('Parsed secondary temperature value:', value, 'isNaN:', isNaN(value));
             if (!isNaN(value)) {
@@ -455,7 +514,7 @@ function setupEntityListeners() {
             }
         });
     }
-    
+
     // Listen for secondary temperature trend changes
     if (config.entities.temperatureSecondaryTrend) {
         addEntityListener(config.entities.temperatureSecondaryTrend, (state) => {
@@ -464,23 +523,23 @@ function setupEntityListeners() {
                 console.error('Secondary temperature trend state is undefined');
                 return;
             }
-            
+
             // Get the secondary temperature trend icon element
             const secondaryTempTrendIcon = document.querySelector('.secondary-temp-trend i');
             if (!secondaryTempTrendIcon) {
                 console.error('Secondary temperature trend icon element not found');
                 return;
             }
-            
+
             // Update the icon based on the trend value
             const trend = state.state.toLowerCase();
             console.log('Secondary temperature trend value:', trend);
-            
+
             // Remove all existing direction classes
             secondaryTempTrendIcon.classList.remove('wi-direction-up');
             secondaryTempTrendIcon.classList.remove('wi-direction-down');
             secondaryTempTrendIcon.style.display = 'inline';
-            
+
             // Set the appropriate icon based on the trend
             if (trend === 'up' || trend === 'rising') {
                 secondaryTempTrendIcon.classList.add('wi-direction-up');
@@ -494,25 +553,129 @@ function setupEntityListeners() {
             }
         });
     }
-    
+
+    // Listen for secondary humidity changes
+    if (config.entities.humiditySecondary) {
+        addEntityListener(config.entities.humiditySecondary, (state) => {
+            console.log('Secondary humidity state received:', state);
+            if (!state) {
+                console.error('Secondary humidity state is undefined');
+                return;
+            }
+
+            const value = parseFloat(state.state);
+            console.log('Parsed secondary humidity value:', value, 'isNaN:', isNaN(value));
+            if (!isNaN(value)) {
+                // Update secondary humidity display
+                const secondaryHumidityValue = document.getElementById('secondary-humidity-value');
+                if (secondaryHumidityValue) {
+                    secondaryHumidityValue.textContent = Math.round(value);
+                    
+                    // Update humidity icon color based on value
+                    const secondaryHumidityIcon = document.querySelector('.secondary-humidity-display i');
+                    if (secondaryHumidityIcon) {
+                        // Get the nearest color stop for the humidity value
+                        const colorStops = [
+                            { value: 30, color: '#3498db' },  // Blue for low humidity
+                            { value: 50, color: '#2ecc71' },  // Green for medium humidity
+                            { value: 70, color: '#f39c12' },  // Orange for high humidity
+                            { value: 100, color: '#e74c3c' }  // Red for very high humidity
+                        ];
+                        
+                        // Find the nearest color stop
+                        let nearestStop = colorStops[0];
+                        let smallestDiff = Math.abs(value - nearestStop.value);
+                        
+                        for (let i = 1; i < colorStops.length; i++) {
+                            const diff = Math.abs(value - colorStops[i].value);
+                            if (diff < smallestDiff) {
+                                smallestDiff = diff;
+                                nearestStop = colorStops[i];
+                            }
+                        }
+                        
+                        // Set the icon color
+                        secondaryHumidityIcon.style.color = nearestStop.color;
+                    }
+                } else {
+                    console.error('Secondary humidity value element not found');
+                }
+            } else {
+                console.warn('Invalid secondary humidity value:', state.state);
+            }
+        });
+    }
+
+    // Listen for CO2 changes
+    if (config.entities.co2) {
+        addEntityListener(config.entities.co2, (state) => {
+            console.log('CO2 state received:', state);
+            if (!state) {
+                console.error('CO2 state is undefined');
+                return;
+            }
+
+            const value = parseFloat(state.state);
+            console.log('Parsed CO2 value:', value, 'isNaN:', isNaN(value));
+            if (!isNaN(value)) {
+                // Update CO2 display
+                const co2Value = document.getElementById('secondary-co2-value');
+                if (co2Value) {
+                    co2Value.textContent = Math.round(value);
+                    
+                    // Update CO2 icon color based on value
+                    const co2Icon = document.querySelector('.secondary-co2-display svg');
+                    if (co2Icon) {
+                        // Get the nearest color stop for the CO2 value
+                        const colorStops = [
+                            { value: 400, color: '#2ecc71' },  // Green for good CO2 levels
+                            { value: 800, color: '#f39c12' },  // Orange for moderate CO2 levels
+                            { value: 1200, color: '#e74c3c' }, // Red for high CO2 levels
+                            { value: 2000, color: '#9b59b6' }  // Purple for very high CO2 levels
+                        ];
+                        
+                        // Find the nearest color stop
+                        let nearestStop = colorStops[0];
+                        let smallestDiff = Math.abs(value - nearestStop.value);
+                        
+                        for (let i = 1; i < colorStops.length; i++) {
+                            const diff = Math.abs(value - colorStops[i].value);
+                            if (diff < smallestDiff) {
+                                smallestDiff = diff;
+                                nearestStop = colorStops[i];
+                            }
+                        }
+                        
+                        // Set the icon color
+                        co2Icon.style.color = nearestStop.color;
+                    }
+                } else {
+                    console.error('CO2 value element not found');
+                }
+            } else {
+                console.warn('Invalid CO2 value:', state.state);
+            }
+        });
+    }
+
     // Listen for weather condition changes
     if (config.entities.weather) {
         addEntityListener(config.entities.weather, (state) => {
-            console.log('Weather state received:', state);
+            console.log('Weather state changed:', state);
             if (!state) {
                 console.error('Weather state is undefined');
                 return;
             }
-            
+
             // Update the current weather state
             currentWeatherState = state.state.toLowerCase();
             console.log('Current weather state:', currentWeatherState);
-            
+
             // Update the weather icon
             updateWeatherIcon();
         });
     }
-    
+
     // Listen for sun position changes
     if (config.entities.sun) {
         addEntityListener(config.entities.sun, (state) => {
@@ -521,16 +684,16 @@ function setupEntityListeners() {
                 console.error('Sun state is undefined');
                 return;
             }
-            
+
             // Check if the sun is above the horizon
             isSunUp = state.state.toLowerCase() === 'above_horizon';
             console.log('Sun is up:', isSunUp);
-            
+
             // Update the weather icon
             updateWeatherIcon();
         });
     }
-    
+
     // Listen for rain sensor changes
     if (config.entities.rain) {
         addEntityListener(config.entities.rain, (state) => {
@@ -539,7 +702,7 @@ function setupEntityListeners() {
                 console.error('Rain state is undefined');
                 return;
             }
-            
+
             const value = parseFloat(state.state);
             console.log('Parsed rain value:', value, 'isNaN:', isNaN(value));
             if (!isNaN(value)) {
@@ -551,7 +714,7 @@ function setupEntityListeners() {
             }
         });
     }
-    
+
     // Listen for rain last hour changes
     if (config.entities.rainLastHour) {
         addEntityListener(config.entities.rainLastHour, (state) => {
@@ -560,7 +723,7 @@ function setupEntityListeners() {
                 console.error('Rain last hour state is undefined');
                 return;
             }
-            
+
             const value = parseFloat(state.state);
             console.log('Parsed rain last hour value:', value, 'isNaN:', isNaN(value));
             if (!isNaN(value)) {
@@ -572,7 +735,7 @@ function setupEntityListeners() {
             }
         });
     }
-    
+
     // Listen for rain today changes
     if (config.entities.rainToday) {
         addEntityListener(config.entities.rainToday, (state) => {
@@ -581,7 +744,7 @@ function setupEntityListeners() {
                 console.error('Rain today state is undefined');
                 return;
             }
-            
+
             const value = parseFloat(state.state);
             console.log('Parsed rain today value:', value, 'isNaN:', isNaN(value));
             if (!isNaN(value)) {
@@ -610,7 +773,7 @@ function updateConnectionStatus(connected, message) {
         console.error('Connection status element not found');
         return;
     }
-    
+
     if (connected) {
         connectionStatus.textContent = 'Connected to Home Assistant';
         connectionStatus.className = 'connected';
@@ -629,22 +792,22 @@ async function retryConnection() {
             connectionStatus.textContent = 'Reconnecting...';
             connectionStatus.className = 'connecting';
         }
-        
+
         // Hide the error overlay
         document.getElementById('connection-error').style.display = 'none';
-        
+
         // Attempt to reconnect
         await connectToHA();
         console.log('Successfully reconnected to Home Assistant');
-        
+
         // Set up entity listeners after successful reconnection
         setupEntityListeners();
-        
+
         // Update connection status
         updateConnectionStatus(true);
     } catch (error) {
         console.error('Reconnection failed:', error.message);
-        
+
         // Show error message with specific error details
         const errorElement = document.getElementById('connection-error');
         const errorContentElement = errorElement.querySelector('.error-content p:first-of-type');
@@ -652,7 +815,7 @@ async function retryConnection() {
             errorContentElement.textContent = `Could not connect to Home Assistant: ${error.message}`;
         }
         errorElement.style.display = 'flex';
-        
+
         // Update connection status
         updateConnectionStatus(false, error.message || 'Reconnection failed');
     }
