@@ -24,7 +24,7 @@ function testGaugeSweep() {
             humidity: { min: 0, max: 100, increment: 4 },
             pressure: { min: 950, max: 1050, increment: 5 }
         };
-        
+
         // Initialize current values
         const currentValues = {
             temperature: gaugeRanges.temperature.min,
@@ -32,7 +32,7 @@ function testGaugeSweep() {
             humidity: gaugeRanges.humidity.min,
             pressure: gaugeRanges.pressure.min
         };
-        
+
         // Store original values to restore later (with safe defaults)
         const originalValues = {
             temperature: parseFloat(document.getElementById('temperature-value')?.textContent || '20'),
@@ -40,30 +40,30 @@ function testGaugeSweep() {
             humidity: parseFloat(document.getElementById('humidity-value')?.textContent || '50'),
             pressure: parseFloat(document.getElementById('pressure-value')?.textContent || '1013')
         };
-        
+
         // Use requestAnimationFrame for smoother animation
         let animationId;
         const startTime = performance.now();
         const duration = 5000; // 5 seconds total
-        
+
         // Animation function
         function animate(timestamp) {
             // Calculate progress (0 to 1)
             const elapsed = timestamp - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             // Update all gauges
             updateTemperatureGauge(currentValues.temperature);
             updateSecondaryTemperatureGauge(currentValues.secondaryTemp);
             updateHumidityGauge(currentValues.humidity);
             updatePressureGauge(currentValues.pressure);
-            
+
             // Increment values with larger steps for faster sweep
             currentValues.temperature += gaugeRanges.temperature.increment;
             currentValues.secondaryTemp += gaugeRanges.secondaryTemp.increment;
             currentValues.humidity += gaugeRanges.humidity.increment;
             currentValues.pressure += gaugeRanges.pressure.increment;
-            
+
             // Reset when reaching max values
             if (currentValues.temperature > gaugeRanges.temperature.max) {
                 currentValues.temperature = gaugeRanges.temperature.min;
@@ -77,7 +77,7 @@ function testGaugeSweep() {
             if (currentValues.pressure > gaugeRanges.pressure.max) {
                 currentValues.pressure = gaugeRanges.pressure.min;
             }
-            
+
             // Continue animation if not complete
             if (progress < 1) {
                 animationId = requestAnimationFrame(animate);
@@ -89,10 +89,10 @@ function testGaugeSweep() {
                 updatePressureGauge(originalValues.pressure);
             }
         }
-        
+
         // Start animation
         animationId = requestAnimationFrame(animate);
-        
+
     } catch (error) {
         console.error('Error in gauge sweep test:', error);
     }

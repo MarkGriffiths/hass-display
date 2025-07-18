@@ -99,17 +99,17 @@ waitForDOMReady().then(() => {
             window.location.href = '/admin.html';
         });
     }
-    
+
     // Set up rain button event listener
     const rainButton = document.getElementById('rain-button');
     if (rainButton) {
         rainButton.addEventListener('click', function() {
             // Toggle the rain view setting
             config.display.showRainView = !config.display.showRainView;
-            
+
             // Update the display
             updateRainViewDisplay();
-            
+
             // Save the setting to localStorage
             const configToSave = {
                 display: {
@@ -117,7 +117,7 @@ waitForDOMReady().then(() => {
                 }
             };
             localStorage.setItem('haDisplayConfig', JSON.stringify(configToSave));
-            
+
             console.log('Rain view toggled:', config.display.showRainView);
         });
     }
@@ -570,7 +570,7 @@ function setupEntityListeners() {
                 const secondaryHumidityValue = document.getElementById('secondary-humidity-value');
                 if (secondaryHumidityValue) {
                     secondaryHumidityValue.textContent = Math.round(value);
-                    
+
                     // Update humidity icon color based on value
                     const secondaryHumidityIcon = document.querySelector('.secondary-humidity-display i');
                     if (secondaryHumidityIcon) {
@@ -581,11 +581,11 @@ function setupEntityListeners() {
                             { value: 70, color: '#f39c12' },  // Orange for high humidity
                             { value: 100, color: '#e74c3c' }  // Red for very high humidity
                         ];
-                        
+
                         // Find the nearest color stop
                         let nearestStop = colorStops[0];
                         let smallestDiff = Math.abs(value - nearestStop.value);
-                        
+
                         for (let i = 1; i < colorStops.length; i++) {
                             const diff = Math.abs(value - colorStops[i].value);
                             if (diff < smallestDiff) {
@@ -593,7 +593,7 @@ function setupEntityListeners() {
                                 nearestStop = colorStops[i];
                             }
                         }
-                        
+
                         // Set the icon color
                         secondaryHumidityIcon.style.color = nearestStop.color;
                     }
@@ -622,7 +622,7 @@ function setupEntityListeners() {
                 const co2Value = document.getElementById('secondary-co2-value');
                 if (co2Value) {
                     co2Value.textContent = Math.round(value);
-                    
+
                     // Update CO2 icon color based on value
                     const co2Icon = document.querySelector('.secondary-co2-display svg');
                     if (co2Icon) {
@@ -633,11 +633,11 @@ function setupEntityListeners() {
                             { value: 1200, color: '#e74c3c' }, // Red for high CO2 levels
                             { value: 2000, color: '#9b59b6' }  // Purple for very high CO2 levels
                         ];
-                        
+
                         // Find the nearest color stop
                         let nearestStop = colorStops[0];
                         let smallestDiff = Math.abs(value - nearestStop.value);
-                        
+
                         for (let i = 1; i < colorStops.length; i++) {
                             const diff = Math.abs(value - colorStops[i].value);
                             if (diff < smallestDiff) {
@@ -645,7 +645,7 @@ function setupEntityListeners() {
                                 nearestStop = colorStops[i];
                             }
                         }
-                        
+
                         // Set the icon color
                         co2Icon.style.color = nearestStop.color;
                     }

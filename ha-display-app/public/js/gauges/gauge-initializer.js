@@ -25,10 +25,10 @@ function checkDOMElementsReady() {
         'humidity-arc',
         'pressure-arc'
     ];
-    
+
     let allElementsReady = true;
     const missingElements = [];
-    
+
     for (const elementId of requiredElements) {
         const element = document.getElementById(elementId);
         if (!element) {
@@ -36,11 +36,11 @@ function checkDOMElementsReady() {
             allElementsReady = false;
         }
     }
-    
+
     if (!allElementsReady) {
         console.log(`Missing DOM elements: ${missingElements.join(', ')}`);
     }
-    
+
     return allElementsReady;
 }
 
@@ -54,29 +54,29 @@ function checkDOMElementsReady() {
 async function waitForDOMElements(elementIds, maxAttempts = 2, interval = 50) {
     return new Promise((resolve) => {
         let attempts = 0;
-        
+
         function checkElements() {
             attempts++;
-            
+
             // Use filter for a single pass through the array
             const missing = elementIds.filter(id => !document.getElementById(id));
-            
+
             if (missing.length === 0) {
                 resolve(true);
                 return;
             }
-            
+
             // If we've reached max attempts, resolve with false
             if (attempts >= maxAttempts) {
                 console.error(`Failed to find DOM elements after ${maxAttempts} attempts`);
                 resolve(false);
                 return;
             }
-            
+
             // Try again after interval - use shorter interval for faster startup
             setTimeout(checkElements, interval);
         }
-        
+
         // Start checking immediately
         checkElements();
     });
@@ -106,7 +106,7 @@ export async function initGauges() {
     try {
         // Ensure DOM is fully loaded - this is a fast check
         await ensureDOMReady();
-        
+
         // Wait for all required DOM elements to be available
         // Using optimized parameters (fewer attempts, shorter interval)
         const requiredElements = [
@@ -119,34 +119,34 @@ export async function initGauges() {
             'humidity-arc',
             'pressure-arc'
         ];
-        
+
         const elementsReady = await waitForDOMElements(requiredElements, 2, 50);
-        
+
         if (!elementsReady) {
             console.error('Failed to find required DOM elements');
             return false;
         }
-        
+
         // Initialize SVG paths
         initSVGPaths();
-        
+
         // Create gradients
         createTemperatureGradient();
         createSecondaryTemperatureGradient();
         createHumidityGradient();
         createPressureGradient();
-        
+
         // Create scale markers
         const tempMarkersResult = await createTemperatureMarkers();
-        
+
         const secondaryTempMarkersResult = await createSecondaryTemperatureMarkers();
         const humidityMarkersResult = await createHumidityMarkers();
         const pressureMarkersResult = await createPressureScaleMarkers();
-        
+
         // Initialize gauge paths
         const centerX = config.gaugeDimensions.centerX;
         const centerY = config.gaugeDimensions.centerY;
-        
+
         // Use class names for all gauge paths
         // The class names must match exactly what's in the HTML
         // For the temperature gauge
@@ -157,22 +157,22 @@ export async function initGauges() {
         initGaugePath('humidity-arc', centerX, centerY, config.gaugeDimensions.humidityRadius, config.gauges.humidity.startAngle, config.gauges.humidity.endAngle);
         // For the pressure gauge
         initGaugePath('pressure-arc', centerX, centerY, config.gaugeDimensions.pressureRadius, config.gauges.pressure.startAngle, config.gauges.pressure.endAngle);
-        
+
         // Initialize all gauges with minimal values to prevent flash of color
         console.log('Initializing gauges with minimal values to prevent flash of color');
-        
+
         // Use default values for initial display
         const defaultTemp = config.gauges.temperature.min;
         const defaultSecondaryTemp = config.gauges.temperatureSecondary.min;
         const defaultHumidity = config.gauges.humidity.min;
         const defaultPressure = config.gauges.pressure.min;
-        
+
         // Call update functions with initializing=true
         updateTemperatureGauge(defaultTemp, true);
         updateSecondaryTemperatureGauge(defaultSecondaryTemp, true);
         updateHumidityGauge(defaultHumidity, true);
         updatePressureGauge(defaultPressure, true);
-        
+
         return true;
     } catch (error) {
         console.error('Error initializing gauges:', error);
