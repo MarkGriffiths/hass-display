@@ -732,6 +732,16 @@ function setupEntityListeners() {
                 if (rainLastHourValueElement) {
                     rainLastHourValueElement.textContent = value.toFixed(1);
                 }
+                
+                // Automatically show rain view if rain amount is greater than zero
+                if (value > 0) {
+                    config.display.showRainView = true;
+                } else {
+                    config.display.showRainView = false;
+                }
+                
+                // Update the display based on the new setting
+                updateRainViewDisplay();
             }
         });
     }
