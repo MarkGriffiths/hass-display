@@ -19,10 +19,10 @@ function testGaugeSweep() {
     try {
         // Define gauge ranges with consistent structure
         const gaugeRanges = {
-            temperature: { min: -10, max: 40, increment: 2 },
-            secondaryTemp: { min: 5, max: 40, increment: 2 },
-            humidity: { min: 0, max: 100, increment: 4 },
-            pressure: { min: 950, max: 1050, increment: 5 }
+            temperature: { min: -10, max: 40, increment: 0.2 },
+            secondaryTemp: { min: 5, max: 40, increment: 0.2 },
+            humidity: { min: 0, max: 100, increment: 0.5 },
+            pressure: { min: 950, max: 1050, increment: 1 }
         };
 
         // Initialize current values
