@@ -1,6 +1,6 @@
 // Humidity gauge implementation
 import { config } from '../config.js';
-import { createGradientStops, createArcPath, calculateAngle } from '../gauge-utils.js';
+import { createGradientStops, createArcPath, calculateAngle, createScaleMarkers } from './gauge-utils.js';
 
 // Humidity gauge configuration
 const humidityConfig = {
@@ -79,87 +79,33 @@ export function createHumidityMarkers() {
                     return;
                 }
 
-                // Clear any existing markers
-                while (markers.firstChild) {
-                    markers.removeChild(markers.firstChild);
-                }
+                // Use the shared createScaleMarkers utility function
+                createScaleMarkers(
+                    'humidity-markers',
+                    config.gaugeDimensions.centerX,
+                    config.gaugeDimensions.centerY,
+                    humidityConfig.arcRadius,
+                    humidityConfig.minHumidity,
+                    humidityConfig.maxHumidity,
+                    10, // Step size of 10%
+                    humidityConfig.startAngle,
+                    humidityConfig.endAngle,
+                    '%' // Humidity unit
+                );
 
-                // Create markers for humidity scale
-                const step = 10; // Show every 10% humidity
-                for (let humidity = humidityConfig.minHumidity; humidity <= humidityConfig.maxHumidity; humidity += step) {
-                    // Calculate angle based on humidity
-                    const angle = calculateAngle(
-                        humidity,
-                        humidityConfig.minHumidity,
-                        humidityConfig.maxHumidity,
-                        humidityConfig.startAngle,
-                        humidityConfig.endAngle
-                    );
-                    const radians = angle * (Math.PI / 180);
-
-                    // Calculate position for text label and scale line
-                    const textRadius = config.gaugeDimensions.humidityRadius;
-                    const innerRadius = config.gaugeDimensions.humidityRadius - 8; // Inner point for scale line
-                    const outerRadius = config.gaugeDimensions.humidityRadius + 8; // Outer point for scale line
-
-                    // Calculate positions
-                    const textX = config.gaugeDimensions.centerX + Math.cos(radians) * textRadius;
-                    const textY = config.gaugeDimensions.centerY + Math.sin(radians) * textRadius;
-                    const innerX = config.gaugeDimensions.centerX + Math.cos(radians) * innerRadius;
-                    const innerY = config.gaugeDimensions.centerY + Math.sin(radians) * innerRadius;
-                    const outerX = config.gaugeDimensions.centerX + Math.cos(radians) * outerRadius;
-                    const outerY = config.gaugeDimensions.centerY + Math.sin(radians) * outerRadius;
-
-                    // Create a group for the marker
-                    const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-
-                    // Create scale line (for all humidity values)
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                    line.setAttribute('x1', innerX);
-                    line.setAttribute('y1', innerY);
-                    line.setAttribute('x2', outerX);
-                    line.setAttribute('y2', outerY);
-                    line.setAttribute('stroke', 'rgba(255, 255, 255, 0.5)');
-                    line.setAttribute('stroke-width', humidity % 50 === 0 ? '1.5' : '0.5'); // Thicker lines for major ticks
-
-                    // Add line to markers container
-                    markers.appendChild(line);
-
-                    // Create text label
-                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    text.setAttribute('x', 0);
-                    text.setAttribute('y', 1);
-                    text.setAttribute('text-anchor', 'middle');
-                    text.setAttribute('dominant-baseline', 'middle');
-                    text.setAttribute('fill', '#fff');
+                // Apply additional styling to the markers
+                const markerTexts = markers.querySelectorAll('text');
+                markerTexts.forEach(text => {
+                    // Add text shadow for better readability against gradient
+                    text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.8);');
                     text.setAttribute('font-size', '0.6rem');
 
-                    // Only show certain humidity values to avoid crowding
-                    // Show every 20% but NOT the min/max values
-                    const shouldShow = humidity % 20 === 0 &&
-                                       humidity !== humidityConfig.minHumidity &&
-                                       humidity !== humidityConfig.maxHumidity;
-
-                    if (shouldShow) {
-                        text.setAttribute('opacity', '1');
-                        // Set the text content - just the humidity value
-                        text.textContent = `${humidity}%`;
-
-                        // Add text shadow for better readability against gradient
-                        text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.8); font-size: 0.6rem;');
-
-                        // Add text to group
-                        markerGroup.appendChild(text);
-
-                        // Position and rotate the group with 90° rotation for text
-                        // This makes the text perpendicular to the radius
-                        const textAngle = angle + 90; // Rotate text by 90°
-                        markerGroup.setAttribute('transform', `translate(${textX}, ${textY}) rotate(${textAngle})`);
-
-                        // Add the marker group to the markers container
-                        markers.appendChild(markerGroup);
+                    // Hide the first and last numbers but keep their positions
+                    const value = parseFloat(text.textContent);
+                    if (value === humidityConfig.minHumidity || value === humidityConfig.maxHumidity) {
+                        text.setAttribute('opacity', '0');
                     }
-                }
+                });
 
                 console.log('Humidity scale markers created successfully');
                 resolve(true);
@@ -191,7 +137,7 @@ export function updateHumidityGauge(humidity, initializing = false) {
             // Get the gauge path element
             const gaugePath = document.getElementById('humidity-arc');
             const valueDisplay = document.getElementById('humidity-value');
-            
+
             // If initializing, use the minimum humidity value to prevent flash of color
             const displayHumidity = initializing ? humidityConfig.minHumidity : humidity;
 
@@ -236,23 +182,16 @@ export function updateHumidityGauge(humidity, initializing = false) {
             const centerY = config.gaugeDimensions.centerY;
             const radius = humidityConfig.arcRadius;
 
-            // For humidity gauge, we want it at the bottom-right (0°/360° to 180°)
-            // Calculate start point (always at startAngle)
-            const startRad = humidityConfig.startAngle * (Math.PI / 180);
-            const startX = centerX + radius * Math.cos(startRad);
-            const startY = centerY + radius * Math.sin(startRad);
-
-            // Calculate end point based on the current humidity
-            const endRad = angle * (Math.PI / 180);
-            const endX = centerX + radius * Math.cos(endRad);
-            const endY = centerY + radius * Math.sin(endRad);
-
-            // Determine if we need to use the large arc flag
-            const largeArcFlag = Math.abs(angle - humidityConfig.startAngle) > 180 ? 1 : 0;
-
-            // Create the SVG arc path
-            const sweepFlag = 1; // 0 for clockwise, 1 for counterclockwise
-            const arcPath = `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
+            // For humidity gauge, we want it at the top (180° to 360°/0°)
+            // Use the shared createArcPath utility function to generate the path
+            const arcPath = createArcPath(
+                centerX,
+                centerY,
+                radius,
+                humidityConfig.startAngle,
+                angle,
+                false // Don't include center point
+            );
 
             // Update the path
             gaugePath.setAttribute('d', arcPath);

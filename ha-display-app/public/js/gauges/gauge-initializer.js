@@ -2,7 +2,7 @@
 // Handles initialization of all gauge components
 
 import { config } from '../config.js';
-import { initGaugePath, initSVGPaths } from '../gauge-utils.js';
+import { initGaugePath, initSVGPaths } from './gauge-utils.js';
 
 // Import individual gauge functions
 import { createTemperatureGradient, createTemperatureMarkers, updateTemperatureGauge } from './temperature-gauge.js';
