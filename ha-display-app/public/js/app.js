@@ -2,7 +2,8 @@
 import { config } from './config.js';
 import { loadConfig, validateConfig } from './config-manager.js';
 import { connectToHA, addEntityListener } from './ha-connection.js';
-import { initTemperatureGauge, updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge } from './gauge-manager.js';
+import { initTemperatureGauge, updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge, updateRainfallGauge } from './gauge-manager.js';
+import { initWindDisplays, updateWindDisplay } from './wind-display.js';
 import { testGauges } from './test-gauges.js';
 
 // Wait for DOM to be fully loaded and ready - optimized version
@@ -100,16 +101,14 @@ waitForDOMReady().then(() => {
         });
     }
 
-    // Set up rain button event listener
-    const rainButton = document.getElementById('rain-button');
-    if (rainButton) {
-        rainButton.addEventListener('click', function() {
-            // Toggle the rain view setting
+    // Set up toggle rain view button event listener
+    const toggleRainViewButton = document.getElementById('toggle-rain-view');
+    if (toggleRainViewButton) {
+        toggleRainViewButton.addEventListener('click', function() {
+            // Toggle the showRainView flag
             config.display.showRainView = !config.display.showRainView;
-
             // Update the display
             updateRainViewDisplay();
-
             // Save the setting to localStorage
             const configToSave = {
                 display: {
@@ -124,28 +123,16 @@ waitForDOMReady().then(() => {
 });
 
 // Weather icon mapping based on weather condition and sun position
-const weatherIconMapping = {
-    'clear-night': { day: 'wi-stars', night: 'wi-stars' },
-    'cloudy': { day: 'wi-cloudy', night: 'wi-night-alt-cloudy' },
-    'exceptional': { day: 'wi-day-sunny', night: 'wi-night-clear' },
-    'fog': { day: 'wi-day-fog', night: 'wi-night-fog' },
-    'hail': { day: 'wi-day-hail', night: 'wi-night-alt-hail' },
-    'lightning': { day: 'wi-day-lightning', night: 'wi-night-alt-lightning' },
-    'lightning-rainy': { day: 'wi-day-thunderstorm', night: 'wi-night-alt-thunderstorm' },
-    'partlycloudy': { day: 'wi-day-cloudy', night: 'wi-night-alt-cloudy' },
-    'pouring': { day: 'wi-rain', night: 'wi-night-alt-rain' },
-    'rainy': { day: 'wi-sprinkle', night: 'wi-night-alt-sprinkle' },
-    'snowy': { day: 'wi-snow', night: 'wi-night-snow' },
-    'snowy-rainy': { day: 'wi-sleet', night: 'wi-night-sleet' },
-    'sunny': { day: 'wi-day-sunny', night: 'wi-night-clear' },
-    'windy': { day: 'wi-windy', night: 'wi-night-alt-cloudy-windy' },
-    'windy-variant': { day: 'wi-cloudy-gusts', night: 'wi-night-alt-cloudy-gusts' }
-};
+// Weather icon mapping is now in config.js
 
 // Function to update the rain view display based on config setting
-function updateRainViewDisplay() {
+// Make updateRainViewDisplay globally accessible for ha-connection.js
+window.updateRainViewDisplay = function() {
     const rainCenter = document.querySelector('.rain-center');
     const conditionsCenter = document.querySelector('.conditions-center');
+    const rainfallArc = document.getElementById('rainfall-arc');
+    const rainfallBackground = document.querySelector('.rainfall-background');
+    const rainfallMarkers = document.getElementById('rainfall-markers');
 
     if (!rainCenter || !conditionsCenter) {
         console.error('Could not find rain-center or conditions-center elements');
@@ -154,6 +141,7 @@ function updateRainViewDisplay() {
 
     console.log('Updating rain view display, showRainView:', config.display.showRainView);
 
+    // Toggle rain-center/conditions-center visibility based on showRainView setting
     if (config.display.showRainView) {
         rainCenter.classList.add('active');
         conditionsCenter.classList.add('inactive');
@@ -161,7 +149,30 @@ function updateRainViewDisplay() {
         rainCenter.classList.remove('active');
         conditionsCenter.classList.remove('inactive');
     }
-}
+    
+    // IMPORTANT: Rainfall gauge visibility is now independent of the view toggle
+    // Always check if there's rain today and show the gauge if needed
+    if (rainfallArc && rainfallBackground && rainfallMarkers) {
+        const rainTodayValue = parseFloat(document.getElementById('rain-today-value')?.textContent || '0');
+        console.log('Checking rainfall gauge visibility, rain today value:', rainTodayValue);
+        
+        if (rainTodayValue > 0) {
+            // Always show rainfall gauge if there's rain today, regardless of which view is active
+            console.log('Showing rainfall gauge because rain today > 0');
+            rainfallArc.style.display = 'block'; // Use explicit 'block' instead of empty string
+            rainfallBackground.style.display = 'block';
+            rainfallMarkers.style.display = 'block';
+            // Update the rainfall gauge with the current value
+            updateRainfallGauge(rainTodayValue);
+        } else {
+            // Only hide if there's no rain today
+            console.log('Hiding rainfall gauge because rain today = 0');
+            rainfallArc.style.display = 'none';
+            rainfallBackground.style.display = 'none';
+            rainfallMarkers.style.display = 'none';
+        }
+    }
+};
 
 // Initialize the application
 async function initApp() {
@@ -282,9 +293,18 @@ async function initApp() {
                     console.error('Failed to initialize gauges');
                     showError('Failed to initialize gauges. Please refresh the page.');
                 }
+                
+                // Initialize wind displays
+                console.log('Initializing wind displays...');
+                const windSuccess = initWindDisplays();
+                if (windSuccess) {
+                    console.log('Wind displays initialized successfully');
+                } else {
+                    console.error('Failed to initialize wind displays');
+                }
             } catch (error) {
-                console.error('Error during gauge initialization:', error);
-                showError('Error initializing gauges: ' + error.message);
+                console.error('Error during initialization:', error);
+                showError('Error initializing components: ' + error.message);
             }
         })();
 
@@ -354,14 +374,16 @@ function setupEntityListeners() {
         weatherIcon.className = 'wi'; // Reset to base class
 
         // Set the appropriate icon based on weather and sun position
-        if (currentWeatherState && weatherIconMapping[currentWeatherState]) {
-            const timeOfDay = isSunUp ? 'day' : 'night';
-            const iconClass = weatherIconMapping[currentWeatherState][timeOfDay];
+        const timeOfDay = isSunUp ? 'day' : 'night';
+        
+        if (currentWeatherState && config.weather.iconMapping[currentWeatherState]) {
+            const iconClass = config.weather.iconMapping[currentWeatherState][timeOfDay];
             console.log('Selected icon class:', iconClass);
             weatherIcon.classList.add(iconClass);
         } else {
-            // Default icon if weather state is unknown
-            weatherIcon.classList.add(isSunUp ? 'wi-day-sunny' : 'wi-night-clear');
+            // Default icon if weather state is unknown - use config value
+            const defaultIcon = config.weather.defaultIcons[timeOfDay];
+            weatherIcon.classList.add(defaultIcon);
             console.warn('Unknown weather state:', currentWeatherState);
         }
     }
@@ -763,6 +785,87 @@ function setupEntityListeners() {
                 if (rainTodayValueElement) {
                     rainTodayValueElement.textContent = value.toFixed(1);
                 }
+                
+                // Always update the rainfall gauge with the current value
+                // This ensures the gauge is visible when there's rainfall
+                console.log('Updating rainfall gauge with value:', value);
+                updateRainfallGauge(value);
+            }
+        });
+    }
+    
+    // Listen for wind angle changes
+    if (config.entities.windAngle) {
+        addEntityListener(config.entities.windAngle, (state) => {
+            console.log('Wind angle state received:', state);
+            if (!state) {
+                console.error('Wind angle state is undefined');
+                return;
+            }
+
+            const angle = parseFloat(state.state);
+            if (!isNaN(angle)) {
+                // Update wind display (left side) with new angle only
+                updateWindDisplay(angle, null, 'left');
+            } else {
+                console.warn('Invalid wind angle value:', state.state);
+            }
+        });
+    }
+    
+    // Listen for wind speed changes
+    if (config.entities.windSpeed) {
+        addEntityListener(config.entities.windSpeed, (state) => {
+            console.log('Wind speed state received:', state);
+            if (!state) {
+                console.error('Wind speed state is undefined');
+                return;
+            }
+
+            const speed = parseFloat(state.state);
+            if (!isNaN(speed)) {
+                // Update wind display (left side) with new speed only
+                updateWindDisplay(null, speed, 'left');
+            } else {
+                console.warn('Invalid wind speed value:', state.state);
+            }
+        });
+    }
+    
+    // Listen for gust angle changes
+    if (config.entities.gustAngle) {
+        addEntityListener(config.entities.gustAngle, (state) => {
+            console.log('Gust angle state received:', state);
+            if (!state) {
+                console.error('Gust angle state is undefined');
+                return;
+            }
+
+            const angle = parseFloat(state.state);
+            if (!isNaN(angle)) {
+                // Update gust display (right side) with new angle only
+                updateWindDisplay(angle, null, 'right');
+            } else {
+                console.warn('Invalid gust angle value:', state.state);
+            }
+        });
+    }
+    
+    // Listen for gust speed changes
+    if (config.entities.gustSpeed) {
+        addEntityListener(config.entities.gustSpeed, (state) => {
+            console.log('Gust speed state received:', state);
+            if (!state) {
+                console.error('Gust speed state is undefined');
+                return;
+            }
+
+            const speed = parseFloat(state.state);
+            if (!isNaN(speed)) {
+                // Update gust display (right side) with new speed only
+                updateWindDisplay(null, speed, 'right');
+            } else {
+                console.warn('Invalid gust speed value:', state.state);
             }
         });
     }

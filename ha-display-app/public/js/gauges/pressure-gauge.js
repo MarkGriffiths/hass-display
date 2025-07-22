@@ -80,37 +80,33 @@ export function createPressureScaleMarkers() {
                 }
 
                 // Use the shared createScaleMarkers utility function
-                createScaleMarkers(
+                // Use the enhanced createScaleMarkers utility function with custom filter
+                const result = createScaleMarkers(
                     'pressure-markers',
                     config.gaugeDimensions.centerX,
                     config.gaugeDimensions.centerY,
-                    pressureConfig.arcRadius,
+                    pressureConfig.arcRadius - 0.5,
                     pressureConfig.minPressure,
                     pressureConfig.maxPressure,
                     10, // Step size of 10 hPa
                     pressureConfig.startAngle,
                     pressureConfig.endAngle,
-                    '' // No unit suffix
+                    '', // No unit suffix
+                    {
+                        hideMinMax: true,
+                        fontSize: '0.6rem',
+                        // Only show values divisible by 20 (but not min/max)
+                        // filterValue: (value, min, max) => {
+                        //     return value % 20 === 0 && value !== min && value !== max;
+                        // }
+                    }
                 );
 
-                // Apply additional styling to the markers
-                const markerTexts = markers.querySelectorAll('text');
-                markerTexts.forEach(text => {
-                    // Add text shadow for better readability against gradient
-                    text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.8);');
-                    text.setAttribute('font-size', '0.6rem');
-
-                    // Only show certain pressure values to avoid crowding
-                    // Show every 20 hPa but NOT the min/max values
-                    const value = parseFloat(text.textContent);
-                    const shouldShow = value % 20 === 0 &&
-                                       value !== pressureConfig.minPressure &&
-                                       value !== pressureConfig.maxPressure;
-
-                    if (!shouldShow) {
-                        text.setAttribute('opacity', '0');
-                    }
-                });
+                if (!result) {
+                    console.error('Failed to create pressure markers');
+                    resolve(false);
+                    return;
+                }
 
                 console.log('Pressure scale markers created successfully');
                 resolve(true);

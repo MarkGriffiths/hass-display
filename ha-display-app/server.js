@@ -159,7 +159,11 @@ app.get('/api/env-config', (req, res) => {
       sun: process.env.ENTITY_SUN || '',
       rain: process.env.ENTITY_RAIN || '',
       rainLastHour: process.env.ENTITY_RAIN_LAST_HOUR || '',
-      rainToday: process.env.ENTITY_RAIN_TODAY || ''
+      rainToday: process.env.ENTITY_RAIN_TODAY || '',
+      windAngle: process.env.ENTITY_WIND_ANGLE || '',
+      windSpeed: process.env.ENTITY_WIND_SPEED || '',
+      gustAngle: process.env.ENTITY_GUST_ANGLE || '',
+      gustSpeed: process.env.ENTITY_GUST_SPEED || ''
     }
   });
 });

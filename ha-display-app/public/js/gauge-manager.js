@@ -15,6 +15,9 @@ import { updateHumidityGauge } from './gauges/humidity-gauge.js';
 // Import pressure gauge functions
 import { updatePressureGauge } from './gauges/pressure-gauge.js';
 
+// Import rainfall gauge functions
+import { updateRainfallGauge } from './gauges/rainfall-gauge.js';
+
 /**
  * Verify that all required DOM elements exist
  * @returns {boolean} True if all elements exist, false otherwise
@@ -25,10 +28,12 @@ function verifyRequiredElements() {
     'secondary-temp-markers',
     'humidity-markers',
     'pressure-markers',
+    'rainfall-markers',
     'temperature-arc',
     'secondary-temp-arc',
     'humidity-arc',
     'pressure-arc',
+    'rainfall-arc',
   ];
 
   console.log('Verifying required DOM elements...');
@@ -90,4 +95,5 @@ export {
   updateSecondaryTemperatureGauge,
   updateHumidityGauge,
   updatePressureGauge,
+  updateRainfallGauge,
 };

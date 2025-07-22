@@ -1,6 +1,6 @@
 // Home Assistant connection handling - simplified approach matching working minimal test
 import { config } from './config.js';
-import { updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge } from './gauge-manager.js';
+import { updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge, updateRainfallGauge } from './gauge-manager.js';
 
 let connection = null;
 let states = {};
@@ -135,8 +135,6 @@ async function connectToHA() {
                             console.warn('✗ Pressure entity not found:', config.entities.pressure);
                         }
                         
-
-                        
                         // Update temperature, humidity, and pressure displays with initial values
                         if (config.entities.temperature && states[config.entities.temperature]) {
                             const tempState = states[config.entities.temperature];
@@ -172,6 +170,26 @@ async function connectToHA() {
                                 const pressureValue = parseFloat(pressureState.state);
                                 updatePressureGauge(pressureValue);
                                 console.log(`Initial pressure: ${pressureValue} hPa`);
+                            }
+                        }
+                        
+                        // Update rain last hour value
+                        if (config.entities.rainLastHour && states[config.entities.rainLastHour]) {
+                            const rainLastHourState = states[config.entities.rainLastHour];
+                            if (rainLastHourState.state && !isNaN(rainLastHourState.state)) {
+                                const rainLastHourValue = parseFloat(rainLastHourState.state);
+                                updateRainLastHour(rainLastHourState);
+                                console.log(`Initial rain last hour: ${rainLastHourValue}mm`);
+                            }
+                        }
+                        
+                        // Update rain today value and gauge
+                        if (config.entities.rainToday && states[config.entities.rainToday]) {
+                            const rainTodayState = states[config.entities.rainToday];
+                            if (rainTodayState.state && !isNaN(rainTodayState.state)) {
+                                const rainTodayValue = parseFloat(rainTodayState.state);
+                                updateRainToday(rainTodayState);
+                                console.log(`Initial rain today: ${rainTodayValue}mm`);
                             }
                         }
                         
@@ -267,6 +285,61 @@ function notifyEntityListeners(entityId, state) {
             listener.callback(state);
         }
     });
+}
+
+// Update rain last hour value
+function updateRainLastHour(state) {
+    try {
+        if (!state) {
+            console.warn('Invalid state for rain last hour');
+            return;
+        }
+
+        const rainLastHourValue = parseFloat(state.state);
+        const rainLastHourElement = document.getElementById('rain-last-hour-value');
+        
+        if (rainLastHourElement) {
+            rainLastHourElement.textContent = rainLastHourValue.toFixed(1);
+        }
+
+        // Auto-switch to rain view if there's rain in the last hour
+        if (rainLastHourValue > 0 && !config.display.showRainView) {
+            config.display.showRainView = true;
+            // Call the updateRainViewDisplay function from app.js
+            if (window.updateRainViewDisplay && typeof window.updateRainViewDisplay === 'function') {
+                window.updateRainViewDisplay();
+            }
+        }
+
+        console.log(`Updated rain last hour: ${rainLastHourValue}mm`);
+    } catch (error) {
+        console.error('Error updating rain last hour:', error);
+    }
+}
+
+// Update rain today value and gauge
+function updateRainToday(state) {
+    try {
+        if (!state) {
+            console.warn('Invalid state for rain today');
+            return;
+        }
+
+        const rainTodayValue = parseFloat(state.state);
+        const rainTodayElement = document.getElementById('rain-today-value');
+        
+        if (rainTodayElement) {
+            rainTodayElement.textContent = rainTodayValue.toFixed(1);
+        }
+
+        // Always update the rainfall gauge regardless of rain view status
+        // The gauge's own visibility logic will handle whether it should be displayed
+        updateRainfallGauge(rainTodayValue);
+
+        console.log(`Updated rain today: ${rainTodayValue}mm`);
+    } catch (error) {
+        console.error('Error updating rain today:', error);
+    }
 }
 
 // Export functions

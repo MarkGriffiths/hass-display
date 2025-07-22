@@ -98,8 +98,10 @@ body {
     stroke: #151515;
     stroke-width: 16; /* ~27% of temperature arc width (60px) */
     stroke-linecap: round;
-    z-index: 4;
-    filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.5));
+    /*transition: all 1s ease;*/
+    shape-rendering: geometricPrecision;
+    z-index: 5;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
 }
 
 /* Pressure arc path */
@@ -112,6 +114,26 @@ body {
     shape-rendering: geometricPrecision;
     z-index: 5;
     filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Rainfall arc */
+.rainfall-arc {
+    fill: none;
+    stroke: url(#rainfall-gradient);
+    stroke-width: 16;
+    stroke-linecap: round;
+    shape-rendering: geometricPrecision;
+    z-index: 5;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Rainfall background */
+.rainfall-background {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 16;
+    stroke-linecap: round;
+    z-index: 1;
 }
 
 /* Secondary Temperature background arc path (bottom arc) */
@@ -178,11 +200,11 @@ body {
 
 .rain-center {
     position: absolute;
-    top: 35%;
+    top: 37%;
     left: 50%;
     transform: translate(-50%, -50%);
     display: none; /* Hidden by default */
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     font-size: 6rem;
     color: #fff;
@@ -195,6 +217,38 @@ body {
 
 .conditions-center.inactive {
     display: none;
+}
+
+.wind-left {
+    position: absolute;
+    top: 59%;
+    left: 20%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.wind-right {
+    position: absolute;
+    top: 59%;
+    right: 13%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.wind-direction {
+    font-size: 4rem;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.wind-beaufort {
+    margin-top: -1rem;
+    font-size: 2rem;
+    color: #fff;
 }
 
 .outdoor-display {
@@ -363,6 +417,12 @@ body {
     font-weight: normal;
     color: #cccccc;
     margin-left: 2px;
+}
+
+/* Rainfall gauge text */
+.rainfall-text {
+    font-size: 14px;
+    font-weight: bold;
 }
 
 /* Toggle Switch */

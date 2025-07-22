@@ -22,6 +22,10 @@ export const config = {
         rain: '',
         rainLastHour: '',
         rainToday: '',
+        windAngle: '',    // Wind direction angle
+        windSpeed: '',    // Wind speed in km/h
+        gustAngle: '',    // Gust direction angle
+        gustSpeed: '',    // Gust speed in km/h
         // Add more entities as needed
     },
 
@@ -32,6 +36,33 @@ export const config = {
         refreshInterval: 30000, // Update interval in milliseconds (30 seconds)
         showRainView: false,    // Toggle between rain and normal conditions view
     },
+    
+    // Weather icon mapping
+    weather: {
+        // Default icons for unknown weather states
+        defaultIcons: {
+            day: 'wi-day-sunny',
+            night: 'wi-night-clear'
+        },
+        // Mapping of weather states to icon classes
+        iconMapping: {
+            'clear-night': { day: 'wi-stars', night: 'wi-stars' },
+            'cloudy': { day: 'wi-cloudy', night: 'wi-night-alt-cloudy' },
+            'exceptional': { day: 'wi-day-sunny', night: 'wi-night-clear' },
+            'fog': { day: 'wi-day-fog', night: 'wi-night-fog' },
+            'hail': { day: 'wi-day-hail', night: 'wi-night-alt-hail' },
+            'lightning': { day: 'wi-day-lightning', night: 'wi-night-alt-lightning' },
+            'lightning-rainy': { day: 'wi-day-thunderstorm', night: 'wi-night-alt-thunderstorm' },
+            'partlycloudy': { day: 'wi-day-cloudy', night: 'wi-night-alt-cloudy' },
+            'pouring': { day: 'wi-rain', night: 'wi-night-alt-rain' },
+            'rainy': { day: 'wi-sprinkle', night: 'wi-night-alt-sprinkle' },
+            'snowy': { day: 'wi-snow', night: 'wi-night-snow' },
+            'snowy-rainy': { day: 'wi-sleet', night: 'wi-night-sleet' },
+            'sunny': { day: 'wi-day-sunny', night: 'wi-night-clear' },
+            'windy': { day: 'wi-windy', night: 'wi-night-alt-cloudy-windy' },
+            'windy-variant': { day: 'wi-cloudy-gusts', night: 'wi-night-alt-cloudy-gusts' }
+        }
+    },
 
     // Common gauge dimensions and parameters
     gaugeDimensions: {
@@ -41,6 +72,7 @@ export const config = {
         secondaryRadius: 316,  // Secondary temperature gauge radius
         humidityRadius: 250,   // Humidity gauge radius
         pressureRadius: 223,   // Pressure gauge radius
+        rainfallRadius: 200,   // Rainfall gauge radius (inside humidity gauge)
     },
 
     // Gauge settings
@@ -95,7 +127,7 @@ export const config = {
             ]
         },
         pressure: {
-            min: 950,
+            min: 960,
             max: 1040,
             startAngle: 180,  // Start angle in degrees (bottom)
             endAngle: 360,   // End angle in degrees (left)
@@ -106,6 +138,20 @@ export const config = {
                 { pressure: 1000, color: '#4CAF50' },   // Green (normal pressure)
                 { pressure: 1025, color: '#FF9800' },  // Orange (high pressure)
                 { pressure: 1040, color: '#F44336' }      // Red (very high pressure)
+            ]
+        },
+        rainfall: {
+            min: 0,
+            max: 100,
+            startAngle: 180,    // Start angle in degrees (bottom)
+            endAngle: 360,    // End angle in degrees (right)
+            unit: 'mm',
+            colorStops: [
+                { rainfall: 0, color: '#1E88E5' },    // Medium blue
+                { rainfall: 25, color: '#1565C0' },    // Blue
+                { rainfall: 50, color: '#0D47A1' },    // Dark blue
+                { rainfall: 75, color: '#880E4F' },    // Deep purple/red
+                { rainfall: 100, color: '#D50000' }    // Bright red
             ]
         }
     }

@@ -80,6 +80,8 @@ export function createGradientStops(gradientId, colorStops, min, max) {
                 offset = ((stop.humidity - min) / valueRange).toFixed(2);
             } else if (stop.pressure !== undefined) {
                 offset = ((stop.pressure - min) / valueRange).toFixed(2);
+            } else if (stop.rainfall !== undefined) {
+                offset = ((stop.rainfall - min) / valueRange).toFixed(2);
             } else {
                 // If no specific property is found, use the provided offset
                 offset = stop.offset;
@@ -111,13 +113,29 @@ export function createGradientStops(gradientId, colorStops, min, max) {
  * @param {number} startAngle - Start angle in degrees
  * @param {number} endAngle - End angle in degrees
  * @param {string} unit - Unit to display after the value
+ * @param {Object} options - Additional options for customization
+ * @param {boolean} options.hideMinMax - Whether to hide min and max values
+ * @param {number} options.fontSize - Font size for the markers (default: 0.6rem)
+ * @param {Function} options.filterValue - Function to determine if a value should be shown
+ * @returns {boolean} - True if successful, false otherwise
  */
-export function createScaleMarkers(markersElementId, centerX, centerY, radius, min, max, step, startAngle, endAngle, unit = '') {
+export function createScaleMarkers(markersElementId, centerX, centerY, radius, min, max, step, startAngle, endAngle, unit = '', options = {}) {
     try {
         const markers = document.getElementById(markersElementId);
         if (!markers) {
-            return;
+            console.error(`Markers element with ID ${markersElementId} not found`);
+            return false;
         }
+
+        // Default options
+        const defaultOptions = {
+            hideMinMax: true,
+            fontSize: '0.6rem',
+            filterValue: null // No filtering by default
+        };
+
+        // Merge options with defaults
+        const mergedOptions = { ...defaultOptions, ...options };
 
         // Clear any existing markers - more efficient approach
         markers.innerHTML = '';
@@ -128,10 +146,11 @@ export function createScaleMarkers(markersElementId, centerX, centerY, radius, m
         const degreesPerUnit = angleRange / valueRange;
 
         // Determine if we need to draw clockwise or counterclockwise
-        // For temperature gauge (top semicircle), we need clockwise direction
+        // For top semicircle gauges, we need clockwise direction
         const isClockwise = markersElementId === 'temperature-markers' ||
                            markersElementId === 'humidity-markers' ||
-                           markersElementId === 'pressure-markers';
+                           markersElementId === 'pressure-markers' ||
+                           markersElementId === 'rainfall-markers';
 
         // Create a document fragment to batch DOM operations
         const fragment = document.createDocumentFragment();
@@ -164,11 +183,28 @@ export function createScaleMarkers(markersElementId, centerX, centerY, radius, m
             text.setAttribute('text-anchor', 'middle');
             text.setAttribute('dominant-baseline', 'middle');
             text.setAttribute('fill', '#fff');
-            text.setAttribute('font-size', '14');
+            text.setAttribute('font-size', mergedOptions.fontSize);
             text.setAttribute('font-weight', 'bold');
+            text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.8);');
 
-            // Only show values between min and max (not at the extremes)
-            text.textContent = (value === min || value === max) ? '' : `${value}${unit}`;
+            // Determine if this value should be shown
+            let showValue = true;
+
+            // Hide min/max if specified
+            if (mergedOptions.hideMinMax && (value === min || value === max)) {
+                showValue = false;
+            }
+
+            // Apply custom filter if provided
+            if (mergedOptions.filterValue && typeof mergedOptions.filterValue === 'function') {
+                showValue = showValue && mergedOptions.filterValue(value, min, max);
+            }
+
+            // Set the text content and visibility
+            text.textContent = `${value}${unit}`;
+            if (!showValue) {
+                text.setAttribute('opacity', '0');
+            }
 
             markerGroup.appendChild(text);
 
@@ -186,8 +222,51 @@ export function createScaleMarkers(markersElementId, centerX, centerY, radius, m
 
         // Add all markers to the DOM in one operation
         markers.appendChild(fragment);
+        return true;
     } catch (error) {
         console.error(`Error creating scale markers for ${markersElementId}:`, error);
+        return false;
+    }
+}
+
+/**
+ * Initialize background arc for a gauge
+ * @param {string} backgroundPathClass - Class name for the background path
+ * @param {number} centerX - X coordinate of the center
+ * @param {number} centerY - Y coordinate of the center
+ * @param {number} radius - Radius of the gauge
+ * @param {number} startAngle - Start angle in degrees
+ * @param {number} endAngle - End angle in degrees
+ */
+export function initBackgroundArc(backgroundPathClass, centerX, centerY, radius, startAngle, endAngle) {
+    try {
+        // Find the background path element by class name
+        const backgroundPathElement = document.querySelector(`.${backgroundPathClass}`);
+        if (!backgroundPathElement) {
+            console.error(`Background path element with class ${backgroundPathClass} not found`);
+            return;
+        }
+
+        // Create the arc path
+        // For background arcs, we always want the large arc (full semicircle)
+        // The direction depends on whether it's a top or bottom semicircle
+        // Special handling for secondary temperature gauge (bottom semicircle with start > end)
+        let clockwise = false;
+
+        if (startAngle > endAngle) {
+            // For secondary temperature gauge (bottom semicircle)
+            clockwise = true;
+        } else if (startAngle > 180) {
+            // For other bottom semicircles
+            clockwise = true;
+        }
+
+        const arcPath = createArcPath(centerX, centerY, radius, startAngle, endAngle, false, clockwise);
+
+        // Set the path attribute
+        backgroundPathElement.setAttribute('d', arcPath);
+    } catch (error) {
+        console.error(`Error initializing background arc for ${backgroundPathClass}:`, error);
     }
 }
 
@@ -243,6 +322,18 @@ export function initGaugePath(backgroundPathClass, centerX, centerY, radius, sta
 
         // Set the path
         backgroundPath.setAttribute('d', arcPath);
+
+        // Set explicit width and height attributes to ensure visibility
+        const svgSize = radius * 2;
+        backgroundPath.setAttribute('width', svgSize);
+        backgroundPath.setAttribute('height', svgSize);
+
+        // Set explicit x and y coordinates to ensure proper positioning
+        backgroundPath.setAttribute('x', centerX - radius);
+        backgroundPath.setAttribute('y', centerY - radius);
+
+        // Log the initialization
+        console.log(`Initialized ${backgroundPathClass} with path: ${arcPath}`);
     } catch (error) {
         console.error(`Error initializing gauge path for ${backgroundPathClass}:`, error);
     }
@@ -297,6 +388,26 @@ export function initSVGPaths() {
             config.gaugeDimensions.pressureRadius,
             config.gauges.pressure.startAngle,
             config.gauges.pressure.endAngle
+        );
+
+        // Initialize rainfall gauge background
+        initGaugePath(
+            'rainfall-background',
+            centerX,
+            centerY,
+            config.gaugeDimensions.rainfallRadius,
+            config.gauges.rainfall.startAngle,
+            config.gauges.rainfall.endAngle
+        );
+
+        // Initialize rainfall gauge arc
+        initGaugePath(
+            'rainfall-arc',
+            centerX,
+            centerY,
+            config.gaugeDimensions.rainfallRadius,
+            config.gauges.rainfall.startAngle,
+            config.gauges.rainfall.endAngle
         );
     } catch (error) {
         console.error('Error initializing SVG paths:', error);

@@ -80,32 +80,29 @@ export function createHumidityMarkers() {
                 }
 
                 // Use the shared createScaleMarkers utility function
-                createScaleMarkers(
+                // Use the enhanced createScaleMarkers utility function
+                const result = createScaleMarkers(
                     'humidity-markers',
                     config.gaugeDimensions.centerX,
                     config.gaugeDimensions.centerY,
-                    humidityConfig.arcRadius,
+                    humidityConfig.arcRadius - 1,
                     humidityConfig.minHumidity,
                     humidityConfig.maxHumidity,
                     10, // Step size of 10%
                     humidityConfig.startAngle,
                     humidityConfig.endAngle,
-                    '%' // Humidity unit
+                    '%', // Humidity unit
+                    {
+                        hideMinMax: true,
+                        fontSize: '0.8rem'
+                    }
                 );
 
-                // Apply additional styling to the markers
-                const markerTexts = markers.querySelectorAll('text');
-                markerTexts.forEach(text => {
-                    // Add text shadow for better readability against gradient
-                    text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.8);');
-                    text.setAttribute('font-size', '0.6rem');
-
-                    // Hide the first and last numbers but keep their positions
-                    const value = parseFloat(text.textContent);
-                    if (value === humidityConfig.minHumidity || value === humidityConfig.maxHumidity) {
-                        text.setAttribute('opacity', '0');
-                    }
-                });
+                if (!result) {
+                    console.error('Failed to create humidity markers');
+                    resolve(false);
+                    return;
+                }
 
                 console.log('Humidity scale markers created successfully');
                 resolve(true);

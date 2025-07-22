@@ -2,13 +2,14 @@
 // Handles initialization of all gauge components
 
 import { config } from '../config.js';
-import { initGaugePath, initSVGPaths } from './gauge-utils.js';
+import { initGaugePath, initBackgroundArc, initSVGPaths } from './gauge-utils.js';
 
 // Import individual gauge functions
 import { createTemperatureGradient, createTemperatureMarkers, updateTemperatureGauge } from './temperature-gauge.js';
 import { createSecondaryTemperatureGradient, createSecondaryTemperatureMarkers, updateSecondaryTemperatureGauge } from './secondary-temperature-gauge.js';
 import { createHumidityGradient, createHumidityMarkers, updateHumidityGauge } from './humidity-gauge.js';
 import { createPressureGradient, createPressureScaleMarkers, updatePressureGauge } from './pressure-gauge.js';
+import { createRainfallGradient, createRainfallMarkers, updateRainfallGauge } from './rainfall-gauge.js';
 
 /**
  * Check if all required DOM elements are available
@@ -20,10 +21,12 @@ function checkDOMElementsReady() {
         'secondary-temp-markers',
         'humidity-markers',
         'pressure-markers',
+        'rainfall-markers',
         'temperature-arc',
         'secondary-temp-arc',
         'humidity-arc',
-        'pressure-arc'
+        'pressure-arc',
+        'rainfall-arc'
     ];
 
     let allElementsReady = true;
@@ -114,10 +117,12 @@ export async function initGauges() {
             'secondary-temp-markers',
             'humidity-markers',
             'pressure-markers',
+            'rainfall-markers',
             'temperature-arc',
             'secondary-temp-arc',
             'humidity-arc',
-            'pressure-arc'
+            'pressure-arc',
+            'rainfall-arc'
         ];
 
         const elementsReady = await waitForDOMElements(requiredElements, 2, 50);
@@ -135,6 +140,7 @@ export async function initGauges() {
         createSecondaryTemperatureGradient();
         createHumidityGradient();
         createPressureGradient();
+        createRainfallGradient();
 
         // Create scale markers
         const tempMarkersResult = await createTemperatureMarkers();
@@ -142,21 +148,36 @@ export async function initGauges() {
         const secondaryTempMarkersResult = await createSecondaryTemperatureMarkers();
         const humidityMarkersResult = await createHumidityMarkers();
         const pressureMarkersResult = await createPressureScaleMarkers();
+        const rainfallMarkersResult = await createRainfallMarkers();
 
         // Initialize gauge paths
         const centerX = config.gaugeDimensions.centerX;
         const centerY = config.gaugeDimensions.centerY;
 
-        // Use class names for all gauge paths
-        // The class names must match exactly what's in the HTML
+        // Initialize background arcs first
+        // For the main temperature gauge
+        initBackgroundArc('gauge-background', centerX, centerY, config.gaugeDimensions.mainRadius, config.gauges.temperature.startAngle, config.gauges.temperature.endAngle);
+        // For the humidity gauge
+        initBackgroundArc('humidity-background', centerX, centerY, config.gaugeDimensions.humidityRadius, config.gauges.humidity.startAngle, config.gauges.humidity.endAngle);
+        // For the pressure gauge
+        initBackgroundArc('pressure-background', centerX, centerY, config.gaugeDimensions.pressureRadius, config.gauges.pressure.startAngle, config.gauges.pressure.endAngle);
+        // For the secondary temperature gauge
+        initBackgroundArc('secondary-temp-background', centerX, centerY, config.gaugeDimensions.secondaryRadius, config.gauges.temperatureSecondary.startAngle, config.gauges.temperatureSecondary.endAngle);
+        // For the rainfall gauge
+        initBackgroundArc('rainfall-background', centerX, centerY, config.gaugeDimensions.rainfallRadius, config.gauges.rainfall.startAngle, config.gauges.rainfall.endAngle);
+        
+        // Initialize gauge paths
         // For the temperature gauge
         initGaugePath('gauge-arc', centerX, centerY, config.gaugeDimensions.mainRadius, config.gauges.temperature.startAngle, config.gauges.temperature.endAngle);
+
         // For the secondary temperature gauge
         initGaugePath('secondary-temp-arc', centerX, centerY, config.gaugeDimensions.secondaryRadius, config.gauges.temperatureSecondary.startAngle, config.gauges.temperatureSecondary.endAngle);
         // For the humidity gauge
         initGaugePath('humidity-arc', centerX, centerY, config.gaugeDimensions.humidityRadius, config.gauges.humidity.startAngle, config.gauges.humidity.endAngle);
         // For the pressure gauge
         initGaugePath('pressure-arc', centerX, centerY, config.gaugeDimensions.pressureRadius, config.gauges.pressure.startAngle, config.gauges.pressure.endAngle);
+        // For the rainfall gauge
+        initGaugePath('rainfall-arc', centerX, centerY, config.gaugeDimensions.rainfallRadius, config.gauges.rainfall.startAngle, config.gauges.rainfall.endAngle);
 
         // Initialize all gauges with minimal values to prevent flash of color
         console.log('Initializing gauges with minimal values to prevent flash of color');
@@ -166,12 +187,14 @@ export async function initGauges() {
         const defaultSecondaryTemp = config.gauges.temperatureSecondary.min;
         const defaultHumidity = config.gauges.humidity.min;
         const defaultPressure = config.gauges.pressure.min;
+        const defaultRainfall = config.gauges.rainfall.min;
 
         // Call update functions with initializing=true
         updateTemperatureGauge(defaultTemp, true);
         updateSecondaryTemperatureGauge(defaultSecondaryTemp, true);
         updateHumidityGauge(defaultHumidity, true);
         updatePressureGauge(defaultPressure, true);
+        updateRainfallGauge(defaultRainfall, true);
 
         return true;
     } catch (error) {

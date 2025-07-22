@@ -185,6 +185,26 @@
                 <code id="co2-entity"></code>
             </div>
 
+            <div class="entity-display">
+                <label>Wind Angle Entity ID:</label>
+                <code id="wind-angle-entity"></code>
+            </div>
+
+            <div class="entity-display">
+                <label>Wind Speed Entity ID:</label>
+                <code id="wind-speed-entity"></code>
+            </div>
+
+            <div class="entity-display">
+                <label>Gust Angle Entity ID:</label>
+                <code id="gust-angle-entity"></code>
+            </div>
+
+            <div class="entity-display">
+                <label>Gust Speed Entity ID:</label>
+                <code id="gust-speed-entity"></code>
+            </div>
+
             <div class="button-group">
                 <button type="submit">Save Configuration</button>
                 <button type="button" id="cancel-button" class="cancel-button">Cancel</button>
@@ -231,6 +251,10 @@
                     document.getElementById('rain-today-entity').textContent = data.entities.rainToday || 'Not set';
                     document.getElementById('humidity-secondary-entity').textContent = data.entities.humiditySecondary || 'Not set';
                     document.getElementById('co2-entity').textContent = data.entities.co2 || 'Not set';
+                    document.getElementById('wind-angle-entity').textContent = data.entities.windAngle || 'Not set';
+                    document.getElementById('wind-speed-entity').textContent = data.entities.windSpeed || 'Not set';
+                    document.getElementById('gust-angle-entity').textContent = data.entities.gustAngle || 'Not set';
+                    document.getElementById('gust-speed-entity').textContent = data.entities.gustSpeed || 'Not set';
 
 
                 })

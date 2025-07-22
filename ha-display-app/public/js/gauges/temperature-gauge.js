@@ -103,33 +103,29 @@ export function createTemperatureMarkers() {
                     return;
                 }
 
-                // Use the shared createScaleMarkers utility function
-                createScaleMarkers(
+                // Use the enhanced createScaleMarkers utility function
+                const result = createScaleMarkers(
                     'temperature-markers',
                     config.gaugeDimensions.centerX,
                     config.gaugeDimensions.centerY,
-                    config.gaugeDimensions.mainRadius,
+                    config.gaugeDimensions.mainRadius - 3,
                     tempConfig.minTemp,
                     tempConfig.maxTemp,
                     5, // Step size of 5 degrees
                     tempConfig.startAngle,
                     tempConfig.endAngle,
-                    '°' // Temperature unit
+                    '°', // Temperature unit
+                    {
+                        hideMinMax: true,
+                        fontSize: '1.2rem'
+                    }
                 );
 
-                // Apply additional styling to the markers
-                const markerTexts = markers.querySelectorAll('text');
-                markerTexts.forEach(text => {
-                    // Add text shadow for better readability against gradient
-                    text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.8);');
-                    text.setAttribute('font-size', '1.2rem');
-
-                    // Hide the first and last numbers but keep their positions
-                    const value = parseFloat(text.textContent);
-                    if (value === tempConfig.minTemp || value === tempConfig.maxTemp) {
-                        text.setAttribute('opacity', '0');
-                    }
-                });
+                if (!result) {
+                    console.error('Failed to create temperature markers');
+                    resolve(false);
+                    return;
+                }
 
                 console.log('Temperature markers created successfully');
                 resolve(true);

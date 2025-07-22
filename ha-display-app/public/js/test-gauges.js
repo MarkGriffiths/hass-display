@@ -1,6 +1,6 @@
 // Test script for verifying gauge configurations
 // Optimized for performance and clarity
-import { updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge } from './gauge-manager.js';
+import { updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge, updateRainfallGauge } from './gauge-manager.js';
 
 /**
  * Main entry point for testing all gauges
@@ -22,7 +22,8 @@ function testGaugeSweep() {
             temperature: { min: -10, max: 40, increment: 0.2 },
             secondaryTemp: { min: 5, max: 40, increment: 0.2 },
             humidity: { min: 0, max: 100, increment: 0.5 },
-            pressure: { min: 950, max: 1050, increment: 1 }
+            pressure: { min: 950, max: 1050, increment: 1 },
+            rainfall: { min: 0, max: 100, increment: 0.5 }
         };
 
         // Initialize current values
@@ -30,7 +31,8 @@ function testGaugeSweep() {
             temperature: gaugeRanges.temperature.min,
             secondaryTemp: gaugeRanges.secondaryTemp.min,
             humidity: gaugeRanges.humidity.min,
-            pressure: gaugeRanges.pressure.min
+            pressure: gaugeRanges.pressure.min,
+            rainfall: gaugeRanges.rainfall.min
         };
 
         // Store original values to restore later (with safe defaults)
@@ -38,7 +40,8 @@ function testGaugeSweep() {
             temperature: parseFloat(document.getElementById('temperature-value')?.textContent || '20'),
             secondaryTemp: parseFloat(document.getElementById('secondary-temp-value')?.textContent || '20'),
             humidity: parseFloat(document.getElementById('humidity-value')?.textContent || '50'),
-            pressure: parseFloat(document.getElementById('pressure-value')?.textContent || '1013')
+            pressure: parseFloat(document.getElementById('pressure-value')?.textContent || '1013'),
+            rainfall: parseFloat(document.getElementById('rain-today-value')?.textContent || '0')
         };
 
         // Use requestAnimationFrame for smoother animation
@@ -57,12 +60,14 @@ function testGaugeSweep() {
             updateSecondaryTemperatureGauge(currentValues.secondaryTemp);
             updateHumidityGauge(currentValues.humidity);
             updatePressureGauge(currentValues.pressure);
+            updateRainfallGauge(currentValues.rainfall);
 
             // Increment values with larger steps for faster sweep
             currentValues.temperature += gaugeRanges.temperature.increment;
             currentValues.secondaryTemp += gaugeRanges.secondaryTemp.increment;
             currentValues.humidity += gaugeRanges.humidity.increment;
             currentValues.pressure += gaugeRanges.pressure.increment;
+            currentValues.rainfall += gaugeRanges.rainfall.increment;
 
             // Reset when reaching max values
             if (currentValues.temperature > gaugeRanges.temperature.max) {
@@ -77,6 +82,9 @@ function testGaugeSweep() {
             if (currentValues.pressure > gaugeRanges.pressure.max) {
                 currentValues.pressure = gaugeRanges.pressure.min;
             }
+            if (currentValues.rainfall > gaugeRanges.rainfall.max) {
+                currentValues.rainfall = gaugeRanges.rainfall.min;
+            }
 
             // Continue animation if not complete
             if (progress < 1) {
@@ -87,6 +95,7 @@ function testGaugeSweep() {
                 updateSecondaryTemperatureGauge(originalValues.secondaryTemp);
                 updateHumidityGauge(originalValues.humidity);
                 updatePressureGauge(originalValues.pressure);
+                updateRainfallGauge(originalValues.rainfall);
             }
         }
 

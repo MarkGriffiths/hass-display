@@ -106,34 +106,29 @@ export function createSecondaryTemperatureMarkers() {
                     return;
                 }
 
-                // Use the shared createScaleMarkers utility function
-                createScaleMarkers(
+                // Use the enhanced createScaleMarkers utility function
+                const result = createScaleMarkers(
                     'secondary-temp-markers',
                     config.gaugeDimensions.centerX,
                     config.gaugeDimensions.centerY,
-                    secondaryTempConfig.arcRadius,
+                    secondaryTempConfig.arcRadius + 1,
                     secondaryTempConfig.min,
                     secondaryTempConfig.max,
                     5, // Step size of 5 degrees
                     secondaryTempConfig.startAngle,
                     secondaryTempConfig.endAngle,
-                    '°' // Temperature unit
+                    '°', // Temperature unit
+                    {
+                        hideMinMax: true,
+                        fontSize: '12px'
+                    }
                 );
 
-                // Apply additional styling to the markers
-                const markerTexts = markers.querySelectorAll('text');
-                markerTexts.forEach(text => {
-                    // Add text shadow for better readability against gradient
-                    text.setAttribute('style', 'text-shadow: 1px 1px 2px rgba(0,0,0,0.8);');
-                    text.setAttribute('font-size', '12px');
-                    text.setAttribute('font-weight', 'bold');
-
-                    // Hide the first and last numbers but keep their positions
-                    const value = parseFloat(text.textContent);
-                    if (value === secondaryTempConfig.min || value === secondaryTempConfig.max) {
-                        text.setAttribute('opacity', '0');
-                    }
-                });
+                if (!result) {
+                    console.error('Failed to create secondary temperature markers');
+                    resolve(false);
+                    return;
+                }
 
                 console.log('Secondary temperature scale markers created successfully');
                 resolve(true);
