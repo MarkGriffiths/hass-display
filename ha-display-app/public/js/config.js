@@ -36,7 +36,7 @@ export const config = {
         refreshInterval: 30000, // Update interval in milliseconds (30 seconds)
         showRainView: false,    // Toggle between rain and normal conditions view
     },
-    
+
     // Weather icon mapping
     weather: {
         // Default icons for unknown weather states
@@ -69,7 +69,7 @@ export const config = {
         centerX: 360,
         centerY: 360,
         mainRadius: 300,       // Main temperature gauge radius
-        secondaryRadius: 316,  // Secondary temperature gauge radius
+        secondaryRadius: 300,  // Secondary temperature gauge radius
         humidityRadius: 250,   // Humidity gauge radius
         pressureRadius: 223,   // Pressure gauge radius
         rainfallRadius: 200,   // Rainfall gauge radius (inside humidity gauge)
@@ -98,8 +98,8 @@ export const config = {
         temperatureSecondary: {
             min: 5,
             max: 40,
-            startAngle: 160,    // Start angle in degrees (right)
-            endAngle: 20,    // End angle in degrees (bottom)
+            startAngle: 150,    // Start angle in degrees (right)
+            endAngle: 30,    // End angle in degrees (bottom)
             unit: '°C',
             colorStops: [
                 { temp: 5, color: '#00a2ff' },   // Cold (blue)

@@ -44,7 +44,7 @@ export function convertToBeaufort(speed) {
 }
 
 /**
- * Update the wind display with new direction and speed values
+ * Update wind display with new angle and speed
  * @param {number|null} angle - Wind direction angle in degrees, or null to use existing value
  * @param {number|null} speed - Wind speed in km/h, or null to use existing value
  * @param {string} position - 'left' for wind, 'right' for gust
@@ -52,21 +52,13 @@ export function convertToBeaufort(speed) {
  */
 export function updateWindDisplay(angle, speed, position) {
     try {
-        // Get the wind display elements
-        const container = document.querySelector(`.wind-${position}`);
+        // Get the container based on position
+        const container = document.querySelector(`.wind-panel.${position}`);
         if (!container) {
             console.error(`Wind ${position} container not found`);
             return false;
         }
-        
-        const directionElement = container.querySelector('.wind-direction i');
-        const beaufortElement = container.querySelector('.wind-beaufort i');
-        
-        if (!directionElement || !beaufortElement) {
-            console.error(`Wind ${position} direction or beaufort element not found`);
-            return false;
-        }
-        
+
         // Update state with new values if provided, otherwise keep existing values
         if (angle !== null && angle !== undefined) {
             windState[position].angle = parseFloat(angle) || 0;
@@ -79,27 +71,63 @@ export function updateWindDisplay(angle, speed, position) {
         // Get current state values
         const currentAngle = windState[position].angle;
         const currentSpeed = windState[position].speed;
+
+        // Update speed display
+        const speedElement = container.querySelector('.wind-speed');
+        if (speedElement) {
+            speedElement.textContent = `${currentSpeed}`;
+        }
+
+        // Calculate Beaufort scale
+        const beaufort = convertToBeaufort(currentSpeed);
+
+        // Update Beaufort display - don't set text content, we'll update the icon class instead
+
+        // Update direction using SVG rotation
+        const directionElement = container.querySelector('.wind-direction svg');
+        if (directionElement) {
+            // Apply rotation to the SVG element
+            // We add 180 degrees because the arrow points up by default, but meteorological wind direction
+            // is the direction the wind is coming FROM, not going TO
+            const rotationAngle = (currentAngle + 180) % 360;
+            
+            // Get current rotation if it exists
+            const currentTransform = directionElement.style.transform;
+            const currentRotation = currentTransform ? parseFloat(currentTransform.match(/rotate\((\d+)deg\)/)?.[1] || 0) : 0;
+            
+            // Determine the shortest path for rotation (clockwise or counterclockwise)
+            let newRotation = rotationAngle;
+            
+            // If we already have a rotation value, calculate the shortest path
+            if (currentTransform) {
+                // Calculate difference between angles
+                let diff = rotationAngle - currentRotation;
+                
+                // Normalize to -180 to 180 degrees for shortest path
+                if (diff > 180) diff -= 360;
+                if (diff < -180) diff += 360;
+                
+                // Add the difference to the current rotation
+                newRotation = currentRotation + diff;
+            }
+            
+            // Apply the new rotation
+            directionElement.style.transform = `rotate(${newRotation}deg)`;
+        }
+
+        console.log(`Updated ${position} wind display: angle=${currentAngle}°, speed=${currentSpeed} km/h, beaufort=${beaufort}`);
         
-        // Update direction icon
-        // Remove existing direction classes
-        const directionClasses = Array.from(directionElement.classList).filter(cls => cls.startsWith('from-'));
-        directionClasses.forEach(cls => directionElement.classList.remove(cls));
+        // Update Beaufort icon class
+        const beaufortIcon = container.querySelector('.wind-beaufort i');
+        if (beaufortIcon) {
+            // Remove existing beaufort classes
+            const beaufortClasses = Array.from(beaufortIcon.classList).filter(cls => cls.startsWith('wi-wind-beaufort-'));
+            beaufortClasses.forEach(cls => beaufortIcon.classList.remove(cls));
+            
+            // Add new beaufort class
+            beaufortIcon.classList.add(`wi-wind-beaufort-${beaufort}`);
+        }
         
-        // Add new direction class (rounded to nearest 5 degrees)
-        const roundedAngle = Math.round(currentAngle / 5) * 5;
-        directionElement.classList.add(`from-${roundedAngle}-deg`);
-        
-        // Convert speed to Beaufort scale and update beaufort icon
-        const beaufortScale = convertToBeaufort(currentSpeed);
-        
-        // Remove existing beaufort classes
-        const beaufortClasses = Array.from(beaufortElement.classList).filter(cls => cls.startsWith('wi-wind-beaufort-'));
-        beaufortClasses.forEach(cls => beaufortElement.classList.remove(cls));
-        
-        // Add new beaufort class
-        beaufortElement.classList.add(`wi-wind-beaufort-${beaufortScale}`);
-        
-        console.log(`Updated ${position} wind display: angle=${currentAngle}°, speed=${currentSpeed} km/h, beaufort=${beaufortScale}`);
         return true;
     } catch (error) {
         console.error(`Error updating ${position} wind display:`, error);
@@ -114,19 +142,29 @@ export function updateWindDisplay(angle, speed, position) {
 export function initWindDisplays() {
     try {
         // Check if wind display elements exist
-        const leftContainer = document.querySelector('.wind-left');
-        const rightContainer = document.querySelector('.wind-right');
+        const leftContainer = document.querySelector('.wind-panel.left');
+        const rightContainer = document.querySelector('.wind-panel.right');
         
         if (!leftContainer || !rightContainer) {
-            console.error('Wind display containers not found');
+            console.error('Wind containers not found');
             return false;
         }
         
-        // Initialize with default values
+        const leftDirectionElement = leftContainer.querySelector('.wind-direction svg');
+        const rightDirectionElement = rightContainer.querySelector('.wind-direction svg');
+        
+        if (leftDirectionElement && rightDirectionElement) {
+            // Set initial rotation to 180 degrees (pointing north)
+            leftDirectionElement.style.transform = 'rotate(180deg)';
+            rightDirectionElement.style.transform = 'rotate(180deg)';
+        }
+        
+        // Initialize wind display (left)
         updateWindDisplay(0, 0, 'left');
+        
+        // Initialize gust display (right)
         updateWindDisplay(0, 0, 'right');
         
-        console.log('Wind displays initialized');
         return true;
     } catch (error) {
         console.error('Error initializing wind displays:', error);

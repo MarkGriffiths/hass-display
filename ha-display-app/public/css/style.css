@@ -219,36 +219,51 @@ body {
     display: none;
 }
 
-.wind-left {
+.wind-panel {
     position: absolute;
-    top: 59%;
-    left: 20%;
-    transform: translate(-50%, -50%);
+    top: 57%;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    gap: 0.5rem;
 }
 
-.wind-right {
-    position: absolute;
-    top: 59%;
-    right: 13%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.wind-panel.left {
+    flex-direction: row;
+    left: 6%;
+}
+
+.wind-panel.right {
+    flex-direction: row-reverse;
+    right: 6%;
 }
 
 .wind-direction {
-    font-size: 4rem;
     color: #fff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.wind-direction svg {
+    width: 4rem;
+    height: 4rem;
+    transition: transform 1s ease-in-out;
+}
+
+.wind-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.wind-info .label {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #999;
+    text-transform: uppercase;
 }
 
 .wind-beaufort {
-    margin-top: -1rem;
     font-size: 2rem;
     color: #fff;
+    line-height: 2rem;
 }
 
 .outdoor-display {
