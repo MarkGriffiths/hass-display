@@ -1,0 +1,98 @@
+/* Temperature display styles */
+
+.outdoor-display {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.indoor-display {
+    margin-top: 0.3rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.temperature-container {
+    margin-right: 1rem;
+}
+
+.other-container {
+    line-height: 1.2rem;
+    font-size: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+/* Temperature display */
+.temperature-display {
+    margin-bottom: 10px;
+}
+
+.temperature-value {
+    font-size: 4rem;
+    line-height: 4rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.temperature-unit {
+    font-size: 2rem;
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 5px;
+}
+
+.temperature-trend {
+    font-size: 2rem;
+    color: #ccc;
+}
+
+/* Secondary display containers */
+.secondary-temp-container {
+    margin-right: 1rem;
+}
+
+.secondary-other-container {
+    line-height: 1rem;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+/* Secondary Temperature display */
+.secondary-temp-display {
+    display: flex;
+    align-items: baseline;
+}
+
+.secondary-temp-value {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.secondary-temp-unit {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 6px;
+}
+
+/* Secondary humidity display */
+.secondary-humidity-display {
+    display: flex;
+    align-items: baseline;
+    font-size: 1rem;
+}
+
+.secondary-humidity-display i,
+.secondary-humidity-display svg {
+    margin-right: 0.3rem;
+    /* Color will be set dynamically in JS */
+}

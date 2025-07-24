@@ -206,7 +206,9 @@
 					</div>
 
 					<div class="rain-center">
-						<i class="wi wi-rain"></i>
+						<div class="rain-conditions">
+							<i class="wi wi-rain"></i>
+						</div>
 						<div class="rain-display">
 							<i class="wi wi-raindrops"></i>
 							<span id="rain-value">--</span>
@@ -277,12 +279,9 @@
 							</div>
 						</div>
 					</div>
-
-				<!-- Connection status indicator -->
-				<div class="connection-status" id="connection-status">
-					Connecting to Home Assistant...
-				</div>
 			</div>
+			<!-- Connection status indicator -->
+			<div class="connection-status connecting" id="connection-status"></div>
 		</div>
 			<!-- Admin Controls (outside the circle) -->
 			<div class="admin-controls top-left">

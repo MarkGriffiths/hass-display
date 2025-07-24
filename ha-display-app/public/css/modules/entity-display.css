@@ -1,0 +1,55 @@
+/* Entity display styles */
+
+/* Entity display styling */
+.entity-display {
+    margin-bottom: 1rem;
+}
+
+.entity-display code {
+    display: inline-block;
+    padding: 0.5rem;
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    min-width: 300px;
+    font-family: monospace;
+    color: #03a9f4;
+}
+
+/* Secondary temperature trend */
+.secondary-temp-trend {
+    margin-left: 3px;
+    font-size: 1.5rem;
+    color: #ccc;
+}
+
+/* Humidity display */
+.humidity-display {
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    margin-bottom: 5px;
+}
+
+.humidity-unit {
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 3px;
+}
+
+/* Pressure display */
+.pressure-display {
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.pressure-unit {
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 3px;
+}
+
+.pressure-trend {
+    color: #aaa;
+}

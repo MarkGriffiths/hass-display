@@ -149,13 +149,13 @@ window.updateRainViewDisplay = function() {
         rainCenter.classList.remove('active');
         conditionsCenter.classList.remove('inactive');
     }
-    
+
     // IMPORTANT: Rainfall gauge visibility is now independent of the view toggle
     // Always check if there's rain today and show the gauge if needed
     if (rainfallArc && rainfallBackground && rainfallMarkers) {
         const rainTodayValue = parseFloat(document.getElementById('rain-today-value')?.textContent || '0');
         console.log('Checking rainfall gauge visibility, rain today value:', rainTodayValue);
-        
+
         if (rainTodayValue > 0) {
             // Always show rainfall gauge if there's rain today, regardless of which view is active
             console.log('Showing rainfall gauge because rain today > 0');
@@ -293,7 +293,7 @@ async function initApp() {
                     console.error('Failed to initialize gauges');
                     showError('Failed to initialize gauges. Please refresh the page.');
                 }
-                
+
                 // Initialize wind displays
                 console.log('Initializing wind displays...');
                 const windSuccess = initWindDisplays();
@@ -352,7 +352,7 @@ function setupEntityListeners() {
     // Update connection status
     const connectionStatus = document.getElementById('connection-status');
     if (connectionStatus) {
-        connectionStatus.textContent = 'Connected to Home Assistant';
+        connectionStatus.textContent = '';
         connectionStatus.classList.add('connected');
     }
 
@@ -375,7 +375,7 @@ function setupEntityListeners() {
 
         // Set the appropriate icon based on weather and sun position
         const timeOfDay = isSunUp ? 'day' : 'night';
-        
+
         if (currentWeatherState && config.weather.iconMapping[currentWeatherState]) {
             const iconClass = config.weather.iconMapping[currentWeatherState][timeOfDay];
             console.log('Selected icon class:', iconClass);
@@ -754,14 +754,14 @@ function setupEntityListeners() {
                 if (rainLastHourValueElement) {
                     rainLastHourValueElement.textContent = value.toFixed(1);
                 }
-                
+
                 // Automatically show rain view if rain amount is greater than zero
                 if (value > 0) {
                     config.display.showRainView = true;
                 } else {
                     config.display.showRainView = false;
                 }
-                
+
                 // Update the display based on the new setting
                 updateRainViewDisplay();
             }
@@ -785,7 +785,7 @@ function setupEntityListeners() {
                 if (rainTodayValueElement) {
                     rainTodayValueElement.textContent = value.toFixed(1);
                 }
-                
+
                 // Always update the rainfall gauge with the current value
                 // This ensures the gauge is visible when there's rainfall
                 console.log('Updating rainfall gauge with value:', value);
@@ -793,7 +793,7 @@ function setupEntityListeners() {
             }
         });
     }
-    
+
     // Listen for wind angle changes
     if (config.entities.windAngle) {
         addEntityListener(config.entities.windAngle, (state) => {
@@ -812,7 +812,7 @@ function setupEntityListeners() {
             }
         });
     }
-    
+
     // Listen for wind speed changes
     if (config.entities.windSpeed) {
         addEntityListener(config.entities.windSpeed, (state) => {
@@ -831,7 +831,7 @@ function setupEntityListeners() {
             }
         });
     }
-    
+
     // Listen for gust angle changes
     if (config.entities.gustAngle) {
         addEntityListener(config.entities.gustAngle, (state) => {
@@ -850,7 +850,7 @@ function setupEntityListeners() {
             }
         });
     }
-    
+
     // Listen for gust speed changes
     if (config.entities.gustSpeed) {
         addEntityListener(config.entities.gustSpeed, (state) => {
@@ -888,11 +888,11 @@ function updateConnectionStatus(connected, message) {
     }
 
     if (connected) {
-        connectionStatus.textContent = 'Connected to Home Assistant';
+        connectionStatus.textContent = '';
         connectionStatus.className = 'connected';
     } else {
-        connectionStatus.textContent = message || 'Connection error';
-        connectionStatus.className = 'error';
+        connectionStatus.textContent = '';
+        connectionStatus.className = 'disconnected';
     }
 }
 
@@ -902,7 +902,7 @@ async function retryConnection() {
         // Update UI to show we're attempting to reconnect
         const connectionStatus = document.getElementById('connection-status');
         if (connectionStatus) {
-            connectionStatus.textContent = 'Reconnecting...';
+            connectionStatus.textContent = '';
             connectionStatus.className = 'connecting';
         }
 

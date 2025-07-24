@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wind Animation Test</title>
+    <link rel="stylesheet" href="/css/modules/wind-display.css">
+    <style>
+        body {
+            background-color: #222;
+            color: white;
+            font-family: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        button {
+            background-color: #03a9f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background-color: #0288d1;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        input {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: white;
+            width: 80px;
+        }
+        label {
+            font-size: 14px;
+            color: #ccc;
+        }
+        .wind-panels {
+            display: flex;
+            gap: 4rem;
+        }
+        .wind-panel {
+            position: relative;
+            top: auto;
+            left: auto;
+            right: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Wind Animation Test</h1>
+        
+        <div class="wind-panels">
+            <div class="wind-panel left">
+                <div class="wind-direction">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L8 11H16L12 2Z"></path>
+                        <path d="M12 21.5C13.3807 21.5 14.5 20.3807 14.5 19C14.5 17.6193 13.3807 16.5 12 16.5C10.6193 16.5 9.5 17.6193 9.5 19C9.5 20.3807 10.6193 21.5 12 21.5Z"></path>
+                    </svg>
+                </div>
+                <div class="wind-info">
+                    <div class="label">Wind</div>
+                    <div class="wind-speed">0</div>
+                    <div class="wind-beaufort"><i class="wi-wind-beaufort-0"></i></div>
+                </div>
+            </div>
+            
+            <div class="wind-panel right">
+                <div class="wind-direction">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L8 11H16L12 2Z"></path>
+                        <path d="M12 21.5C13.3807 21.5 14.5 20.3807 14.5 19C14.5 17.6193 13.3807 16.5 12 16.5C10.6193 16.5 9.5 17.6193 9.5 19C9.5 20.3807 10.6193 21.5 12 21.5Z"></path>
+                    </svg>
+                </div>
+                <div class="wind-info">
+                    <div class="label">Gust</div>
+                    <div class="wind-speed">0</div>
+                    <div class="wind-beaufort"><i class="wi-wind-beaufort-0"></i></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="windAngle">Wind Angle:</label>
+                <input type="number" id="windAngle" min="0" max="359" value="0">
+                <button id="updateWindAngle">Update</button>
+                <button id="rotateWindCW">Rotate +45°</button>
+                <button id="rotateWindCCW">Rotate -45°</button>
+            </div>
+            
+            <div class="control-group">
+                <label for="gustAngle">Gust Angle:</label>
+                <input type="number" id="gustAngle" min="0" max="359" value="0">
+                <button id="updateGustAngle">Update</button>
+                <button id="rotateGustCW">Rotate +45°</button>
+                <button id="rotateGustCCW">Rotate -45°</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the wind display functions
+        import { updateWindDisplay } from '/js/wind-display.js';
+        
+        // Initialize wind displays
+        const leftDirectionElement = document.querySelector('.wind-panel.left .wind-direction svg');
+        const rightDirectionElement = document.querySelector('.wind-panel.right .wind-direction svg');
+        
+        if (leftDirectionElement && rightDirectionElement) {
+            // Set initial rotation to 180 degrees (pointing north)
+            leftDirectionElement.style.transform = 'rotate(180deg)';
+            rightDirectionElement.style.transform = 'rotate(180deg)';
+        }
+        
+        // Event listeners for wind angle
+        document.getElementById('updateWindAngle').addEventListener('click', () => {
+            const angle = parseInt(document.getElementById('windAngle').value);
+            updateWindDisplay(angle, null, 'left');
+        });
+        
+        document.getElementById('rotateWindCW').addEventListener('click', () => {
+            const currentAngle = parseInt(document.getElementById('windAngle').value);
+            const newAngle = (currentAngle + 45) % 360;
+            document.getElementById('windAngle').value = newAngle;
+            updateWindDisplay(newAngle, null, 'left');
+        });
+        
+        document.getElementById('rotateWindCCW').addEventListener('click', () => {
+            const currentAngle = parseInt(document.getElementById('windAngle').value);
+            const newAngle = (currentAngle - 45 + 360) % 360;
+            document.getElementById('windAngle').value = newAngle;
+            updateWindDisplay(newAngle, null, 'left');
+        });
+        
+        // Event listeners for gust angle
+        document.getElementById('updateGustAngle').addEventListener('click', () => {
+            const angle = parseInt(document.getElementById('gustAngle').value);
+            updateWindDisplay(angle, null, 'right');
+        });
+        
+        document.getElementById('rotateGustCW').addEventListener('click', () => {
+            const currentAngle = parseInt(document.getElementById('gustAngle').value);
+            const newAngle = (currentAngle + 45) % 360;
+            document.getElementById('gustAngle').value = newAngle;
+            updateWindDisplay(newAngle, null, 'right');
+        });
+        
+        document.getElementById('rotateGustCCW').addEventListener('click', () => {
+            const currentAngle = parseInt(document.getElementById('gustAngle').value);
+            const newAngle = (currentAngle - 45 + 360) % 360;
+            document.getElementById('gustAngle').value = newAngle;
+            updateWindDisplay(newAngle, null, 'right');
+        });
+    </script>
+</body>
+</html>

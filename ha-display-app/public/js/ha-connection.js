@@ -26,7 +26,7 @@ async function connectToHA() {
             // Update connection status in UI
             const connectionStatus = document.getElementById('connection-status');
             if (connectionStatus) {
-                connectionStatus.textContent = 'Connecting...';
+                connectionStatus.textContent = '';
                 connectionStatus.className = 'connecting';
             }
             
@@ -56,7 +56,7 @@ async function connectToHA() {
                         console.log('✓ Authentication successful!');
                         
                         if (connectionStatus) {
-                            connectionStatus.textContent = 'Connected to Home Assistant';
+                            connectionStatus.textContent = '';
                             connectionStatus.className = 'connected';
                         }
                         
@@ -82,8 +82,8 @@ async function connectToHA() {
                         console.error('✗ Authentication failed:', message.message);
                         
                         if (connectionStatus) {
-                            connectionStatus.textContent = 'Authentication failed';
-                            connectionStatus.className = 'error';
+                            connectionStatus.textContent = '';
+                            connectionStatus.className = 'disconnected';
                         }
                         
                         reject(new Error('Authentication failed: ' + message.message));
@@ -237,8 +237,8 @@ async function connectToHA() {
             setTimeout(() => {
                 if (!connection) {
                     if (connectionStatus) {
-                        connectionStatus.textContent = 'Connection timeout';
-                        connectionStatus.className = 'error';
+                        connectionStatus.textContent = '';
+                        connectionStatus.className = 'disconnected';
                     }
                     reject(new Error('Connection timeout after 10 seconds'));
                 }
@@ -250,8 +250,8 @@ async function connectToHA() {
             
             const connectionStatus = document.getElementById('connection-status');
             if (connectionStatus) {
-                connectionStatus.textContent = `Connection error: ${errorMessage}`;
-                connectionStatus.className = 'error';
+                connectionStatus.textContent = '';
+                connectionStatus.className = 'disconnected';
             }
             
             reject(new Error(errorMessage));

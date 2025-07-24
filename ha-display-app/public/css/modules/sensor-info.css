@@ -1,0 +1,46 @@
+/* Sensor info and charts styles */
+
+/* Sensor info styling */
+.sensor-info {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.sensor-info h3 {
+    margin: 5px 0;
+    color: #03a9f4;
+}
+
+.entity-name {
+    font-size: 14px;
+    color: #aaaaaa;
+    margin-bottom: 5px;
+    word-break: break-all;
+}
+
+/* Charts section */
+.charts-section {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+/* Chart container for data charts (different from gauge chart container) */
+.charts-section .chart-container {
+    width: 48%;
+    height: 250px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    margin-bottom: 20px;
+}
+
+.chart-container h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #03a9f4;
+    font-size: 16px;
+}

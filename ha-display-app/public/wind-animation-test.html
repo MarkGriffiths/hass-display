@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wind Animation Rotation Test</title>
+    <style>
+        body {
+            background-color: #222;
+            color: white;
+            font-family: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        button {
+            background-color: #03a9f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 0 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background-color: #0288d1;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        button.active {
+            background-color: #4caf50;
+        }
+        input {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: white;
+            width: 80px;
+        }
+        label {
+            font-size: 14px;
+            color: #ccc;
+        }
+        .wind-direction {
+            color: #fff;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .wind-direction svg {
+            width: 8rem;
+            height: 8rem;
+            transition: transform 1s ease-in-out;
+        }
+        .direction-indicator {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: #03a9f4;
+        }
+        .log {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        .transition-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .transition-speed {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Wind Animation Rotation Test</h1>
+        
+        <div class="wind-direction">
+            <div class="direction-indicator" id="directionText">0°</div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L8 11H16L12 2Z"></path>
+                <path d="M12 21.5C13.3807 21.5 14.5 20.3807 14.5 19C14.5 17.6193 13.3807 16.5 12 16.5C10.6193 16.5 9.5 17.6193 9.5 19C9.5 20.3807 10.6193 21.5 12 21.5Z"></path>
+            </svg>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="windAngle">Wind Angle:</label>
+                <input type="number" id="windAngle" min="0" max="359" value="0">
+                <button id="updateAngle">Update</button>
+            </div>
+            
+            <div class="control-group">
+                <button id="rotate45">Rotate +45°</button>
+                <button id="rotate90">Rotate +90°</button>
+                <button id="rotate180">Rotate +180°</button>
+                <button id="rotateMinus45">Rotate -45°</button>
+            </div>
+            
+            <div class="transition-controls">
+                <button id="startAutoRotate" class="active">Start Auto-Rotation</button>
+                <div class="transition-speed">
+                    <label for="transitionSpeed">Transition Speed:</label>
+                    <select id="transitionSpeed">
+                        <option value="0.5">0.5s (Fast)</option>
+                        <option value="1" selected>1s (Medium)</option>
+                        <option value="2">2s (Slow)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        // Get elements
+        const directionElement = document.querySelector('.wind-direction svg');
+        const directionTextElement = document.getElementById('directionText');
+        const angleInput = document.getElementById('windAngle');
+        const updateButton = document.getElementById('updateAngle');
+        const rotate45Button = document.getElementById('rotate45');
+        const rotate90Button = document.getElementById('rotate90');
+        const rotate180Button = document.getElementById('rotate180');
+        const rotateMinus45Button = document.getElementById('rotateMinus45');
+        const logElement = document.getElementById('log');
+        const startAutoRotateButton = document.getElementById('startAutoRotate');
+        const transitionSpeedSelect = document.getElementById('transitionSpeed');
+        
+        // Initialize
+        let currentAngle = 0;
+        let autoRotateInterval = null;
+        let isAutoRotating = true;
+        
+        // Log function
+        function log(message) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = message;
+            logElement.appendChild(entry);
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // Keep log size manageable
+            if (logElement.children.length > 20) {
+                logElement.removeChild(logElement.children[0]);
+            }
+        }
+        
+        // Update wind direction
+        function updateWindDirection(angle) {
+            // Parse angle
+            angle = parseInt(angle) || 0;
+            angle = angle % 360;
+            if (angle < 0) angle += 360;
+            
+            // Get current rotation if it exists
+            const currentTransform = directionElement.style.transform;
+            const currentRotation = currentTransform ? parseFloat(currentTransform.match(/rotate\(([-\d\.]+)deg\)/)?.[1] || 0) : 0;
+            
+            // Calculate meteorological angle (direction wind is coming FROM)
+            // We add 180 degrees because the arrow points up by default
+            const rotationAngle = (angle + 180) % 360;
+            
+            // Determine the shortest path for rotation
+            let newRotation = rotationAngle;
+            
+            // If we already have a rotation value, calculate the shortest path
+            if (currentTransform) {
+                // Calculate difference between angles
+                let diff = rotationAngle - currentRotation;
+                
+                // Normalize to -180 to 180 degrees for shortest path
+                if (diff > 180) diff -= 360;
+                if (diff < -180) diff += 360;
+                
+                // Add the difference to the current rotation
+                newRotation = currentRotation + diff;
+            }
+            
+            // Update transition duration based on selection
+            const transitionDuration = transitionSpeedSelect.value;
+            directionElement.style.transition = `transform ${transitionDuration}s ease-in-out`;
+            
+            // Apply the new rotation
+            directionElement.style.transform = `rotate(${newRotation}deg)`;
+            
+            // Update current angle
+            currentAngle = angle;
+            angleInput.value = angle;
+            directionTextElement.textContent = `${angle}°`;
+            
+            // Log
+            log(`Rotated to ${angle}° (SVG rotation: ${newRotation}°)`);
+        }
+        
+        // Auto-rotate function
+        function startAutoRotate() {
+            if (autoRotateInterval) {
+                clearInterval(autoRotateInterval);
+            }
+            
+            isAutoRotating = true;
+            startAutoRotateButton.textContent = 'Stop Auto-Rotation';
+            startAutoRotateButton.classList.add('active');
+            
+            // Sequence of rotations to demonstrate smooth animation
+            const rotations = [0, 45, 90, 135, 180, 225, 270, 315, 0, 180, 0, 270, 90, 0];
+            let index = 0;
+            
+            // Update immediately with first rotation
+            updateWindDirection(rotations[0]);
+            
+            // Set interval for subsequent rotations
+            autoRotateInterval = setInterval(() => {
+                index = (index + 1) % rotations.length;
+                updateWindDirection(rotations[index]);
+                
+                // Stop after completing the sequence once
+                if (index === rotations.length - 1) {
+                    stopAutoRotate();
+                }
+            }, 2000); // 2 seconds between rotations
+        }
+        
+        function stopAutoRotate() {
+            if (autoRotateInterval) {
+                clearInterval(autoRotateInterval);
+                autoRotateInterval = null;
+            }
+            
+            isAutoRotating = false;
+            startAutoRotateButton.textContent = 'Start Auto-Rotation';
+            startAutoRotateButton.classList.remove('active');
+        }
+        
+        // Event listeners
+        updateButton.addEventListener('click', () => {
+            updateWindDirection(angleInput.value);
+        });
+        
+        rotate45Button.addEventListener('click', () => {
+            updateWindDirection((currentAngle + 45) % 360);
+        });
+        
+        rotate90Button.addEventListener('click', () => {
+            updateWindDirection((currentAngle + 90) % 360);
+        });
+        
+        rotate180Button.addEventListener('click', () => {
+            updateWindDirection((currentAngle + 180) % 360);
+        });
+        
+        rotateMinus45Button.addEventListener('click', () => {
+            updateWindDirection((currentAngle - 45 + 360) % 360);
+        });
+        
+        startAutoRotateButton.addEventListener('click', () => {
+            if (isAutoRotating) {
+                stopAutoRotate();
+            } else {
+                startAutoRotate();
+            }
+        });
+        
+        transitionSpeedSelect.addEventListener('change', () => {
+            // Update the transition speed immediately
+            const transitionDuration = transitionSpeedSelect.value;
+            directionElement.style.transition = `transform ${transitionDuration}s ease-in-out`;
+            log(`Transition speed updated to ${transitionDuration}s`);
+        });
+        
+        // Initialize with north (0 degrees) and start auto-rotation
+        updateWindDirection(0);
+        startAutoRotate();
+    </script>
+</body>
+</html>

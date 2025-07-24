@@ -1,0 +1,48 @@
+/* Wind display styles */
+
+.wind-panel {
+    position: absolute;
+    top: 57%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.wind-panel.left {
+    flex-direction: row;
+    left: 6%;
+}
+
+.wind-panel.right {
+    flex-direction: row-reverse;
+    right: 6%;
+}
+
+.wind-direction {
+    color: #fff;
+}
+
+.wind-direction svg {
+    width: 4rem;
+    height: 4rem;
+    transition: transform 1s ease-in-out;
+}
+
+.wind-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.wind-info .label {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #999;
+    text-transform: uppercase;
+}
+
+.wind-beaufort {
+    font-size: 2rem;
+    color: #fff;
+    line-height: 2rem;
+}

@@ -1,0 +1,139 @@
+/* Gauge styles */
+
+/* Gauge wrapper - contains all gauges */
+.gauges-wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+/* SVG gauge styling */
+.gauge-svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+/* Background arc path */
+.gauge-background {
+    fill: none;
+    stroke: #333;
+    stroke-width: 60; /* Matches arcWidth in JavaScript */
+    stroke-linecap: round;
+}
+
+/* Temperature arc path */
+.gauge-arc {
+    fill: none;
+    stroke: url(#temperature-gradient);
+    stroke-width: 60; /* Matches arcWidth in JavaScript */
+    stroke-linecap: round;
+    shape-rendering: geometricPrecision;
+    z-index: 10;
+}
+
+/* Humidity background arc path (inner arc) */
+.humidity-background {
+    fill: none;
+    stroke: #1a1a1a;
+    stroke-width: 24; /* 40% of temperature arc width (60px) */
+    stroke-linecap: round;
+    z-index: 2;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Humidity arc path */
+.humidity-arc {
+    fill: none;
+    stroke: url(#humidity-gradient);
+    stroke-width: 24; /* 40% of temperature arc width (60px) */
+    stroke-linecap: round;
+    shape-rendering: geometricPrecision;
+    z-index: 3;
+    filter: drop-shadow(0px 0px 3px rgba(0, 0, 0, 0.3));
+}
+
+/* Pressure background arc path (innermost arc) */
+.pressure-background {
+    fill: none;
+    stroke: #151515;
+    stroke-width: 16; /* ~27% of temperature arc width (60px) */
+    stroke-linecap: round;
+    shape-rendering: geometricPrecision;
+    z-index: 5;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Pressure arc path */
+.pressure-arc {
+    fill: none;
+    stroke: url(#pressure-gradient);
+    stroke-width: 16; /* ~27% of temperature arc width (60px) */
+    stroke-linecap: round;
+    shape-rendering: geometricPrecision;
+    z-index: 5;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Rainfall arc */
+.rainfall-arc {
+    fill: none;
+    stroke: url(#rainfall-gradient);
+    stroke-width: 16;
+    stroke-linecap: round;
+    shape-rendering: geometricPrecision;
+    z-index: 5;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Rainfall background */
+.rainfall-background {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 16;
+    stroke-linecap: round;
+    z-index: 1;
+}
+
+/* Secondary Temperature background arc path (bottom arc) */
+.secondary-temp-background {
+    fill: none;
+    stroke: #333;
+    stroke-width: 30; /* Half of temperature arc width (60px) */
+    stroke-linecap: round;
+    z-index: 1;
+}
+
+/* Secondary Temperature arc path (bottom arc) */
+.secondary-temp-arc {
+    fill: none;
+    stroke: url(#secondary-temp-gradient);
+    stroke-width: 30; /* Half of temperature arc width (60px) */
+    stroke-linecap: round;
+    shape-rendering: geometricPrecision;
+    z-index: 2;
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Gauge scale text styles */
+.gauge-markers text {
+    fill: white;
+    text-anchor: middle;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 0, 0, 0.7);
+    font-weight: bold;
+}
+
+/* Secondary temperature scale text */
+.secondary-temp-text {
+    font-size: 14px;
+}
+
+/* Gauge markers */
+.gauge-markers line {
+    stroke: rgba(255, 255, 255, 0.3);
+    stroke-width: 2;
+}

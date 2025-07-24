@@ -1,0 +1,52 @@
+/* Admin Controls styles */
+
+/* Admin Controls */
+.admin-controls {
+    position: absolute;
+    z-index: 100;
+    padding: 15px;
+}
+
+/* Position variants for admin controls */
+.admin-controls.top-right {
+    top: 8px;
+    right: 8px;
+}
+
+.admin-controls.top-left {
+    top: 8px;
+    left: 8px;
+}
+
+.admin-controls.bottom-right {
+    bottom: 8px;
+    right: 8px;
+}
+
+.admin-controls.bottom-left {
+    bottom: 8px;
+    left: 8px;
+}
+
+/* Connection status error states */
+.connection-status.error {
+    background-color: #F44336;
+}
+
+.connection-status.connecting {
+    background-color: #FFC107;
+    color: #333;
+}
+
+/* Error content button styling */
+.error-content button {
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: normal;
+}
+
+.error-content button:hover {
+    background-color: #0288d1;
+}

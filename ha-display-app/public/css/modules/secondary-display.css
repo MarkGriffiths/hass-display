@@ -1,0 +1,87 @@
+/* Secondary display styles */
+
+/* Secondary display containers */
+.secondary-temp-container {
+    margin-right: 1rem;
+}
+
+.secondary-other-container {
+    line-height: 1rem;
+    font-size: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+/* Secondary Temperature display */
+.secondary-temp-display {
+    display: flex;
+    align-items: baseline;
+}
+
+.secondary-temp-value {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.secondary-temp-unit {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 6px;
+}
+
+.secondary-temp-text {
+    font-size: 14px;
+}
+
+/* Secondary humidity display */
+.secondary-humidity-display {
+    display: flex;
+    align-items: baseline;
+    font-size: 1rem;
+}
+
+.secondary-humidity-display i,
+.secondary-humidity-display svg {
+    margin-right: 0.3rem;
+    /* Color will be set dynamically in JS */
+}
+
+#secondary-humidity-value {
+    color: white;
+    font-weight: bold;
+}
+
+.secondary-humidity-unit {
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 2px;
+}
+
+/* Secondary CO2 display */
+.secondary-co2-display {
+    display: flex;
+    align-items: baseline;
+    font-size: 1rem;
+}
+
+.secondary-co2-display svg {
+    /* Color will be set dynamically in JS */
+    color: #8BC34A; /* Default color before JS updates it */
+}
+
+#secondary-co2-value {
+    color: white;
+    font-weight: bold;
+}
+
+.secondary-co2-unit {
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: #cccccc;
+    margin-left: 2px;
+}

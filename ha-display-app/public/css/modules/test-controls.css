@@ -1,0 +1,50 @@
+/* Test controls styles */
+
+/* Test buttons layout */
+.test-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.test-button {
+    flex: 1;
+    font-size: 14px;
+    padding: 4px 6px;
+    margin: 0;
+    font-family: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: normal;
+}
+
+/* Test controls */
+.test-controls {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+}
+
+.test-btn {
+    background-color: #03a9f4;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 0 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.test-btn:hover {
+    background-color: #0288d1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.test-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
