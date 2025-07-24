@@ -1,46 +1,5 @@
 /* Rain display styles */
 
-/* Rain display */
-.rain-display {
-    display: flex;
-    align-items: center;
-    margin-top: 0.5rem;
-    font-size: 1.8rem;
-    color: #03A9F4;
-}
-
-.rain-display i {
-    margin-right: 0.5rem;
-}
-
-.rain-unit {
-    font-size: 1rem;
-    font-weight: normal;
-    color: #cccccc;
-    margin-left: 2px;
-}
-
-.rain-details {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: 0.3rem;
-    font-size: 0.9rem;
-    color: #cccccc;
-}
-
-.rain-last-hour, .rain-today {
-    display: flex;
-    align-items: center;
-    margin: 0 0.5rem;
-}
-
-/* Rainfall gauge text */
-.rainfall-text {
-    font-size: 14px;
-    font-weight: bold;
-}
-
 /* Rain center display */
 .rain-center {
     position: absolute;
@@ -50,15 +9,40 @@
     display: none; /* Hidden by default */
     flex-direction: column;
     align-items: center;
-    font-size: 8rem;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .rain-center.active {
     display: flex;
 }
 
-.conditions-center.inactive {
-    display: none;
+.rain-conditions {
+    font-size: 8rem;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    line-height: 8rem;
+}
+
+/* Rain display */
+.rain-display {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    color: white;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.rain-display i {
+    font-size: 2rem;
+    color: #03A9F4;
+    margin-right: 2px;
+}
+
+.rain-value-bold {
+    font-weight: bold;
+}
+
+
+.rain-unit {
+    color: #cccccc;
+    margin-left: 2px;
 }
