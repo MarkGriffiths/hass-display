@@ -47,3 +47,6 @@
 
 /* Import connection status styles */
 @import url('./modules/connection-status.css');
+
+/* Import history display styles */
+@import url('./modules/history-display.css');

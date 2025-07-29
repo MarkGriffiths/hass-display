@@ -13,35 +13,87 @@ async function connectToHA() {
     return new Promise((resolve, reject) => {
         try {
             console.log('Connecting to Home Assistant at:', config.homeAssistant.url);
-            
+
             // Check if token is provided
             if (!config.homeAssistant.accessToken) {
                 throw new Error('No access token provided. Please configure your access token in the setup page.');
             }
-            
+
             // Convert HTTP URL to WebSocket URL
             let wsUrl = config.homeAssistant.url.replace('http://', 'ws://').replace('https://', 'wss://') + '/api/websocket';
             console.log('WebSocket URL:', wsUrl);
-            
+
             // Update connection status in UI
             const connectionStatus = document.getElementById('connection-status');
+            const connectionActivity = document.getElementById('connection-activity');
             if (connectionStatus) {
                 connectionStatus.textContent = '';
                 connectionStatus.className = 'connecting';
             }
-            
+            if (connectionActivity) {
+                connectionActivity.className = 'idle';
+            }
+
             // Create WebSocket connection
             ws = new WebSocket(wsUrl);
-            
+
             ws.onopen = () => {
                 console.log('✓ WebSocket connection established');
             };
-            
+
             ws.onmessage = (event) => {
                 try {
+                    // Parse the message first to determine the type of update
                     const message = JSON.parse(event.data);
                     console.log('Received:', message.type, message.message || '');
                     
+                    // Determine if this is a UI-affecting update
+                    let isUiUpdate = false;
+                    
+                    // State changes that affect UI elements
+                    if (message.type === 'event' && 
+                        message.event && 
+                        message.event.event_type === 'state_changed' &&
+                        message.event.data) {
+                        
+                        // These are the specific entity types that update the UI when changed
+                        const entityId = message.event.data.entity_id;
+                        const uiEntities = [
+                            config.entities.temperature,
+                            config.entities.humidity,
+                            config.entities.pressure,
+                            config.entities.rainToday,
+                            config.entities.rainLastHour,
+                            config.entities.windAngle,
+                            config.entities.windSpeed,
+                            config.entities.gustAngle,
+                            config.entities.gustSpeed,
+                            config.entities.weather,
+                            config.entities.sun
+                        ];
+                        
+                        // Check if this entity update affects the UI
+                        if (uiEntities.includes(entityId)) {
+                            isUiUpdate = true;
+                        }
+                    }
+                    
+                    // Initial state load affects UI
+                    if (message.type === 'result' && message.result && Array.isArray(message.result) && message.result.length > 0) {
+                        isUiUpdate = true;
+                    }
+                    
+                    // Blink the connection activity indicator with appropriate class
+                    const connectionActivity = document.getElementById('connection-activity');
+                    if (connectionActivity) {
+                        // Use different blink class based on whether this update affects the UI
+                        const blinkClass = isUiUpdate ? 'blinking-connected' : 'blinking-connecting';
+                        connectionActivity.classList.add(blinkClass);
+                        setTimeout(() => {
+                            connectionActivity.classList.remove(blinkClass);
+                        }, 200);
+                    }
+
                     // Handle authentication required
                     if (message.type === 'auth_required') {
                         console.log('Sending authentication token...');
@@ -50,45 +102,45 @@ async function connectToHA() {
                             access_token: config.homeAssistant.accessToken
                         }));
                     }
-                    
+
                     // Handle successful authentication
                     if (message.type === 'auth_ok') {
                         console.log('✓ Authentication successful!');
-                        
+
                         if (connectionStatus) {
                             connectionStatus.textContent = '';
                             connectionStatus.className = 'connected';
                         }
-                        
+
                         // Subscribe to state changes
                         ws.send(JSON.stringify({
                             id: messageId++,
                             type: 'subscribe_events',
                             event_type: 'state_changed'
                         }));
-                        
+
                         // Get all states
                         ws.send(JSON.stringify({
                             id: messageId++,
                             type: 'get_states'
                         }));
-                        
+
                         connection = { connected: true };
                         resolve(true);
                     }
-                    
+
                     // Handle authentication failure
                     if (message.type === 'auth_invalid') {
                         console.error('✗ Authentication failed:', message.message);
-                        
+
                         if (connectionStatus) {
                             connectionStatus.textContent = '';
                             connectionStatus.className = 'disconnected';
                         }
-                        
+
                         reject(new Error('Authentication failed: ' + message.message));
                     }
-                    
+
                     // Handle state change events
                     if (message.type === 'event' && message.event && message.event.event_type === 'state_changed') {
                         const eventData = message.event.data;
@@ -97,44 +149,44 @@ async function connectToHA() {
                             notifyEntityListeners(eventData.entity_id, eventData.new_state);
                         }
                     }
-                    
+
                     // Handle result messages (initial states)
                     if (message.type === 'result' && message.result && Array.isArray(message.result)) {
                         console.log('✓ Received', message.result.length, 'entity states');
-                        
+
                         // Store all states
                         message.result.forEach((state) => {
                             if (state && state.entity_id) {
                                 states[state.entity_id] = state;
                             }
                         });
-                        
+
                         // Check configured entities
-                        const tempEntity = message.result.find(state => 
+                        const tempEntity = message.result.find(state =>
                             state.entity_id === config.entities.temperature);
-                        const humEntity = message.result.find(state => 
+                        const humEntity = message.result.find(state =>
                             state.entity_id === config.entities.humidity);
-                        const pressureEntity = message.result.find(state => 
+                        const pressureEntity = message.result.find(state =>
                             state.entity_id === config.entities.pressure);
-                        
+
                         if (tempEntity) {
                             console.log('✓ Temperature entity found:', tempEntity.state + '°C');
                         } else {
                             console.warn('✗ Temperature entity not found:', config.entities.temperature);
                         }
-                        
+
                         if (humEntity) {
                             console.log('✓ Humidity entity found:', humEntity.state + '%');
                         } else {
                             console.warn('✗ Humidity entity not found:', config.entities.humidity);
                         }
-                        
+
                         if (pressureEntity) {
                             console.log('✓ Pressure entity found:', pressureEntity.state + ' hPa');
                         } else {
                             console.warn('✗ Pressure entity not found:', config.entities.pressure);
                         }
-                        
+
                         // Update temperature, humidity, and pressure displays with initial values
                         if (config.entities.temperature && states[config.entities.temperature]) {
                             const tempState = states[config.entities.temperature];
@@ -144,7 +196,7 @@ async function connectToHA() {
                                 console.log(`Initial temperature: ${tempValue}°C`);
                             }
                         }
-                        
+
                         // Update secondary temperature display with initial value
                         if (config.entities.temperatureSecondary && states[config.entities.temperatureSecondary]) {
                             const secondaryTempState = states[config.entities.temperatureSecondary];
@@ -154,7 +206,7 @@ async function connectToHA() {
                                 console.log(`Initial secondary temperature: ${secondaryTempValue}°C`);
                             }
                         }
-                        
+
                         if (config.entities.humidity && states[config.entities.humidity]) {
                             const humidityState = states[config.entities.humidity];
                             if (humidityState.state && !isNaN(humidityState.state)) {
@@ -163,7 +215,7 @@ async function connectToHA() {
                                 console.log(`Initial humidity: ${humidityValue}%`);
                             }
                         }
-                        
+
                         if (config.entities.pressure && states[config.entities.pressure]) {
                             const pressureState = states[config.entities.pressure];
                             if (pressureState.state && !isNaN(pressureState.state)) {
@@ -172,7 +224,7 @@ async function connectToHA() {
                                 console.log(`Initial pressure: ${pressureValue} hPa`);
                             }
                         }
-                        
+
                         // Update rain last hour value
                         if (config.entities.rainLastHour && states[config.entities.rainLastHour]) {
                             const rainLastHourState = states[config.entities.rainLastHour];
@@ -182,7 +234,7 @@ async function connectToHA() {
                                 console.log(`Initial rain last hour: ${rainLastHourValue}mm`);
                             }
                         }
-                        
+
                         // Update rain today value and gauge
                         if (config.entities.rainToday && states[config.entities.rainToday]) {
                             const rainTodayState = states[config.entities.rainToday];
@@ -192,7 +244,7 @@ async function connectToHA() {
                                 console.log(`Initial rain today: ${rainTodayValue}mm`);
                             }
                         }
-                        
+
                         // Notify all listeners with initial states
                         Object.keys(states).forEach(entityId => {
                             notifyEntityListeners(entityId, states[entityId]);
@@ -202,37 +254,37 @@ async function connectToHA() {
                     console.error('Error processing message:', error);
                 }
             };
-            
+
             ws.onerror = (error) => {
                 // Create a more descriptive error object since WebSocket error events don't contain much detail
                 const errorMessage = `WebSocket connection error to ${wsUrl}`;
                 console.error('✗ WebSocket error:', errorMessage, error);
-                
+
                 if (connectionStatus) {
                     connectionStatus.textContent = 'Connection error';
                     connectionStatus.className = 'error';
                 }
-                
+
                 // Create a proper error object with message
                 reject(new Error(errorMessage));
             };
-            
+
             ws.onclose = (event) => {
                 const closeReason = event.reason ? event.reason : `Code: ${event.code}`;
                 console.log('WebSocket connection closed:', event.code, closeReason);
                 connection = null;
-                
+
                 if (connectionStatus) {
                     connectionStatus.textContent = `Connection closed: ${closeReason}`;
                     connectionStatus.className = 'error';
                 }
-                
+
                 // If connection was never established successfully and then closed, this might be an error
                 if (!connection && event.code !== 1000) {
                     reject(new Error(`Connection closed unexpectedly: ${closeReason}`));
                 }
             };
-            
+
             // Set timeout
             setTimeout(() => {
                 if (!connection) {
@@ -243,17 +295,17 @@ async function connectToHA() {
                     reject(new Error('Connection timeout after 10 seconds'));
                 }
             }, 10000);
-            
+
         } catch (error) {
             const errorMessage = error.message || 'Unknown error creating WebSocket connection';
             console.error('Error creating WebSocket:', errorMessage);
-            
+
             const connectionStatus = document.getElementById('connection-status');
             if (connectionStatus) {
                 connectionStatus.textContent = '';
                 connectionStatus.className = 'disconnected';
             }
-            
+
             reject(new Error(errorMessage));
         }
     });
@@ -271,7 +323,7 @@ function getState(entityId) {
 // Add event listener for entity state changes
 function addEntityListener(entityId, callback) {
     eventListeners.push({ entityId, callback });
-    
+
     // If we already have state for this entity, notify the listener immediately
     if (states[entityId]) {
         callback(states[entityId]);
@@ -297,7 +349,7 @@ function updateRainLastHour(state) {
 
         const rainLastHourValue = parseFloat(state.state);
         const rainLastHourElement = document.getElementById('rain-last-hour-value');
-        
+
         if (rainLastHourElement) {
             rainLastHourElement.textContent = rainLastHourValue.toFixed(1);
         }
@@ -327,7 +379,7 @@ function updateRainToday(state) {
 
         const rainTodayValue = parseFloat(state.state);
         const rainTodayElement = document.getElementById('rain-today-value');
-        
+
         if (rainTodayElement) {
             rainTodayElement.textContent = rainTodayValue.toFixed(1);
         }

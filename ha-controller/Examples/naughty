@@ -1,0 +1,122 @@
+#! /bin/sudo /home/mark/Documents/Electro/.venv/bin/python
+
+import time
+import board
+import digitalio
+import neopixel
+from rainbowio import colorwheel
+from adafruit_seesaw.seesaw import Seesaw
+from adafruit_seesaw.digitalio import DigitalIO
+from adafruit_seesaw.pwmout import PWMOut
+from adafruit_seesaw.rotaryio import IncrementalEncoder
+from adafruit_seesaw.neopixel import NeoPixel
+import keyboard
+
+i2c = board.I2C()
+
+qt_encoder_L = Seesaw(i2c, addr=0x36)
+qt_encoder_R = Seesaw(i2c, addr=0x37)
+qt_buttons = Seesaw(i2c, addr=0x3A)
+
+encoder_L = IncrementalEncoder(qt_encoder_L)
+encoder_R = IncrementalEncoder(qt_encoder_R)
+
+pixel_L = NeoPixel(qt_encoder_L, 6, 1)
+pixel_R = NeoPixel(qt_encoder_R, 6, 1)
+
+num_pixels = 16
+
+pixel_ring = neopixel.NeoPixel(
+    board.D18, num_pixels, brightness=1, auto_write=False, pixel_order=neopixel.GRB
+)
+
+last_position_L = -1
+last_position_R = -1
+
+button_pins = (18, 19, 20, 2)
+buttons = []
+
+for button_pin in button_pins:
+    button = DigitalIO(qt_buttons, button_pin)
+    button.direction = digitalio.Direction.INPUT
+    button.pull = digitalio.Pull.UP
+    buttons.append(button)
+
+led_pins = (12, 13, 0, 1)
+leds = []
+
+for led_pin in led_pins:
+    led = PWMOut(qt_buttons, led_pin)
+    leds.append(led)
+
+
+for led_number, button in enumerate(buttons):
+    leds[led_number].duty_cycle = 65534
+
+pixel_ring.fill((0, 0, 0))
+pixel_ring.show()
+
+color_L = 128
+color_R = 128
+
+level_L = 0
+level_R = 0
+
+while True:
+    position_L = encoder_L.position
+    position_R = encoder_R.position
+
+    if position_L != last_position_L and position_L > -2000000000:
+        print("Position L: {}".format(position_L))
+        level_L = min(1.0, max(0, position_L / 100.0))
+        pixel_L.fill(colorwheel(color_L + level_L * 127))
+        pixel_L.brightness = level_L
+        if position_L > 100:
+            encoder_L.position = 100
+
+        if position_L < 0:
+            encoder_L.position = 0
+
+        last_position_L = position_L
+
+
+    if position_R != last_position_R and position_R > -2000000000:
+        print("Position R: {}".format(position_R))
+        level_R = min(1.0, max(0, position_R / 100.0))
+        pixel_R.fill(colorwheel(color_R + level_R * 127))
+        pixel_R.brightness = level_R
+        if position_R > 100:
+            encoder_R.position = 100
+
+        if position_R < 0:
+            encoder_R.position = 0
+
+        last_position_R = position_R
+
+    for led_number, button in enumerate(buttons):
+        if not button.value:
+            print("Button: {}".format(led_number))
+            match led_number:
+                case 0:
+                    if position_L + position_R > 100:
+                        keyboard.press_and_release('1')
+                    elif position_L + position_R < 50:
+                        keyboard.press_and_release('2')
+                    else:
+                        keyboard.press_and_release('space')
+                case 3:
+                    keyboard.press_and_release('1')
+                case _:
+                    keyboard.press_and_release('space')
+            
+            leds[led_number].duty_cycle = 10000
+        else:
+            leds[led_number].duty_cycle = 65534
+
+    for i in range(num_pixels):
+        pixel_ring[i] = (
+            (level_L >= (num_pixels - i) / num_pixels ) * (64 * level_L),
+            0,
+            (level_R >= (num_pixels - i) / num_pixels) * (64 + level_R)
+        )
+    pixel_ring.show()

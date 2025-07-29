@@ -1,0 +1,11 @@
+#history-display {
+    position: absolute;
+    top: 69%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    background-color: #191919;
+    border-radius: 10px;
+    width: 280px;
+    height: 100px;
+}
+

@@ -1,13 +1,49 @@
 /* Connection status styling */
-#connection-status {
+#connection-display {
     position: absolute;
     bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
-    padding: 2px 4px;
-    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#connection-status {
+    border-radius: 4px;
+    width: 16px;
+    height: 8px;
+}
+
+#connection-activity {
+    border-radius: 4px;
     width: 8px;
-    height: 4px;
+    height: 8px;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.idle {
+    background-color: #111;
+}
+
+@keyframes blink-connecting {
+    0% { background-color: #111; }
+    50% { background-color: #FFC107; }
+    100% { background-color: #111; }
+}
+
+@keyframes blink-connected {
+    0% { background-color: #111; }
+    50% { background-color: #4CAF50; }
+    100% { background-color: #111; }
+}
+
+.blinking-connecting {
+    animation: blink-connecting 0.2s ease-in-out;
+}
+
+.blinking-connected {
+    animation: blink-connected 0.2s ease-in-out;
 }
 
 .connected {

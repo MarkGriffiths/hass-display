@@ -11,7 +11,7 @@
     align-items: center;
 }
 
-.conditions-center {
+#conditions-center {
     position: absolute;
     top: 38%;
     left: 50%;
@@ -22,6 +22,6 @@
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-.conditions-center.inactive {
+#conditions-center.inactive {
     display: none;
 }

@@ -201,20 +201,22 @@
 						</div>
 					</div>
 
-					<div class="conditions-center">
+					<div id="conditions-center">
 						<i class="wi"></i>
 					</div>
 
-					<div class="rain-center">
+					<div id="rain-center">
 						<div class="rain-conditions">
 							<i class="wi wi-rain"></i>
 						</div>
 						<div class="rain-display">
 							<i class="wi wi-raindrops"></i>
 							<span id="rain-last-hour-value" class="rain-value-bold">--</span>
-							<span class="rain-unit">mm</span>
+							<span class="rain-unit">mm/hr</span>
 						</div>
 					</div>
+
+					<div id="history-display">[CHART]</div>
 
 					<!-- Center content -->
 					<div class="gauge-center">
@@ -269,24 +271,37 @@
 					</div>
 			</div>
 			<!-- Connection status indicator -->
-			<div class="connection-status connecting" id="connection-status"></div>
+			<div id="connection-display">
+				<div class="connecting" id="connection-status"></div>
+				<div class="idle" id="connection-activity"></div>
+			</div>
 		</div>
-			<!-- Admin Controls (outside the circle) -->
-			<div class="admin-controls top-left">
-				<button id="test-button" class="admin-button test-button">
-					Test Gauges
-				</button>
-			</div>
+		<!-- Admin Controls (outside the circle) -->
+		<div class="admin-controls top-left">
+			<button id="test-button" class="admin-button test-button">
+				Test Gauges
+			</button>
+		</div>
 
-			<div class="admin-controls top-right">
-				<button id="admin-button" class="admin-button">Admin Settings</button>
-			</div>
+		<div class="admin-controls top-right">
+			<button id="admin-button" class="admin-button">Admin Settings</button>
+		</div>
 
-			<div class="admin-controls bottom-right">
-				<button id="toggle-rain-view" class="admin-button">Toggle Rain View</button>
-			</div>
+		<div class="admin-controls bottom-right">
+			<button id="toggle-rain-view" class="admin-button">Toggle Rain View</button>
+		</div>
 
-			<!-- Charts section removed -->
+		<div class="admin-controls bottom-left">
+			<div>
+				Current Rain: <span id="rain-value">0</span>mm
+			</div>
+			<div>
+				Rain Today: <span id="rain-today-value">0</span>mm
+			</div>
+		</div>
+
+
+		<!-- Charts section removed -->
 
 		<!-- Load libraries -->
 		<script src="https://cdn.jsdelivr.net/npm/home-assistant-js-websocket@8.2.0/dist/haws.umd.js"></script>

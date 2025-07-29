@@ -138,8 +138,8 @@ waitForDOMReady().then(() => {
 // Function to update the rain view display based on config setting
 // Make updateRainViewDisplay globally accessible for ha-connection.js
 window.updateRainViewDisplay = function () {
-  const rainCenter = document.querySelector('.rain-center');
-  const conditionsCenter = document.querySelector('.conditions-center');
+  const rainCenter = document.getElementById('rain-center');
+  const conditionsCenter = document.getElementById('conditions-center');
   const rainfallArc = document.getElementById('rainfall-arc');
   const rainfallBackground = document.querySelector('.rainfall-background');
   const rainfallMarkers = document.getElementById('rainfall-markers');
@@ -390,7 +390,7 @@ function setupEntityListeners() {
 
   // Function to update the weather icon based on current states
   function updateWeatherIcon() {
-    const weatherIcon = document.querySelector('.conditions-center i');
+    const weatherIcon = document.querySelector('#conditions-center i');
     if (!weatherIcon) {
       console.error('Weather icon element not found');
       return;

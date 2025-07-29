@@ -7,8 +7,8 @@ import { updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidity
  * Runs a comprehensive test of all gauge displays
  */
 export function testGauges() {
-    // Run the optimized gauge sweep test
-    testGaugeSweep();
+    // Show test options dialog
+    showTestOptions();
 }
 
 /**
@@ -107,6 +107,144 @@ function testGaugeSweep() {
     }
 }
 
-// Secondary temperature gauge test function removed - consolidated into testTemperatureGaugeSweep
+/**
+ * Test specifically for rainfall gauge auto-scaling
+ * Tests each of the rainfall bands: 0-3mm, 0-10mm, 0-50mm, 0-100mm
+ */
+function testRainfallAutoScaling() {
+    try {
+        // Store original value to restore later
+        const originalValue = parseFloat(document.getElementById('rain-today-value')?.textContent || '0');
+        
+        // Define test values for each band
+        const testValues = [
+            { value: 0, delay: 1000, label: 'No rain' },
+            { value: 1.5, delay: 2000, label: '0-3mm band' },
+            { value: 7, delay: 2000, label: '0-10mm band' },
+            { value: 35, delay: 2000, label: '0-50mm band' },
+            { value: 90, delay: 2000, label: '0-100mm band' },
+            { value: originalValue, delay: 0, label: 'Original value' } // Return to original value
+        ];
+        
+        // Create status display
+        const statusElement = document.createElement('div');
+        statusElement.id = 'test-status';
+        statusElement.style.position = 'fixed';
+        statusElement.style.bottom = '80px';
+        statusElement.style.left = '50%';
+        statusElement.style.transform = 'translateX(-50%)';
+        statusElement.style.background = 'rgba(0,0,0,0.7)';
+        statusElement.style.color = 'white';
+        statusElement.style.padding = '10px 20px';
+        statusElement.style.borderRadius = '5px';
+        statusElement.style.zIndex = '1000';
+        statusElement.style.fontSize = '18px';
+        statusElement.textContent = 'Testing rainfall auto-scaling...';
+        document.body.appendChild(statusElement);
+        
+        // Run tests sequentially
+        let currentIndex = 0;
+        
+        function runNextTest() {
+            if (currentIndex >= testValues.length) {
+                // All tests complete, remove status element
+                document.body.removeChild(statusElement);
+                return;
+            }
+            
+            const test = testValues[currentIndex];
+            statusElement.textContent = `Testing: ${test.label} (${test.value}mm)`;
+            
+            // Update the rainfall gauge
+            updateRainfallGauge(test.value);
+            
+            // Move to next test after delay
+            currentIndex++;
+            setTimeout(runNextTest, test.delay);
+        }
+        
+        // Start the test sequence
+        runNextTest();
+        
+    } catch (error) {
+        console.error('Error in rainfall auto-scaling test:', error);
+    }
+}
 
-// Humidity and pressure gauge test functions removed - consolidated into testTemperatureGaugeSweep
+/**
+ * Show a dialog with test options
+ */
+function showTestOptions() {
+    // Create dialog container
+    const dialog = document.createElement('div');
+    dialog.style.position = 'fixed';
+    dialog.style.top = '50%';
+    dialog.style.left = '50%';
+    dialog.style.transform = 'translate(-50%, -50%)';
+    dialog.style.background = '#222';
+    dialog.style.color = 'white';
+    dialog.style.padding = '20px';
+    dialog.style.borderRadius = '10px';
+    dialog.style.zIndex = '1000';
+    dialog.style.minWidth = '300px';
+    dialog.style.boxShadow = '0 0 20px rgba(0,0,0,0.5)';
+    
+    // Add title
+    const title = document.createElement('h2');
+    title.textContent = 'Select Test';
+    title.style.marginTop = '0';
+    title.style.marginBottom = '20px';
+    title.style.textAlign = 'center';
+    dialog.appendChild(title);
+    
+    // Add test options
+    const tests = [
+        { name: 'All Gauges Sweep', fn: testGaugeSweep },
+        { name: 'Rainfall Auto-Scaling', fn: testRainfallAutoScaling },
+    ];
+    
+    tests.forEach(test => {
+        const button = document.createElement('button');
+        button.textContent = test.name;
+        button.style.display = 'block';
+        button.style.width = '100%';
+        button.style.padding = '10px';
+        button.style.margin = '10px 0';
+        button.style.background = '#4CAF50';
+        button.style.color = 'white';
+        button.style.border = 'none';
+        button.style.borderRadius = '5px';
+        button.style.cursor = 'pointer';
+        button.style.fontSize = '16px';
+        
+        button.addEventListener('click', () => {
+            document.body.removeChild(dialog);
+            test.fn();
+        });
+        
+        dialog.appendChild(button);
+    });
+    
+    // Add close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = 'Cancel';
+    closeButton.style.display = 'block';
+    closeButton.style.width = '100%';
+    closeButton.style.padding = '10px';
+    closeButton.style.margin = '10px 0';
+    closeButton.style.background = '#f44336';
+    closeButton.style.color = 'white';
+    closeButton.style.border = 'none';
+    closeButton.style.borderRadius = '5px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.fontSize = '16px';
+    
+    closeButton.addEventListener('click', () => {
+        document.body.removeChild(dialog);
+    });
+    
+    dialog.appendChild(closeButton);
+    
+    // Add to document
+    document.body.appendChild(dialog);
+}

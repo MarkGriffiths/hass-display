@@ -1,7 +1,7 @@
 /* Rain display styles */
 
 /* Rain center display */
-.rain-center {
+#rain-center {
     position: absolute;
     top: 35%;
     left: 50%;
@@ -11,19 +11,19 @@
     align-items: center;
 }
 
-.rain-center.active {
+#rain-center.active {
     display: flex;
 }
 
-.rain-conditions {
-    font-size: 8rem;
+#rain-center .rain-conditions {
+    font-size: 7rem;
     color: #fff;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     line-height: 8rem;
 }
 
 /* Rain display */
-.rain-display {
+#rain-center .rain-display {
     display: flex;
     align-items: center;
     font-size: 1.2rem;
@@ -31,18 +31,18 @@
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.rain-display i {
+#rain-center .rain-display i {
     font-size: 2rem;
     color: #03A9F4;
     margin-right: 2px;
 }
 
-.rain-value-bold {
+#rain-center .rain-value-bold {
     font-weight: bold;
 }
 
 
-.rain-unit {
+#rain-center .rain-unit {
     color: #cccccc;
     margin-left: 2px;
 }

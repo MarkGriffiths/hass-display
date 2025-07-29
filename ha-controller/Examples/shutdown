@@ -1,0 +1,65 @@
+#! /bin/sudo /home/mark/Documents/Electro/.venv/bin/python
+
+import time
+import board
+import digitalio
+import neopixel
+from rainbowio import colorwheel
+from adafruit_seesaw.seesaw import Seesaw
+from adafruit_seesaw.digitalio import DigitalIO
+from adafruit_seesaw.pwmout import PWMOut
+from adafruit_seesaw.rotaryio import IncrementalEncoder
+from adafruit_seesaw.neopixel import NeoPixel
+
+i2c = board.I2C()
+
+qt_encoder_L = Seesaw(i2c, addr=0x36)
+qt_encoder_R = Seesaw(i2c, addr=0x37)
+qt_buttons = Seesaw(i2c, addr=0x3A)
+
+encoder_L = IncrementalEncoder(qt_encoder_L)
+encoder_R = IncrementalEncoder(qt_encoder_R)
+
+pixel_L = NeoPixel(qt_encoder_L, 6, 1)
+pixel_R = NeoPixel(qt_encoder_R, 6, 1)
+
+num_pixels = 16
+
+pixel_ring = neopixel.NeoPixel(
+    board.D18, num_pixels, brightness=1, auto_write=False, pixel_order=neopixel.GRB
+)
+
+last_position_L = -1
+last_position_R = -1
+
+button_pins = (18, 19, 20, 2)
+buttons = []
+
+for button_pin in button_pins:
+    button = DigitalIO(qt_buttons, button_pin)
+    button.direction = digitalio.Direction.INPUT
+    button.pull = digitalio.Pull.UP
+    buttons.append(button)
+
+led_pins = (12, 13, 0, 1)
+leds = []
+
+for led_pin in led_pins:
+    led = PWMOut(qt_buttons, led_pin)
+    leds.append(led)
+
+
+for led_number, button in enumerate(buttons):
+    leds[led_number].duty_cycle = 65534
+
+pixel_ring.fill((0, 0, 0))
+pixel_ring.show()
+
+pixel_L.fill((0, 0, 0))
+pixel_R.fill((0, 0, 0))
+
+for led_number, button in enumerate(buttons):
+    leds[led_number].duty_cycle = 0
+
+color_L = 128
+color_R = 128
