@@ -2,7 +2,8 @@
 import { config } from './config.js';
 import { loadConfig, validateConfig } from './config-manager.js';
 import { connectToHA, addEntityListener, updateRainToday, updateRainLastHour } from './ha-connection.js';
-import { initSparkline, addTemperaturePoint } from './temp-history.js';
+import { initSparkline, addTempPoint } from './temp-history.js';
+import { initPressureSparkline, addPressurePoint } from './pressure-history.js';
 import {
   initTemperatureGauge,
   updateTemperatureGauge,
@@ -330,9 +331,15 @@ async function initApp() {
         connectionErrorElement.style.display = 'none';
       }
       
-      // Initialize temperature sparkline chart after connection is established
+      // Initialize sparkline charts after connection is established
       console.log('Initializing temperature history sparkline with entity:', config.entities.temperature);
       initSparkline();
+      
+      // Initialize pressure sparkline chart
+      if (config.entities.pressure) {
+        console.log('Initializing pressure history sparkline with entity:', config.entities.pressure);
+        initPressureSparkline();
+      }
     } catch (error) {
       console.error('Error connecting to Home Assistant:', error);
     }
@@ -418,7 +425,7 @@ function setupEntityListeners() {
       updateTemperatureGauge(tempValue);
       
       // Add temperature data point to history sparkline
-      addTemperaturePoint(tempValue);
+      addTempPoint(tempValue);
     } else {
       console.warn('Invalid temperature value:', state.state);
     }
@@ -884,6 +891,22 @@ function setupEntityListeners() {
       if (!isNaN(speed)) {
         // Update gust display (right side) with new speed only
         updateWindDisplay(null, speed, 'right');
+      }
+    });
+  }
+  
+  // Listen for pressure changes
+  if (config.entities.pressure) {
+    addEntityListener(config.entities.pressure, (state) => {
+      if (!state) return;
+
+      const pressure = parseFloat(state.state);
+      if (!isNaN(pressure)) {
+        // Update the pressure gauge
+        updatePressureGauge(pressure);
+
+        // Update the pressure sparkline
+        addPressurePoint(pressure);
       }
     });
   }

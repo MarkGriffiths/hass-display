@@ -6,17 +6,16 @@
     background-color: #191919;
     border-radius: 10px;
     width: 280px;
-    height: 100px;
+    height: 90px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
-#temp-sparkline {
+#combined-sparkline {
     width: 260px;
     height: 80px;
-    margin-bottom: 5px;
+    margin: 0;
 }
 
 
