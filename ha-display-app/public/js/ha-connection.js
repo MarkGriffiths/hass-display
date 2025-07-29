@@ -12,8 +12,6 @@ let messageId = 1;
 async function connectToHA() {
     return new Promise((resolve, reject) => {
         try {
-            console.log('Connecting to Home Assistant at:', config.homeAssistant.url);
-
             // Check if token is provided
             if (!config.homeAssistant.accessToken) {
                 throw new Error('No access token provided. Please configure your access token in the setup page.');
@@ -21,7 +19,6 @@ async function connectToHA() {
 
             // Convert HTTP URL to WebSocket URL
             let wsUrl = config.homeAssistant.url.replace('http://', 'ws://').replace('https://', 'wss://') + '/api/websocket';
-            console.log('WebSocket URL:', wsUrl);
 
             // Update connection status in UI
             const connectionStatus = document.getElementById('connection-status');
@@ -38,14 +35,13 @@ async function connectToHA() {
             ws = new WebSocket(wsUrl);
 
             ws.onopen = () => {
-                console.log('✓ WebSocket connection established');
+                // Connection established
             };
 
             ws.onmessage = (event) => {
                 try {
                     // Parse the message first to determine the type of update
                     const message = JSON.parse(event.data);
-                    console.log('Received:', message.type, message.message || '');
                     
                     // Determine if this is a UI-affecting update
                     let isUiUpdate = false;
@@ -96,7 +92,6 @@ async function connectToHA() {
 
                     // Handle authentication required
                     if (message.type === 'auth_required') {
-                        console.log('Sending authentication token...');
                         ws.send(JSON.stringify({
                             type: 'auth',
                             access_token: config.homeAssistant.accessToken
@@ -105,7 +100,6 @@ async function connectToHA() {
 
                     // Handle successful authentication
                     if (message.type === 'auth_ok') {
-                        console.log('✓ Authentication successful!');
 
                         if (connectionStatus) {
                             connectionStatus.textContent = '';
@@ -131,8 +125,6 @@ async function connectToHA() {
 
                     // Handle authentication failure
                     if (message.type === 'auth_invalid') {
-                        console.error('✗ Authentication failed:', message.message);
-
                         if (connectionStatus) {
                             connectionStatus.textContent = '';
                             connectionStatus.className = 'disconnected';
@@ -152,7 +144,6 @@ async function connectToHA() {
 
                     // Handle result messages (initial states)
                     if (message.type === 'result' && message.result && Array.isArray(message.result)) {
-                        console.log('✓ Received', message.result.length, 'entity states');
 
                         // Store all states
                         message.result.forEach((state) => {
@@ -258,8 +249,7 @@ async function connectToHA() {
             ws.onerror = (error) => {
                 // Create a more descriptive error object since WebSocket error events don't contain much detail
                 const errorMessage = `WebSocket connection error to ${wsUrl}`;
-                console.error('✗ WebSocket error:', errorMessage, error);
-
+                
                 if (connectionStatus) {
                     connectionStatus.textContent = 'Connection error';
                     connectionStatus.className = 'error';
@@ -271,7 +261,6 @@ async function connectToHA() {
 
             ws.onclose = (event) => {
                 const closeReason = event.reason ? event.reason : `Code: ${event.code}`;
-                console.log('WebSocket connection closed:', event.code, closeReason);
                 connection = null;
 
                 if (connectionStatus) {
@@ -298,8 +287,7 @@ async function connectToHA() {
 
         } catch (error) {
             const errorMessage = error.message || 'Unknown error creating WebSocket connection';
-            console.error('Error creating WebSocket:', errorMessage);
-
+            
             const connectionStatus = document.getElementById('connection-status');
             if (connectionStatus) {
                 connectionStatus.textContent = '';
@@ -343,7 +331,6 @@ function notifyEntityListeners(entityId, state) {
 function updateRainLastHour(state) {
     try {
         if (!state) {
-            console.warn('Invalid state for rain last hour');
             return;
         }
 
@@ -362,10 +349,8 @@ function updateRainLastHour(state) {
                 window.updateRainViewDisplay();
             }
         }
-
-        console.log(`Updated rain last hour: ${rainLastHourValue}mm`);
     } catch (error) {
-        console.error('Error updating rain last hour:', error);
+        // Silent fail
     }
 }
 
@@ -373,7 +358,6 @@ function updateRainLastHour(state) {
 function updateRainToday(state) {
     try {
         if (!state) {
-            console.warn('Invalid state for rain today');
             return;
         }
 
@@ -387,10 +371,47 @@ function updateRainToday(state) {
         // Always update the rainfall gauge regardless of rain view status
         // The gauge's own visibility logic will handle whether it should be displayed
         updateRainfallGauge(rainTodayValue);
-
-        console.log(`Updated rain today: ${rainTodayValue}mm`);
     } catch (error) {
-        console.error('Error updating rain today:', error);
+        // Silent fail
+    }
+}
+
+// Fetch historical data for an entity
+async function fetchEntityHistory(entityId, startTime) {
+    try {
+        if (!config.homeAssistant.url || !config.homeAssistant.accessToken) {
+            throw new Error('Home Assistant URL or access token not configured');
+        }
+        
+        // Format: /api/proxy/api/history/period/{startTime}?filter_entity_id={entityId}
+        // Note the additional /api/ in the path to match Home Assistant API structure
+        const apiUrl = `/api/proxy/api/history/period/${startTime.toISOString()}?filter_entity_id=${entityId}`;
+        
+        const response = await fetch(apiUrl, {
+            headers: {
+                'Content-Type': 'application/json',
+                // Pass the HA token via a custom header for the proxy
+                'ha-auth': config.homeAssistant.accessToken
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch history: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Process the data - history API returns an array of entities, each with state history
+        if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
+            return data[0].map(state => ({
+                state: state.state,
+                timestamp: new Date(state.last_changed)
+            }));
+        }
+        
+        return [];
+    } catch (error) {
+        return [];
     }
 }
 
@@ -398,5 +419,8 @@ function updateRainToday(state) {
 export {
     connectToHA,
     getState,
-    addEntityListener
+    addEntityListener,
+    updateRainLastHour,
+    updateRainToday,
+    fetchEntityHistory
 };

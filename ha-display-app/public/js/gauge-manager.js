@@ -36,16 +36,12 @@ function verifyRequiredElements() {
     'rainfall-arc',
   ];
 
-  console.log('Verifying required DOM elements...');
-
   let allFound = true;
   for (const id of requiredElements) {
     const element = document.getElementById(id);
     if (!element) {
       console.error(`Required element #${id} not found in DOM`);
       allFound = false;
-    } else {
-      console.log(`Required element #${id} found in DOM`);
     }
   }
 
@@ -57,12 +53,7 @@ function verifyRequiredElements() {
  * @returns {Promise<boolean>} Promise that resolves to true if successful, false otherwise
  */
 export async function initTemperatureGauge() {
-  console.log('Initializing all gauges...');
-
   try {
-    // Verify that the document is ready
-    console.log('Document ready state:', document.readyState);
-
     // First verify that all required elements exist
     const elementsExist = verifyRequiredElements();
     if (!elementsExist) {
@@ -73,12 +64,9 @@ export async function initTemperatureGauge() {
     }
 
     // Use the centralized gauge initializer - now properly awaited
-    console.log('Calling initGauges()...');
     const result = await initGauges();
 
-    if (result) {
-      console.log('All gauges initialized successfully');
-    } else {
+    if (!result) {
       console.error('Failed to initialize one or more gauges');
     }
 

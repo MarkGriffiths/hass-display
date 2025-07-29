@@ -216,7 +216,12 @@
 						</div>
 					</div>
 
-					<div id="history-display">[CHART]</div>
+					<div id="history-display">
+						<svg id="temp-sparkline" width="260" height="80" viewBox="0 0 260 80" preserveAspectRatio="none">
+							<path id="sparkline-path" d="" fill="none" stroke="#4CAF50" stroke-width="2"></path>
+							<g id="sparkline-points"></g>
+						</svg>
+					</div>
 
 					<!-- Center content -->
 					<div class="gauge-center">
@@ -306,7 +311,8 @@
 		<!-- Load libraries -->
 		<script src="https://cdn.jsdelivr.net/npm/home-assistant-js-websocket@8.2.0/dist/haws.umd.js"></script>
 
-		<!-- Load our scripts as ES modules -->
-		<script type="module" src="js/app.js"></script>
+		<!-- Load our scripts as ES modules with cache-busting -->
+		<script src="js/temp-history.js?v=20250729161627" type="module"></script>
+		<script src="js/app.js?v=20250729161627" type="module"></script>
 	</body>
 </html>

@@ -56,7 +56,6 @@ export function createRainfallGradient() {
             gradient.appendChild(stopElement);
         });
 
-        console.log(`Created ${stops.length} gradient stops for rainfall gauge`);
         return true;
     } catch (error) {
         console.error('Error creating rainfall gradient:', error);
@@ -86,7 +85,6 @@ function determineRainfallScale(rainValue) {
         selectedBand = RAINFALL_BANDS[RAINFALL_BANDS.length - 1];
     }
 
-    console.log(`Auto-scaling rainfall gauge: value=${rainValue}mm, selected scale=0-${selectedBand.max}mm, step=${selectedBand.step}mm`);
     return selectedBand;
 }
 
@@ -124,7 +122,7 @@ export async function createRainfallMarkers(maxValue = null, stepSize = null) {
         const originalMax = config.gauges.rainfall.max;
         config.gauges.rainfall.max = max;
 
-        console.log(`Creating rainfall markers with max=${max}mm and step=${step}mm`);
+
 
         // Use the enhanced createScaleMarkers utility with options
         const result = createScaleMarkers(
@@ -275,11 +273,8 @@ export function updateRainfallGauge(rainTodayValue, initializing = false) {
             rainfallPath.style.display = 'none';
             rainfallBackground.style.display = 'none';
             rainfallMarkers.style.display = 'none';
-            console.log(`Hiding rainfall gauge: rain today=${rainTodayValue}mm, current rain=${currentRainValue}mm`);
         } else {
             // Show if there's rain today OR current rain
-            console.log('DEBUG - Setting rainfall gauge to visible');
-
             // IMPORTANT: Use explicit style.display = 'block' to ensure visibility
             rainfallPath.style.display = 'block';
             rainfallBackground.style.display = 'block';
@@ -289,27 +284,9 @@ export function updateRainfallGauge(rainTodayValue, initializing = false) {
             rainfallPath.removeAttribute('display');
             rainfallBackground.removeAttribute('display');
             rainfallMarkers.removeAttribute('display');
-
-            // Debug element visibility state after setting
-            console.log('DEBUG - Rainfall elements after setting display:', {
-                pathDisplay: rainfallPath.getAttribute('display') || 'not set',
-                backgroundDisplay: rainfallBackground.getAttribute('display') || 'not set',
-                markersDisplay: rainfallMarkers.getAttribute('display') || 'not set',
-                pathStyleDisplay: rainfallPath.style.display,
-                backgroundStyleDisplay: rainfallBackground.style.display,
-                markersStyleDisplay: rainfallMarkers.style.display
-            });
-
-            console.log(`Showing rainfall gauge: rain today=${rainTodayValue}mm, current rain=${currentRainValue}mm`);
         }
 
-        // Log the update with detailed information
-        if (!initializing) {
-            console.log(`Updated rainfall gauge: rain today=${rainTodayValue}mm, angle: ${angle}\u00b0, path: ${arcPath}`);
-            console.log(`Rainfall path attributes: d=${rainfallPath.getAttribute('d')}, stroke-width=${rainfallPath.getAttribute('stroke-width')}`);
-        } else {
-            console.log(`Initialized rainfall gauge with path: ${arcPath}`);
-        }
+        // No logging needed
 
         return true;
     } catch (error) {

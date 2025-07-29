@@ -1,7 +1,8 @@
 // Main application script
 import { config } from './config.js';
 import { loadConfig, validateConfig } from './config-manager.js';
-import { connectToHA, addEntityListener } from './ha-connection.js';
+import { connectToHA, addEntityListener, updateRainToday, updateRainLastHour } from './ha-connection.js';
+import { initSparkline, addTemperaturePoint } from './temp-history.js';
 import {
   initTemperatureGauge,
   updateTemperatureGauge,
@@ -87,9 +88,7 @@ function showError(errorMessage) {
 }
 
 // Initialize the application when DOM is ready
-waitForDOMReady().then(() => {
-  console.log('DOM is fully ready, initializing application...');
-
+document.addEventListener('DOMContentLoaded', async () => {
   // Initialize the application
   initApp();
 
@@ -196,7 +195,6 @@ window.updateRainViewDisplay = function () {
 async function initApp() {
   try {
     // Fetch configuration from backend
-    console.log('Fetching configuration from backend...');
     const response = await fetch('/api/env-config');
 
     if (!response.ok) {
@@ -206,7 +204,6 @@ async function initApp() {
     }
 
     const envConfig = await response.json();
-    console.log('Received environment config:', envConfig);
 
     // Update config with values from backend
     config.homeAssistant.url = envConfig.haUrl;
@@ -238,10 +235,7 @@ async function initApp() {
       }
     }
 
-    console.log(
-      'Updated config with backend values and stored settings:',
-      config
-    );
+    // Configuration updated with backend values and stored settings
 
     // Apply rain view setting
     updateRainViewDisplay();
@@ -259,7 +253,7 @@ async function initApp() {
     return;
   }
 
-  console.log('Loaded entities:', config.entities);
+  // Configuration validated
 
   // Add connection error element
   const errorElement = document.createElement('div');
@@ -279,9 +273,6 @@ async function initApp() {
 
   // Connect to Home Assistant - simplified approach matching working minimal test
   try {
-    console.log('Connecting to Home Assistant at:', config.homeAssistant.url);
-    console.log('Using temperature entity:', config.entities.temperature);
-    console.log('Using humidity entity:', config.entities.humidity);
 
     // Initialize UI components with optimized DOM handling
     const initializeGauges = async () => {
@@ -308,24 +299,17 @@ async function initApp() {
     // Initialize gauges immediately with optimized approach
     (async () => {
       try {
-        console.log('Initializing gauges...');
-
         // Single attempt initialization with minimal error handling
         const success = await initializeGauges();
 
-        if (success) {
-          console.log('Gauge initialization completed successfully');
-        } else {
+        if (!success) {
           console.error('Failed to initialize gauges');
           showError('Failed to initialize gauges. Please refresh the page.');
         }
 
         // Initialize wind displays
-        console.log('Initializing wind displays...');
         const windSuccess = initWindDisplays();
-        if (windSuccess) {
-          console.log('Wind displays initialized successfully');
-        } else {
+        if (!windSuccess) {
           console.error('Failed to initialize wind displays');
         }
       } catch (error) {
@@ -345,6 +329,10 @@ async function initApp() {
       if (connectionErrorElement) {
         connectionErrorElement.style.display = 'none';
       }
+      
+      // Initialize temperature sparkline chart after connection is established
+      console.log('Initializing temperature history sparkline with entity:', config.entities.temperature);
+      initSparkline();
     } catch (error) {
       console.error('Error connecting to Home Assistant:', error);
     }
@@ -396,13 +384,6 @@ function setupEntityListeners() {
       return;
     }
 
-    console.log(
-      'Updating weather icon with weather:',
-      currentWeatherState,
-      'sun up:',
-      isSunUp
-    );
-
     // Remove all existing weather classes
     weatherIcon.className = 'wi'; // Reset to base class
 
@@ -415,7 +396,6 @@ function setupEntityListeners() {
     ) {
       const iconClass =
         config.weather.iconMapping[currentWeatherState][timeOfDay];
-      console.log('Selected icon class:', iconClass);
       weatherIcon.classList.add(iconClass);
     } else {
       // Default icon if weather state is unknown - use config value
@@ -427,20 +407,18 @@ function setupEntityListeners() {
 
   // Listen for temperature changes
   addEntityListener(config.entities.temperature, (state) => {
-    console.log('Temperature state received:', state);
     if (!state) {
       console.error('Temperature state is undefined');
       return;
     }
 
-    const value = parseFloat(state.state);
-    console.log('Parsed temperature value:', value, 'isNaN:', isNaN(value));
-    if (!isNaN(value)) {
-      // Update custom temperature gauge
-      updateTemperatureGauge(value);
-
-      // Temperature chart update removed
-      // Entity name update removed
+    const tempValue = parseFloat(state.state);
+    if (!isNaN(tempValue)) {
+      // Update temperature gauge with new value
+      updateTemperatureGauge(tempValue);
+      
+      // Add temperature data point to history sparkline
+      addTemperaturePoint(tempValue);
     } else {
       console.warn('Invalid temperature value:', state.state);
     }
@@ -448,7 +426,6 @@ function setupEntityListeners() {
 
   // Listen for temperature trend changes
   addEntityListener(config.entities.temperatureTrend, (state) => {
-    console.log('Temperature trend state received:', state);
     if (!state) {
       console.error('Temperature trend state is undefined');
       return;
@@ -463,7 +440,6 @@ function setupEntityListeners() {
 
     // Update the icon based on the trend value
     const trend = state.state.toLowerCase();
-    console.log('Temperature trend value:', trend);
 
     // Remove all existing direction classes
     temperatureTrendIcon.classList.remove('wi-direction-up');
@@ -485,14 +461,12 @@ function setupEntityListeners() {
 
   // Listen for humidity changes
   addEntityListener(config.entities.humidity, (state) => {
-    console.log('Humidity state received:', state);
     if (!state) {
       console.error('Humidity state is undefined');
       return;
     }
 
     const value = parseFloat(state.state);
-    console.log('Parsed humidity value:', value, 'isNaN:', isNaN(value));
     if (!isNaN(value)) {
       // Update custom humidity gauge
       updateHumidityGauge(value);
@@ -503,14 +477,12 @@ function setupEntityListeners() {
 
   // Listen for pressure changes
   addEntityListener(config.entities.pressure, (state) => {
-    console.log('Pressure state received:', state);
     if (!state) {
       console.error('Pressure state is undefined');
       return;
     }
 
     const value = parseFloat(state.state);
-    console.log('Parsed pressure value:', value, 'isNaN:', isNaN(value));
     if (!isNaN(value)) {
       // Update custom pressure gauge
       updatePressureGauge(value);
@@ -521,7 +493,6 @@ function setupEntityListeners() {
 
   // Listen for pressure trend changes
   addEntityListener(config.entities.pressureTrend, (state) => {
-    console.log('Pressure trend state received:', state);
     if (!state) {
       console.error('Pressure trend state is undefined');
       return;
@@ -536,7 +507,6 @@ function setupEntityListeners() {
 
     // Update the icon based on the trend value
     const trend = state.state.toLowerCase();
-    console.log('Pressure trend value:', trend);
 
     // Remove all existing direction classes
     pressureTrendIcon.classList.remove('wi-direction-up');
@@ -582,7 +552,6 @@ function setupEntityListeners() {
   // Listen for secondary temperature trend changes
   if (config.entities.temperatureSecondaryTrend) {
     addEntityListener(config.entities.temperatureSecondaryTrend, (state) => {
-      console.log('Secondary temperature trend state received:', state);
       if (!state) {
         console.error('Secondary temperature trend state is undefined');
         return;
@@ -599,7 +568,6 @@ function setupEntityListeners() {
 
       // Update the icon based on the trend value
       const trend = state.state.toLowerCase();
-      console.log('Secondary temperature trend value:', trend);
 
       // Remove all existing direction classes
       secondaryTempTrendIcon.classList.remove('wi-direction-up');
@@ -623,19 +591,12 @@ function setupEntityListeners() {
   // Listen for secondary humidity changes
   if (config.entities.humiditySecondary) {
     addEntityListener(config.entities.humiditySecondary, (state) => {
-      console.log('Secondary humidity state received:', state);
       if (!state) {
         console.error('Secondary humidity state is undefined');
         return;
       }
 
       const value = parseFloat(state.state);
-      console.log(
-        'Parsed secondary humidity value:',
-        value,
-        'isNaN:',
-        isNaN(value)
-      );
       if (!isNaN(value)) {
         // Update secondary humidity display
         const secondaryHumidityValue = document.getElementById(
@@ -873,21 +834,17 @@ function setupEntityListeners() {
     });
   }
 
+
+
   // Listen for wind angle changes
   if (config.entities.windAngle) {
     addEntityListener(config.entities.windAngle, (state) => {
-      console.log('Wind angle state received:', state);
-      if (!state) {
-        console.error('Wind angle state is undefined');
-        return;
-      }
+      if (!state) return;
 
       const angle = parseFloat(state.state);
       if (!isNaN(angle)) {
         // Update wind display (left side) with new angle only
         updateWindDisplay(angle, null, 'left');
-      } else {
-        console.warn('Invalid wind angle value:', state.state);
       }
     });
   }
@@ -895,18 +852,12 @@ function setupEntityListeners() {
   // Listen for wind speed changes
   if (config.entities.windSpeed) {
     addEntityListener(config.entities.windSpeed, (state) => {
-      console.log('Wind speed state received:', state);
-      if (!state) {
-        console.error('Wind speed state is undefined');
-        return;
-      }
+      if (!state) return;
 
       const speed = parseFloat(state.state);
       if (!isNaN(speed)) {
         // Update wind display (left side) with new speed only
         updateWindDisplay(null, speed, 'left');
-      } else {
-        console.warn('Invalid wind speed value:', state.state);
       }
     });
   }
@@ -914,18 +865,12 @@ function setupEntityListeners() {
   // Listen for gust angle changes
   if (config.entities.gustAngle) {
     addEntityListener(config.entities.gustAngle, (state) => {
-      console.log('Gust angle state received:', state);
-      if (!state) {
-        console.error('Gust angle state is undefined');
-        return;
-      }
+      if (!state) return;
 
       const angle = parseFloat(state.state);
       if (!isNaN(angle)) {
         // Update gust display (right side) with new angle only
         updateWindDisplay(angle, null, 'right');
-      } else {
-        console.warn('Invalid gust angle value:', state.state);
       }
     });
   }
@@ -933,18 +878,12 @@ function setupEntityListeners() {
   // Listen for gust speed changes
   if (config.entities.gustSpeed) {
     addEntityListener(config.entities.gustSpeed, (state) => {
-      console.log('Gust speed state received:', state);
-      if (!state) {
-        console.error('Gust speed state is undefined');
-        return;
-      }
+      if (!state) return;
 
       const speed = parseFloat(state.state);
       if (!isNaN(speed)) {
         // Update gust display (right side) with new speed only
         updateWindDisplay(null, speed, 'right');
-      } else {
-        console.warn('Invalid gust speed value:', state.state);
       }
     });
   }
@@ -961,10 +900,7 @@ function validateConfiguration() {
 // Update connection status in the UI
 function updateConnectionStatus(connected, message) {
   const connectionStatus = document.getElementById('connection-status');
-  if (!connectionStatus) {
-    console.error('Connection status element not found');
-    return;
-  }
+  if (!connectionStatus) return;
 
   if (connected) {
     connectionStatus.textContent = '';
@@ -990,16 +926,13 @@ async function retryConnection() {
 
     // Attempt to reconnect
     await connectToHA();
-    console.log('Successfully reconnected to Home Assistant');
-
+    
     // Set up entity listeners after successful reconnection
     setupEntityListeners();
 
     // Update connection status
     updateConnectionStatus(true);
   } catch (error) {
-    console.error('Reconnection failed:', error.message);
-
     // Show error message with specific error details
     const errorElement = document.getElementById('connection-error');
     const errorContentElement = errorElement.querySelector(
