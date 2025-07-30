@@ -13,11 +13,12 @@
 
 #conditions-center {
     position: absolute;
-    top: 36%;
+    top: 38%;
     left: 50%;
     transform: translate(-50%, -50%);
     align-items: center;
-    font-size: 8rem;
+    font-size: 7rem;
+    line-height: 7rem;
     color: #fff;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }

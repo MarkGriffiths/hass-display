@@ -1,7 +1,6 @@
 // Temperature history sparkline module
 import { config } from './config.js';
 import { loadEntityHistory, addDataPoint, updateSparkline } from './sparkline-utils.js';
-import { fetchEntityHistory } from './ha-connection.js';
 
 // Temperature history data store
 const tempHistory = {
@@ -90,10 +89,10 @@ function updateTempSparkline() {
         'maxTemp',
         'sparkline-path',
         'sparkline-points',
-        '#4CAF50',
-        2,
+        '#FFF',
+        1,
         0,  // yOffset - top half of SVG
-        40  // height - use top 40px
+        80  // height - use top 40px
     );
 }
 

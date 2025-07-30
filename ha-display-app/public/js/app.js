@@ -4,6 +4,7 @@ import { loadConfig, validateConfig } from './config-manager.js';
 import { connectToHA, addEntityListener, updateRainToday, updateRainLastHour } from './ha-connection.js';
 import { initSparkline, addTempPoint } from './temp-history.js';
 import { initPressureSparkline, addPressurePoint } from './pressure-history.js';
+import { initHumiditySparkline, addHumidityPoint } from './humidity-history.js';
 import {
   initTemperatureGauge,
   updateTemperatureGauge,
@@ -330,16 +331,12 @@ async function initApp() {
       if (connectionErrorElement) {
         connectionErrorElement.style.display = 'none';
       }
-      
-      // Initialize sparkline charts after connection is established
-      console.log('Initializing temperature history sparkline with entity:', config.entities.temperature);
+
+      // Initialize sparklines
       initSparkline();
-      
-      // Initialize pressure sparkline chart
-      if (config.entities.pressure) {
-        console.log('Initializing pressure history sparkline with entity:', config.entities.pressure);
-        initPressureSparkline();
-      }
+      initPressureSparkline();
+      initHumiditySparkline();
+
     } catch (error) {
       console.error('Error connecting to Home Assistant:', error);
     }
@@ -423,7 +420,7 @@ function setupEntityListeners() {
     if (!isNaN(tempValue)) {
       // Update temperature gauge with new value
       updateTemperatureGauge(tempValue);
-      
+
       // Add temperature data point to history sparkline
       addTempPoint(tempValue);
     } else {
@@ -477,6 +474,9 @@ function setupEntityListeners() {
     if (!isNaN(value)) {
       // Update custom humidity gauge
       updateHumidityGauge(value);
+
+      // Update the humidity sparkline
+      addHumidityPoint(value);
     } else {
       console.warn('Invalid humidity value:', state.state);
     }
@@ -841,8 +841,6 @@ function setupEntityListeners() {
     });
   }
 
-
-
   // Listen for wind angle changes
   if (config.entities.windAngle) {
     addEntityListener(config.entities.windAngle, (state) => {
@@ -894,7 +892,7 @@ function setupEntityListeners() {
       }
     });
   }
-  
+
   // Listen for pressure changes
   if (config.entities.pressure) {
     addEntityListener(config.entities.pressure, (state) => {
@@ -949,7 +947,7 @@ async function retryConnection() {
 
     // Attempt to reconnect
     await connectToHA();
-    
+
     // Set up entity listeners after successful reconnection
     setupEntityListeners();
 

@@ -153,28 +153,41 @@ export function updateSparkline(
     const xScale = svgWidth / (historyStore.data.length - 1 || 1);
     const yScale = height / range;
 
-    // Generate the path data
-    historyStore.data.forEach((point, index) => {
+    // Generate the path data with smooth curves
+    const points = historyStore.data.map((point, index) => {
         const x = index * xScale;
         const y = yOffset + height - ((point[valueKey] - min) * yScale);
+        return { x, y };
+    });
 
-        // Start the path or continue it
-        if (index === 0) {
-            pathData = `M ${x},${y}`;
-        } else {
-            pathData += ` L ${x},${y}`;
+    // Start the path
+    if (points.length > 0) {
+        pathData = `M ${points[0].x},${points[0].y}`;
+
+        // Add smooth Bezier curves between points
+        for (let i = 0; i < points.length - 1; i++) {
+            const current = points[i];
+            const next = points[i + 1];
+
+            // Calculate control points for smooth curve
+            // Use 0.8 of the distance between points for control point distance (increased for more smoothing)
+            const cpDistance = (next.x - current.x) * 0.2;
+
+            // Add cubic Bezier curve
+            pathData += ` C ${current.x + cpDistance},${current.y} ${next.x - cpDistance},${next.y} ${next.x},${next.y}`;
         }
 
         // Add a point for the latest value
-        if (index === historyStore.data.length - 1) {
+        if (points.length > 0) {
+            const lastPoint = points[points.length - 1];
             const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            circle.setAttribute('cx', x);
-            circle.setAttribute('cy', y);
+            circle.setAttribute('cx', lastPoint.x);
+            circle.setAttribute('cy', lastPoint.y);
             circle.setAttribute('r', '3');
             circle.setAttribute('fill', strokeColor);
             pointsGroup.appendChild(circle);
         }
-    });
+    }
 
     // Update the path
     path.setAttribute('d', pathData);

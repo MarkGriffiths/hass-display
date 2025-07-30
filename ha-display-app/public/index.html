@@ -207,7 +207,7 @@
 
 					<div id="rain-center">
 						<div class="rain-conditions">
-							<i class="wi wi-rain"></i>
+							<i class="wi"></i>
 						</div>
 						<div class="rain-display">
 							<i class="wi wi-raindrops"></i>
@@ -218,13 +218,17 @@
 
 					<div id="history-display">
 						<svg id="combined-sparkline" width="260" height="80" viewBox="0 0 260 80" preserveAspectRatio="none">
-							<!-- Temperature sparkline (top half) -->
-							<path id="sparkline-path" d="" fill="none" stroke="#4CAF50" stroke-width="2"></path>
-							<g id="sparkline-points"></g>
-							
-							<!-- Pressure sparkline (bottom half) -->
-							<path id="pressure-sparkline-path" d="" fill="none" stroke="#2196F3" stroke-width="2"></path>
+							<!-- Humidity sparkline -->
+							<path id="humidity-sparkline-path" d="" fill="none" stroke="#2196F3" stroke-width="2"></path>
+							<g id="humidity-sparkline-points"></g>
+
+							<!-- Pressure sparkline -->
+							<path id="pressure-sparkline-path" d="" fill="none" stroke="#4CAF50" stroke-width="2"></path>
 							<g id="pressure-sparkline-points"></g>
+
+							<!-- Temperature sparkline -->
+							<path id="sparkline-path" d="" fill="none" stroke="#FFF" stroke-width="2"></path>
+							<g id="sparkline-points"></g>
 						</svg>
 					</div>
 
@@ -320,6 +324,7 @@
 		<script src="js/sparkline-utils.js?v=20250729161628" type="module"></script>
 		<script src="js/pressure-history.js?v=20250729161628" type="module"></script>
 		<script src="js/temp-history.js?v=20250729161628" type="module"></script>
+		<script src="js/humidity-history.js?v=20250729161628" type="module"></script>
 		<script src="js/app.js?v=20250729161628" type="module"></script>
 	</body>
 </html>

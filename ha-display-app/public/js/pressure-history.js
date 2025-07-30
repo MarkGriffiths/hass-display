@@ -1,7 +1,6 @@
 // Pressure history sparkline module
 import { config } from './config.js';
 import { loadEntityHistory, addDataPoint, updateSparkline } from './sparkline-utils.js';
-import { fetchEntityHistory } from './ha-connection.js';
 
 // Pressure history data store
 const pressureHistory = {
@@ -100,9 +99,9 @@ export function updatePressureSparkline() {
         'maxPressure',
         'pressure-sparkline-path',
         'pressure-sparkline-points',
-        '#2196F3',
-        5, // Minimum range of 5 hPa
-        40, // yOffset - bottom half of SVG
-        40  // height - use bottom 40px
+        '#4CAF50',
+        0, // Minimum range of 5 hPa
+        0, // yOffset - bottom half of SVG
+        80  // height - use bottom 40px
     );
 }
