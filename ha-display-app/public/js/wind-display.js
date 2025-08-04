@@ -142,8 +142,8 @@ export function updateWindDisplay(angle, speed, position) {
 export function initWindDisplays() {
     try {
         // Check if wind display elements exist
-        const leftContainer = document.querySelector('.wind-panel.left');
-        const rightContainer = document.querySelector('.wind-panel.right');
+        const leftContainer = document.getElementById('wind-panel-left');
+        const rightContainer = document.getElementById('wind-panel-right');
         
         if (!leftContainer || !rightContainer) {
             console.error('Wind containers not found');

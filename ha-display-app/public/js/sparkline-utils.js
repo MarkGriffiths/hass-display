@@ -83,7 +83,14 @@ export function addDataPoint(value, historyStore, valueKey, minKey, maxKey, upda
         historyStore[minKey] = value - 2; // Add some padding
     }
 
-    // Limit the number of points
+    // Remove data points older than 24 hours
+    const twentyFourHoursAgo = new Date();
+    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+    
+    // Filter out data points older than 24 hours
+    historyStore.data = historyStore.data.filter(point => point.time >= twentyFourHoursAgo);
+    
+    // Also limit by max points as a safety measure
     if (historyStore.data.length > historyStore.maxPoints) {
         historyStore.data.shift(); // Remove oldest point
     }

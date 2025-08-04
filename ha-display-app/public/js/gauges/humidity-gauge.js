@@ -141,7 +141,7 @@ export function updateHumidityGauge(humidity, initializing = false) {
             if (!gaugePath) {
                 console.error('Humidity gauge arc element not found');
                 // Check if SVG exists
-                const svg = document.querySelector('.gauge-svg');
+                const svg = document.getElementById('gauge-svg');
                 if (!svg) {
                     console.error('SVG container not found!');
                 } else {
@@ -198,7 +198,7 @@ export function updateHumidityGauge(humidity, initializing = false) {
                 valueDisplay.textContent = initializing ? '--' : Math.round(humidity);
 
                 // Update the humidity icon color to match the current humidity value
-                const humidityIcon = document.querySelector('.humidity-display i.wi-humidity');
+                const humidityIcon = document.getElementById('humidity-icon');
                 if (humidityIcon) {
                     // Calculate color based on humidity value (use actual humidity, not displayHumidity)
                     const colorStops = humidityConfig.colorStops;

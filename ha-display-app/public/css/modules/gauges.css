@@ -127,11 +127,6 @@
     font-weight: bold;
 }
 
-/* Secondary temperature scale text */
-.secondary-temp-text {
-    font-size: 14px;
-}
-
 /* Gauge markers */
 .gauge-markers line {
     stroke: rgba(255, 255, 255, 0.3);

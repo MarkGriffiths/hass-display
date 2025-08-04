@@ -75,7 +75,7 @@ export function createTemperatureMarkers() {
                     console.error(`Temperature markers element not found (attempt ${retryCount}/${maxRetries})`);
 
                     // Check if SVG exists
-                    const svg = document.querySelector('.gauge-svg');
+                    const svg = document.getElementById('gauge-svg');
                     if (!svg) {
                         console.error('SVG container not found!');
                     } else {

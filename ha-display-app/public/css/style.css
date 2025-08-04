@@ -12,20 +12,20 @@
 /* Import wind display styles */
 @import url('./modules/wind-display.css');
 
-/* Import temperature display styles */
-@import url('./modules/temperature-display.css');
-
 /* Import rain display styles */
 @import url('./modules/rain-display.css');
-
-/* Import secondary display styles */
-@import url('./modules/secondary-display.css');
 
 /* Import toggle switch styles */
 @import url('./modules/toggle-switch.css');
 
 /* Import entity display styles */
 @import url('./modules/entity-display.css');
+
+/* Import outdoor display styles */
+@import url('./modules/outdoor-display.css');
+
+/* Import indoor display styles */
+@import url('./modules/indoor-display.css');
 
 /* Import layout styles */
 @import url('./modules/layout.css');
@@ -41,9 +41,6 @@
 
 /* Import test controls styles */
 @import url('./modules/test-controls.css');
-
-/* Import gauge text styles */
-@import url('./modules/gauge-text.css');
 
 /* Import connection status styles */
 @import url('./modules/connection-status.css');

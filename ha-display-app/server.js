@@ -163,6 +163,8 @@ app.get('/api/env-config', (req, res) => {
   res.json({
     haUrl: process.env.HA_URL || 'http://10.0.0.127:8123',
     accessToken: process.env.HA_ACCESS_TOKEN || '',
+    secondaryName: process.env.SECONDARY_NAME || 'Indoor',
+    tertiaryName: process.env.TERTIARY_NAME || 'Office',
     entities: {
       temperature: process.env.ENTITY_TEMP_MAIN || '',
       temperatureTrend: process.env.ENTITY_TEMP_MAIN_TREND || '',
@@ -172,7 +174,11 @@ app.get('/api/env-config', (req, res) => {
       temperatureSecondary: process.env.ENTITY_TEMP_SECONDARY || '',
       temperatureSecondaryTrend: process.env.ENTITY_TEMP_SECONDARY_TREND || '',
       humiditySecondary: process.env.ENTITY_HUMIDITY_SECONDARY || '',
-      co2: process.env.ENTITY_CO2_SECONDARY || '',
+      co2Secondary: process.env.ENTITY_CO2_SECONDARY || '',
+      temperatureTertiary: process.env.ENTITY_TEMP_TERTIARY || '',
+      temperatureTertiaryTrend: process.env.ENTITY_TEMP_TERTIARY_TREND || '',
+      humidityTertiary: process.env.ENTITY_HUMIDITY_TERTIARY || '',
+      co2Tertiary: process.env.ENTITY_CO2_TERTIARY || '',
       weather: process.env.ENTITY_WEATHER || '',
       sun: process.env.ENTITY_SUN || '',
       rain: process.env.ENTITY_RAIN || '',

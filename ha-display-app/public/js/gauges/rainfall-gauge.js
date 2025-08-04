@@ -168,9 +168,9 @@ export function updateRainfallGauge(rainTodayValue, initializing = false) {
     try {
         // Get the rainfall gauge elements
         const rainfallPath = document.getElementById('rainfall-arc');
-        const rainfallBackground = document.querySelector('.rainfall-background');
+        const rainfallBackground = document.getElementById('rainfall-background');
         const rainfallMarkers = document.getElementById('rainfall-markers');
-        const gaugeSvg = document.querySelector('.gauge-svg');
+        const gaugeSvg = document.getElementById('gauge-svg');
 
         if (!rainfallPath || !rainfallBackground || !rainfallMarkers || !gaugeSvg) {
             console.error('Rainfall gauge elements not found');

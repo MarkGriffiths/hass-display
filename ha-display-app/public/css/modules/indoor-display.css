@@ -1,0 +1,71 @@
+/* Outdoor display styles */
+
+.indoor-display {
+    .room-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        .room-name {
+            font-weight: bold;
+            color: #fff;
+            transform: rotate(-90deg);
+            transform-origin: center;
+            font-size: 0.5rem;
+        }
+
+        .value {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .unit {
+            color: #ccc;
+        }
+
+        .trend {
+            color: #aaa;
+        }
+
+        .temperature-container {
+            margin-right: 1rem;
+
+            .value {
+                font-size: 3rem;
+                line-height: 3rem;
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            }
+
+            .unit {
+                font-size: 1.5rem;
+                margin-left: 2px;
+            }
+
+            .trend {
+                font-size: 1.5rem;
+            }
+        }
+
+        .other-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+
+            .value {
+                line-height: 1rem;
+                font-size: 1rem;
+            }
+            .unit {
+                font-size: 0.8rem;
+            }
+            .trend {
+                font-size: 0.8rem;
+            }
+
+            /* .humidity {} */
+
+            /* .pressure {} */
+        }
+    }
+
+}

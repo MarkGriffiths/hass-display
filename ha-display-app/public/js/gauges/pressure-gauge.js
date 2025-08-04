@@ -146,7 +146,7 @@ export function updatePressureGauge(pressure, initializing = false) {
             if (!gaugePath) {
                 console.error('Pressure gauge arc element not found');
                 // Check if SVG exists
-                const svg = document.querySelector('.gauge-svg');
+                const svg = document.getElementById('gauge-svg');
                 if (!svg) {
                     console.error('SVG container not found!');
                 } else {
@@ -203,7 +203,7 @@ export function updatePressureGauge(pressure, initializing = false) {
                 valueDisplay.textContent = initializing ? '----' : pressure.toFixed(0);
 
                 // Update the pressure icon color to match the current pressure value
-                const pressureIcon = document.querySelector('.pressure-display i.wi-barometer');
+                const pressureIcon = document.getElementById('pressure-icon');
                 if (pressureIcon) {
                     // Calculate color based on pressure value
                     const colorStops = pressureConfig.colorStops;
