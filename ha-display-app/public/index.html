@@ -1,357 +1,584 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Home Assistant Display</title>
-		<!-- Import Inter font from node_modules -->
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-		<link rel="stylesheet" href="css/style.css" />
-		<link rel="stylesheet" href="css/weather-icons.min.css" />
-		<link rel="stylesheet" href="css/weather-icons-wind.min.css" />
-	</head>
-	<body>
-		<div class="container">
-			<div class="round-display">
-				<!-- Custom circular temperature gauge -->
-				<div class="gauges-wrapper">
-					<!-- Gauge arc background -->
-					<svg id="gauge-svg" class="gauge-svg" viewBox="0 0 720 720">
-						<!-- SVG Gradient Definitions -->
-						<defs>
-							<!-- Temperature gradient (main arc) - using true conic-like gradient -->
-							<linearGradient
-								id="temperature-gradient"
-								gradientUnits="userSpaceOnUse"
-								x1="60"
-								y1="360"
-								x2="660"
-								y2="360"
-							>
-								<stop offset="0%" stop-color="#00a2ff" />
-								<!-- Cold (blue) -->
-								<stop offset="25%" stop-color="#4caf50" />
-								<!-- Cool (green) -->
-								<stop offset="50%" stop-color="#8BC34A" />
-								<!-- Mild (light green) -->
-								<stop offset="75%" stop-color="#FFC107" />
-								<!-- Warm (yellow) -->
-								<stop offset="100%" stop-color="#f44336" />
-								<!-- Hot (red) -->
-							</linearGradient>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home Assistant Display</title>
+    <!-- Import Inter font from node_modules -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/weather-icons.min.css" />
+    <link rel="stylesheet" href="css/weather-icons-wind.min.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="round-display">
+        <!-- Custom circular temperature gauge -->
+        <div class="gauges-wrapper">
+          <!-- Gauge arc background -->
+          <svg id="gauge-svg" class="gauge-svg" viewBox="0 0 720 720">
+            <!-- SVG Gradient Definitions -->
+            <defs>
+              <!-- Temperature gradient (main arc) - using true conic-like gradient -->
+              <linearGradient
+                id="temperature-gradient"
+                gradientUnits="userSpaceOnUse"
+                x1="60"
+                y1="360"
+                x2="660"
+                y2="360"
+              >
+                <stop offset="0%" stop-color="#00a2ff" />
+                <!-- Cold (blue) -->
+                <stop offset="25%" stop-color="#4caf50" />
+                <!-- Cool (green) -->
+                <stop offset="50%" stop-color="#8BC34A" />
+                <!-- Mild (light green) -->
+                <stop offset="75%" stop-color="#FFC107" />
+                <!-- Warm (yellow) -->
+                <stop offset="100%" stop-color="#f44336" />
+                <!-- Hot (red) -->
+              </linearGradient>
 
-							<!-- Secondary temperature gradient (bottom arc) - using true conic-like gradient -->
-							<linearGradient
-								id="secondary-temp-gradient"
-								gradientUnits="userSpaceOnUse"
-								x1="60"
-								y1="360"
-								x2="660"
-								y2="360"
-							>
-								<stop offset="0%" stop-color="#0077FF" />
-								<!-- Cold (5°C - blue) -->
-								<stop offset="14%" stop-color="#2196F3" />
-								<!-- Cool (10°C - light blue) -->
-								<stop offset="28%" stop-color="#4caf50" />
-								<!-- Cool (15°C - green) -->
-								<stop offset="43%" stop-color="#8BC34A" />
-								<!-- Mild (20°C - light green) -->
-								<stop offset="57%" stop-color="#CDDC39" />
-								<!-- Comfortable (25°C - lime) -->
-								<stop offset="71%" stop-color="#FFC107" />
-								<!-- Warm (30°C - yellow) -->
-								<stop offset="86%" stop-color="#FF9800" />
-								<!-- Hot (35°C - orange) -->
-								<stop offset="100%" stop-color="#f44336" />
-								<!-- Very hot (40°C - red) -->
-							</linearGradient>
+              <!-- Secondary temperature gradient (bottom arc) - using true conic-like gradient -->
+              <linearGradient
+                id="secondary-temp-gradient"
+                gradientUnits="userSpaceOnUse"
+                x1="60"
+                y1="360"
+                x2="660"
+                y2="360"
+              >
+                <stop offset="0%" stop-color="#0077FF" />
+                <!-- Cold (5°C - blue) -->
+                <stop offset="14%" stop-color="#2196F3" />
+                <!-- Cool (10°C - light blue) -->
+                <stop offset="28%" stop-color="#4caf50" />
+                <!-- Cool (15°C - green) -->
+                <stop offset="43%" stop-color="#8BC34A" />
+                <!-- Mild (20°C - light green) -->
+                <stop offset="57%" stop-color="#CDDC39" />
+                <!-- Comfortable (25°C - lime) -->
+                <stop offset="71%" stop-color="#FFC107" />
+                <!-- Warm (30°C - yellow) -->
+                <stop offset="86%" stop-color="#FF9800" />
+                <!-- Hot (35°C - orange) -->
+                <stop offset="100%" stop-color="#f44336" />
+                <!-- Very hot (40°C - red) -->
+              </linearGradient>
 
-							<!-- Humidity gradient (inner arc) - using true conic-like gradient -->
-							<linearGradient
-								id="humidity-gradient"
-								gradientUnits="userSpaceOnUse"
-								x1="110"
-								y1="360"
-								x2="610"
-								y2="360"
-							>
-								<stop offset="0%" stop-color="#FFEB3B" />
-								<!-- Very dry (yellow) -->
-								<stop offset="25%" stop-color="#8BC34A" />
-								<!-- Dry (light green) -->
-								<stop offset="50%" stop-color="#4CAF50" />
-								<!-- Comfortable (green) -->
-								<stop offset="75%" stop-color="#03A9F4" />
-								<!-- Humid (light blue) -->
-								<stop offset="100%" stop-color="#0D47A1" />
-								<!-- Very humid (deep blue) -->
-							</linearGradient>
+              <!-- Humidity gradient (inner arc) - using true conic-like gradient -->
+              <linearGradient
+                id="humidity-gradient"
+                gradientUnits="userSpaceOnUse"
+                x1="110"
+                y1="360"
+                x2="610"
+                y2="360"
+              >
+                <stop offset="0%" stop-color="#FFEB3B" />
+                <!-- Very dry (yellow) -->
+                <stop offset="25%" stop-color="#8BC34A" />
+                <!-- Dry (light green) -->
+                <stop offset="50%" stop-color="#4CAF50" />
+                <!-- Comfortable (green) -->
+                <stop offset="75%" stop-color="#03A9F4" />
+                <!-- Humid (light blue) -->
+                <stop offset="100%" stop-color="#0D47A1" />
+                <!-- Very humid (deep blue) -->
+              </linearGradient>
 
-							<!-- Pressure gradient (innermost arc) - using true conic-like gradient -->
-							<linearGradient
-								id="pressure-gradient"
-								gradientUnits="userSpaceOnUse"
-								x1="137"
-								y1="360"
-								x2="583"
-								y2="360"
-							>
-								<stop offset="0%" stop-color="#9C27B0" />
-								<!-- Low pressure (purple) -->
-								<stop offset="50%" stop-color="#2196F3" />
-								<!-- Normal pressure (blue) -->
-								<stop offset="100%" stop-color="#FF9800" />
-								<!-- High pressure (orange) -->
-							</linearGradient>
+              <!-- Pressure gradient (innermost arc) - using true conic-like gradient -->
+              <linearGradient
+                id="pressure-gradient"
+                gradientUnits="userSpaceOnUse"
+                x1="137"
+                y1="360"
+                x2="583"
+                y2="360"
+              >
+                <stop offset="0%" stop-color="#9C27B0" />
+                <!-- Low pressure (purple) -->
+                <stop offset="50%" stop-color="#2196F3" />
+                <!-- Normal pressure (blue) -->
+                <stop offset="100%" stop-color="#FF9800" />
+                <!-- High pressure (orange) -->
+              </linearGradient>
 
-							<!-- Rainfall gradient (innermost arc) - using blue gradient for rainfall -->
-							<linearGradient
-								id="rainfall-gradient"
-								gradientUnits="userSpaceOnUse"
-								x1="165"
-								y1="360"
-								x2="555"
-								y2="360"
-							>
-								<stop offset="0%" stop-color="#E3F2FD" />
-								<!-- Very light blue (low rainfall) -->
-								<stop offset="20%" stop-color="#90CAF9" />
-								<!-- Light blue -->
-								<stop offset="40%" stop-color="#42A5F5" />
-								<!-- Medium blue -->
-								<stop offset="60%" stop-color="#1E88E5" />
-								<!-- Blue -->
-								<stop offset="80%" stop-color="#1565C0" />
-								<!-- Dark blue -->
-								<stop offset="100%" stop-color="#0D47A1" />
-								<!-- Very dark blue (high rainfall) -->
-							</linearGradient>
-						</defs>
-						<!-- Main temperature background arc - will be set by JavaScript -->
-						<path id="temperature-background" class="gauge-background" d="" />
-						<!-- Temperature arc - will be set by JavaScript -->
-						<path class="gauge-arc" id="temperature-arc" d="" />
-						<!-- Humidity background arc (inner arc) - smaller radius (250px) -->
-						<!-- Humidity background arc - will be set by JavaScript -->
-						<path id="humidity-background" class="humidity-background" d="" />
-						<!-- Humidity arc - will be set by JavaScript -->
-						<path class="humidity-arc" id="humidity-arc" d="" />
-						<!-- Pressure background arc (innermost arc) - even smaller radius (200px) -->
-						<!-- Pressure background arc - will be set by JavaScript -->
-						<path id="pressure-background" class="pressure-background" d="" />
-						<!-- Pressure arc - will be set by JavaScript -->
-						<path class="pressure-arc" id="pressure-arc" d="" />
-						<!-- Rainfall background arc (innermost arc) - even smaller radius (150px) -->
-						<!-- Rainfall background arc - will be set by JavaScript -->
-						<path id="rainfall-background" class="rainfall-background" d="" />
-						<!-- Rainfall arc - will be set by JavaScript -->
-						<path class="rainfall-arc" id="rainfall-arc" d="" />
-						<!-- Secondary Temperature background arc (bottom arc) - will be set by JavaScript -->
-						<path id="secondary-temp-background" class="secondary-temp-background" d="" />
-						<!-- Secondary Temperature arc - will be set by JavaScript -->
-						<path class="secondary-temp-arc" id="secondary-temp-arc" d="" />
-						<!-- Temperature Scale markers -->
-						<g class="gauge-markers" id="temperature-markers">
-							<!-- Temperature markers will be generated by JavaScript -->
-						</g>
-						<!-- Secondary Temperature Scale markers -->
-						<g class="gauge-markers" id="secondary-temp-markers">
-							<!-- Secondary temperature markers will be generated by JavaScript -->
-						</g>
-						<!-- Humidity Scale markers -->
-						<g class="gauge-markers" id="humidity-markers">
-							<!-- Humidity markers will be generated by JavaScript -->
-						</g>
-						<!-- Pressure Scale markers -->
-						<g class="gauge-markers" id="pressure-markers">
-							<!-- Pressure markers will be generated by JavaScript -->
-						</g>
-						<!-- Rainfall Scale markers -->
-						<g class="gauge-markers" id="rainfall-markers">
-							<!-- Rainfall markers will be generated by JavaScript -->
-						</g>
-					</svg>
+              <!-- Rainfall gradient (innermost arc) - using blue gradient for rainfall -->
+              <linearGradient
+                id="rainfall-gradient"
+                gradientUnits="userSpaceOnUse"
+                x1="165"
+                y1="360"
+                x2="555"
+                y2="360"
+              >
+                <stop offset="0%" stop-color="#E3F2FD" />
+                <!-- Very light blue (low rainfall) -->
+                <stop offset="20%" stop-color="#90CAF9" />
+                <!-- Light blue -->
+                <stop offset="40%" stop-color="#42A5F5" />
+                <!-- Medium blue -->
+                <stop offset="60%" stop-color="#1E88E5" />
+                <!-- Blue -->
+                <stop offset="80%" stop-color="#1565C0" />
+                <!-- Dark blue -->
+                <stop offset="100%" stop-color="#0D47A1" />
+                <!-- Very dark blue (high rainfall) -->
+              </linearGradient>
+            </defs>
+            <!-- Main temperature background arc - will be set by JavaScript -->
+            <path id="temperature-background" class="gauge-background" d="" />
+            <!-- Temperature arc - will be set by JavaScript -->
+            <path class="gauge-arc" id="temperature-arc" d="" />
+            <!-- Humidity background arc (inner arc) - smaller radius (250px) -->
+            <!-- Humidity background arc - will be set by JavaScript -->
+            <path id="humidity-background" class="humidity-background" d="" />
+            <!-- Humidity arc - will be set by JavaScript -->
+            <path class="humidity-arc" id="humidity-arc" d="" />
+            <!-- Pressure background arc (innermost arc) - even smaller radius (200px) -->
+            <!-- Pressure background arc - will be set by JavaScript -->
+            <path id="pressure-background" class="pressure-background" d="" />
+            <!-- Pressure arc - will be set by JavaScript -->
+            <path class="pressure-arc" id="pressure-arc" d="" />
+            <!-- Rainfall background arc (innermost arc) - even smaller radius (150px) -->
+            <!-- Rainfall background arc - will be set by JavaScript -->
+            <path id="rainfall-background" class="rainfall-background" d="" />
+            <!-- Rainfall arc - will be set by JavaScript -->
+            <path class="rainfall-arc" id="rainfall-arc" d="" />
+            <!-- Secondary Temperature background arc (bottom arc) - will be set by JavaScript -->
+            <path
+              id="secondary-temp-background"
+              class="secondary-temp-background"
+              d=""
+            />
+            <!-- Secondary Temperature arc - will be set by JavaScript -->
+            <path class="secondary-temp-arc" id="secondary-temp-arc" d="" />
+            <!-- Temperature Scale markers -->
+            <g class="gauge-markers" id="temperature-markers">
+              <!-- Temperature markers will be generated by JavaScript -->
+            </g>
+            <!-- Secondary Temperature Scale markers -->
+            <g class="gauge-markers" id="secondary-temp-markers">
+              <!-- Secondary temperature markers will be generated by JavaScript -->
+            </g>
+            <!-- Humidity Scale markers -->
+            <g class="gauge-markers" id="humidity-markers">
+              <!-- Humidity markers will be generated by JavaScript -->
+            </g>
+            <!-- Pressure Scale markers -->
+            <g class="gauge-markers" id="pressure-markers">
+              <!-- Pressure markers will be generated by JavaScript -->
+            </g>
+            <!-- Rainfall Scale markers -->
+            <g class="gauge-markers" id="rainfall-markers">
+              <!-- Rainfall markers will be generated by JavaScript -->
+            </g>
+          </svg>
 
-					<div id="wind-panel-left" class="wind-panel left">
-						<div class="wind-direction">
-							<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 30 30" style="transform: rotate(0deg);"><defs><filter id="b" width="175%" height="150%" x="-37.5%" y="-25%" filterUnits="objectBoundingBox"><feOffset in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="1.5"/><feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.552420236 0"/></filter><path id="a" d="M9.00816326,22.6082626 L14.7626378,5.19918849 C14.7779831,5.06639616 14.8547094,5 14.9928168,5 C15.1309242,5 15.2076505,5.06639616 15.2229958,5.19918849 L20.9621251,22.6082626 C21.0235062,22.7543342 21.0081609,22.8605681 20.9314346,22.9402435 C20.8547083,23.0199188 20.7319462,23.0199188 20.5631482,22.9402435 L15.2383411,21.2139432 C15.0848884,21.1608263 14.9314358,21.1608263 14.7933284,21.2139432 L9.42248543,22.9402435 C9.26903278,23.0199188 9.16161592,23.0199188 9.10023485,22.9402435 C9.03885379,22.8605681 8.97747273,22.741055 9.00816326,22.6082626 Z"/></defs><g fill="none"><path fill="#FFF" d="M15.0133215,0 C17.0381883,0 18.9831261,0.39964476 20.8348135,1.18561279 C22.6865009,1.97158082 24.2717584,3.05062167 25.6172291,4.38277087 C26.9626998,5.71492007 28.0284192,7.31349911 28.8143872,9.17850799 C29.6003552,11.0435169 30,12.9751332 30,15.026643 C30,17.0515098 29.6003552,18.9964476 28.8143872,20.848135 C28.0284192,22.6998224 26.9493783,24.2984014 25.6172291,25.6305506 C24.2850799,26.9626998 22.6865009,28.0284192 20.8348135,28.8143872 C18.9831261,29.6003552 17.0515098,30 15.0133215,30 C12.9751332,30 11.0168739,29.6003552 9.1651865,28.8143872 C7.31349911,28.0284192 5.71492007,26.9493783 4.36944938,25.6172291 C3.02397869,24.2850799 1.97158082,22.6865009 1.1722913,20.848135 C0.373001776,19.0097691 0,17.0648313 0,15.026643 C0,12.3090586 0.679396092,9.79129663 2.02486679,7.48667851 C3.37033748,5.18206039 5.19538188,3.35701599 7.5,2.01154529 C9.80461812,0.6660746 12.3090586,0 15.0133215,0 Z M15,3 C12.8430034,3 10.8361775,3.53302961 9.00682594,4.61275626 C7.1774744,5.69248292 5.70307167,7.15489749 4.6109215,9 C3.51877133,10.8451025 3,12.8542141 3,15.0136674 C3,18.2528474 4.17406143,21.0683371 6.53583618,23.4601367 C8.89761092,25.8246014 11.7098976,27 15,27 C17.1569966,27 19.1638225,26.4669704 20.9931741,25.3872437 C22.8225256,24.3075171 24.2969283,22.8587699 25.3754266,21.0136674 C26.4539249,19.1685649 27,17.1731207 27,15.0136674 C27,12.8542141 26.4539249,10.8451025 25.3754266,9 C24.2969283,7.15489749 22.8361775,5.69248292 20.9931741,4.61275626 C19.1501706,3.53302961 17.1569966,3 15,3 Z" opacity=".3"/><use xlink:href="#a" fill="#000" filter="url(#b)"/><use xlink:href="#a" fill="#FFF" fill-rule="evenodd"/></g></svg>
-						</div>
-						<div class="wind-info">
-							<div class="label">
-								Wind
-							</div>
-							<div class="wind-beaufort">
-								<i class="wi"></i>
-							</div>
-						</div>
-					</div>
+          <div id="wind-panel-left" class="wind-panel left">
+            <div class="wind-direction">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 30 30"
+                style="transform: rotate(0deg)"
+              >
+                <defs>
+                  <filter
+                    id="b"
+                    width="175%"
+                    height="150%"
+                    x="-37.5%"
+                    y="-25%"
+                    filterUnits="objectBoundingBox"
+                  >
+                    <feOffset in="SourceAlpha" result="shadowOffsetOuter1" />
+                    <feGaussianBlur
+                      in="shadowOffsetOuter1"
+                      result="shadowBlurOuter1"
+                      stdDeviation="1.5"
+                    />
+                    <feColorMatrix
+                      in="shadowBlurOuter1"
+                      values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.552420236 0"
+                    />
+                  </filter>
+                  <path
+                    id="a"
+                    d="M9.00816326,22.6082626 L14.7626378,5.19918849 C14.7779831,5.06639616 14.8547094,5 14.9928168,5 C15.1309242,5 15.2076505,5.06639616 15.2229958,5.19918849 L20.9621251,22.6082626 C21.0235062,22.7543342 21.0081609,22.8605681 20.9314346,22.9402435 C20.8547083,23.0199188 20.7319462,23.0199188 20.5631482,22.9402435 L15.2383411,21.2139432 C15.0848884,21.1608263 14.9314358,21.1608263 14.7933284,21.2139432 L9.42248543,22.9402435 C9.26903278,23.0199188 9.16161592,23.0199188 9.10023485,22.9402435 C9.03885379,22.8605681 8.97747273,22.741055 9.00816326,22.6082626 Z"
+                  />
+                </defs>
+                <g fill="none">
+                  <path
+                    fill="#FFF"
+                    d="M15.0133215,0 C17.0381883,0 18.9831261,0.39964476 20.8348135,1.18561279 C22.6865009,1.97158082 24.2717584,3.05062167 25.6172291,4.38277087 C26.9626998,5.71492007 28.0284192,7.31349911 28.8143872,9.17850799 C29.6003552,11.0435169 30,12.9751332 30,15.026643 C30,17.0515098 29.6003552,18.9964476 28.8143872,20.848135 C28.0284192,22.6998224 26.9493783,24.2984014 25.6172291,25.6305506 C24.2850799,26.9626998 22.6865009,28.0284192 20.8348135,28.8143872 C18.9831261,29.6003552 17.0515098,30 15.0133215,30 C12.9751332,30 11.0168739,29.6003552 9.1651865,28.8143872 C7.31349911,28.0284192 5.71492007,26.9493783 4.36944938,25.6172291 C3.02397869,24.2850799 1.97158082,22.6865009 1.1722913,20.848135 C0.373001776,19.0097691 0,17.0648313 0,15.026643 C0,12.3090586 0.679396092,9.79129663 2.02486679,7.48667851 C3.37033748,5.18206039 5.19538188,3.35701599 7.5,2.01154529 C9.80461812,0.6660746 12.3090586,0 15.0133215,0 Z M15,3 C12.8430034,3 10.8361775,3.53302961 9.00682594,4.61275626 C7.1774744,5.69248292 5.70307167,7.15489749 4.6109215,9 C3.51877133,10.8451025 3,12.8542141 3,15.0136674 C3,18.2528474 4.17406143,21.0683371 6.53583618,23.4601367 C8.89761092,25.8246014 11.7098976,27 15,27 C17.1569966,27 19.1638225,26.4669704 20.9931741,25.3872437 C22.8225256,24.3075171 24.2969283,22.8587699 25.3754266,21.0136674 C26.4539249,19.1685649 27,17.1731207 27,15.0136674 C27,12.8542141 26.4539249,10.8451025 25.3754266,9 C24.2969283,7.15489749 22.8361775,5.69248292 20.9931741,4.61275626 C19.1501706,3.53302961 17.1569966,3 15,3 Z"
+                    opacity=".3"
+                  />
+                  <use xlink:href="#a" fill="#000" filter="url(#b)" />
+                  <use xlink:href="#a" fill="#FFF" fill-rule="evenodd" />
+                </g>
+              </svg>
+            </div>
+            <div class="wind-info">
+              <div class="label">Wind</div>
+              <div class="wind-beaufort">
+                <i class="wi"></i>
+              </div>
+            </div>
+          </div>
 
-					<div id="wind-panel-right" class="wind-panel right">
-						<div class="wind-direction">
-							<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 30 30" style="transform: rotate(0deg);"><defs><filter id="b" width="175%" height="150%" x="-37.5%" y="-25%" filterUnits="objectBoundingBox"><feOffset in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="1.5"/><feColorMatrix in="shadowBlurOuter1" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.552420236 0"/></filter><path id="a" d="M9.00816326,22.6082626 L14.7626378,5.19918849 C14.7779831,5.06639616 14.8547094,5 14.9928168,5 C15.1309242,5 15.2076505,5.06639616 15.2229958,5.19918849 L20.9621251,22.6082626 C21.0235062,22.7543342 21.0081609,22.8605681 20.9314346,22.9402435 C20.8547083,23.0199188 20.7319462,23.0199188 20.5631482,22.9402435 L15.2383411,21.2139432 C15.0848884,21.1608263 14.9314358,21.1608263 14.7933284,21.2139432 L9.42248543,22.9402435 C9.26903278,23.0199188 9.16161592,23.0199188 9.10023485,22.9402435 C9.03885379,22.8605681 8.97747273,22.741055 9.00816326,22.6082626 Z"/></defs><g fill="none"><path fill="#FFF" d="M15.0133215,0 C17.0381883,0 18.9831261,0.39964476 20.8348135,1.18561279 C22.6865009,1.97158082 24.2717584,3.05062167 25.6172291,4.38277087 C26.9626998,5.71492007 28.0284192,7.31349911 28.8143872,9.17850799 C29.6003552,11.0435169 30,12.9751332 30,15.026643 C30,17.0515098 29.6003552,18.9964476 28.8143872,20.848135 C28.0284192,22.6998224 26.9493783,24.2984014 25.6172291,25.6305506 C24.2850799,26.9626998 22.6865009,28.0284192 20.8348135,28.8143872 C18.9831261,29.6003552 17.0515098,30 15.0133215,30 C12.9751332,30 11.0168739,29.6003552 9.1651865,28.8143872 C7.31349911,28.0284192 5.71492007,26.9493783 4.36944938,25.6172291 C3.02397869,24.2850799 1.97158082,22.6865009 1.1722913,20.848135 C0.373001776,19.0097691 0,17.0648313 0,15.026643 C0,12.3090586 0.679396092,9.79129663 2.02486679,7.48667851 C3.37033748,5.18206039 5.19538188,3.35701599 7.5,2.01154529 C9.80461812,0.6660746 12.3090586,0 15.0133215,0 Z M15,3 C12.8430034,3 10.8361775,3.53302961 9.00682594,4.61275626 C7.1774744,5.69248292 5.70307167,7.15489749 4.6109215,9 C3.51877133,10.8451025 3,12.8542141 3,15.0136674 C3,18.2528474 4.17406143,21.0683371 6.53583618,23.4601367 C8.89761092,25.8246014 11.7098976,27 15,27 C17.1569966,27 19.1638225,26.4669704 20.9931741,25.3872437 C22.8225256,24.3075171 24.2969283,22.8587699 25.3754266,21.0136674 C26.4539249,19.1685649 27,17.1731207 27,15.0136674 C27,12.8542141 26.4539249,10.8451025 25.3754266,9 C24.2969283,7.15489749 22.8361775,5.69248292 20.9931741,4.61275626 C19.1501706,3.53302961 17.1569966,3 15,3 Z" opacity=".3"/><use xlink:href="#a" fill="#000" filter="url(#b)"/><use xlink:href="#a" fill="#FFF" fill-rule="evenodd"/></g></svg>
-						</div>
-						<div class="wind-info">
-							<div class="label">
-								Gust
-							</div>
-							<div class="wind-beaufort">
-								<i class="wi"></i>
-							</div>
-						</div>
-					</div>
+          <div id="wind-panel-right" class="wind-panel right">
+            <div class="wind-direction">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 30 30"
+                style="transform: rotate(0deg)"
+              >
+                <defs>
+                  <filter
+                    id="b"
+                    width="175%"
+                    height="150%"
+                    x="-37.5%"
+                    y="-25%"
+                    filterUnits="objectBoundingBox"
+                  >
+                    <feOffset in="SourceAlpha" result="shadowOffsetOuter1" />
+                    <feGaussianBlur
+                      in="shadowOffsetOuter1"
+                      result="shadowBlurOuter1"
+                      stdDeviation="1.5"
+                    />
+                    <feColorMatrix
+                      in="shadowBlurOuter1"
+                      values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.552420236 0"
+                    />
+                  </filter>
+                  <path
+                    id="a"
+                    d="M9.00816326,22.6082626 L14.7626378,5.19918849 C14.7779831,5.06639616 14.8547094,5 14.9928168,5 C15.1309242,5 15.2076505,5.06639616 15.2229958,5.19918849 L20.9621251,22.6082626 C21.0235062,22.7543342 21.0081609,22.8605681 20.9314346,22.9402435 C20.8547083,23.0199188 20.7319462,23.0199188 20.5631482,22.9402435 L15.2383411,21.2139432 C15.0848884,21.1608263 14.9314358,21.1608263 14.7933284,21.2139432 L9.42248543,22.9402435 C9.26903278,23.0199188 9.16161592,23.0199188 9.10023485,22.9402435 C9.03885379,22.8605681 8.97747273,22.741055 9.00816326,22.6082626 Z"
+                  />
+                </defs>
+                <g fill="none">
+                  <path
+                    fill="#FFF"
+                    d="M15.0133215,0 C17.0381883,0 18.9831261,0.39964476 20.8348135,1.18561279 C22.6865009,1.97158082 24.2717584,3.05062167 25.6172291,4.38277087 C26.9626998,5.71492007 28.0284192,7.31349911 28.8143872,9.17850799 C29.6003552,11.0435169 30,12.9751332 30,15.026643 C30,17.0515098 29.6003552,18.9964476 28.8143872,20.848135 C28.0284192,22.6998224 26.9493783,24.2984014 25.6172291,25.6305506 C24.2850799,26.9626998 22.6865009,28.0284192 20.8348135,28.8143872 C18.9831261,29.6003552 17.0515098,30 15.0133215,30 C12.9751332,30 11.0168739,29.6003552 9.1651865,28.8143872 C7.31349911,28.0284192 5.71492007,26.9493783 4.36944938,25.6172291 C3.02397869,24.2850799 1.97158082,22.6865009 1.1722913,20.848135 C0.373001776,19.0097691 0,17.0648313 0,15.026643 C0,12.3090586 0.679396092,9.79129663 2.02486679,7.48667851 C3.37033748,5.18206039 5.19538188,3.35701599 7.5,2.01154529 C9.80461812,0.6660746 12.3090586,0 15.0133215,0 Z M15,3 C12.8430034,3 10.8361775,3.53302961 9.00682594,4.61275626 C7.1774744,5.69248292 5.70307167,7.15489749 4.6109215,9 C3.51877133,10.8451025 3,12.8542141 3,15.0136674 C3,18.2528474 4.17406143,21.0683371 6.53583618,23.4601367 C8.89761092,25.8246014 11.7098976,27 15,27 C17.1569966,27 19.1638225,26.4669704 20.9931741,25.3872437 C22.8225256,24.3075171 24.2969283,22.8587699 25.3754266,21.0136674 C26.4539249,19.1685649 27,17.1731207 27,15.0136674 C27,12.8542141 26.4539249,10.8451025 25.3754266,9 C24.2969283,7.15489749 22.8361775,5.69248292 20.9931741,4.61275626 C19.1501706,3.53302961 17.1569966,3 15,3 Z"
+                    opacity=".3"
+                  />
+                  <use xlink:href="#a" fill="#000" filter="url(#b)" />
+                  <use xlink:href="#a" fill="#FFF" fill-rule="evenodd" />
+                </g>
+              </svg>
+            </div>
+            <div class="wind-info">
+              <div class="label">Gust</div>
+              <div class="wind-beaufort">
+                <i class="wi"></i>
+              </div>
+            </div>
+          </div>
 
-					<div id="conditions-center">
-						<i class="wi"></i>
-					</div>
+          <div id="conditions-center">
+            <i id="weather-icon" class="wi wi-day-sunny"></i>
+          </div>
 
-					<div id="rain-center">
-						<div class="rain-conditions">
-							<i id="rain-conditions-icon" class="wi"></i>
-						</div>
-						<div class="rain-display">
-							<i class="wi wi-raindrops"></i>
-							<span id="rain-last-hour-value" class="rain-value-bold">--</span>
-							<span class="rain-unit">mm/hr</span>
-						</div>
-					</div>
+          <div id="rain-center">
+            <div class="rain-conditions">
+              <i id="rain-conditions-icon" class="wi wi-rain"></i>
+            </div>
+            <div class="rain-display">
+              <i class="wi wi-raindrops"></i>
+              <span id="rain-last-hour-value" class="rain-value-bold">--</span>
+              <span class="rain-unit">mm/hr</span>
+            </div>
+          </div>
 
-					<div id="history-display">
-						<svg id="combined-sparkline" width="260" height="80" viewBox="0 0 260 80" preserveAspectRatio="none">
-							<!-- Humidity sparkline -->
-							<path id="humidity-sparkline-path" d="" fill="none" stroke="#2196F3" stroke-width="2"></path>
-							<g id="humidity-sparkline-points"></g>
+          <div id="history-display">
+            <svg
+              id="combined-sparkline"
+              width="260"
+              height="80"
+              viewBox="0 0 260 80"
+              preserveAspectRatio="none"
+            >
+              <!-- Humidity sparkline -->
+              <path
+                id="humidity-sparkline-path"
+                d=""
+                fill="none"
+                stroke="#2196F3"
+                stroke-width="2"
+              ></path>
+              <g id="humidity-sparkline-points"></g>
 
-							<!-- Pressure sparkline -->
-							<path id="pressure-sparkline-path" d="" fill="none" stroke="#4CAF50" stroke-width="2"></path>
-							<g id="pressure-sparkline-points"></g>
+              <!-- Pressure sparkline -->
+              <path
+                id="pressure-sparkline-path"
+                d=""
+                fill="none"
+                stroke="#4CAF50"
+                stroke-width="2"
+              ></path>
+              <g id="pressure-sparkline-points"></g>
 
-							<!-- Temperature sparkline -->
-							<path id="sparkline-path" d="" fill="none" stroke="#FFF" stroke-width="2"></path>
-							<g id="sparkline-points"></g>
-						</svg>
-					</div>
+              <!-- Temperature sparkline -->
+              <path
+                id="sparkline-path"
+                d=""
+                fill="none"
+                stroke="#FFF"
+                stroke-width="2"
+              ></path>
+              <g id="sparkline-points"></g>
+            </svg>
+          </div>
 
-					<!-- Center content -->
-					<div class="gauge-center">
-						<div class="outdoor-display">
-							<div class="temperature-container">
-								<span class="trend"><i id="temperature-trend-icon" class="wi wi-direction-up"></i></span>
-								<span class="value" id="temperature-value">--</span>
-								<span class="unit">°C</span>
-							</div>
-							<div class="other-container">
-								<div class="humidity">
-									<i id="humidity-icon" class="wi wi-humidity"></i>
-									<span id="humidity-value" class="value">--</span
-									><span class="unit">%</span>
-								</div>
-								<div class="pressure">
-									<i id="pressure-icon" class="wi wi-barometer"></i>
-									<span class="value" id="pressure-value">--</span>
-									<span class="unit">hPa</span>
-									<span class="trend"><i id="pressure-trend-icon" class="wi wi-direction-up"></i></span>
-								</div>
-							</div>
-						</div>
-						<div class="indoor-display">
-							<div class="room-container">
-								<div class="room-name" id="secondary-room-name">--</div>
-								<div class="temperature-container">
-										<span class="trend"><i id="secondary-temperature-trend-icon" class="wi wi-direction-up"></i></span>
-										<span class="value" id="secondary-temp-value"
-											>--</span
-										><span class="unit">°C</span>
-								</div>
-								<div class="other-container">
-									<div class="humidity">
-										<i id="secondary-humidity-icon" class="wi wi-humidity"></i>
-										<span id="secondary-humidity-value" class="value">--</span
-										><span class="unit">%</span>
-									</div>
-									<div class="co2">
-										<svg id="secondary-co2-icon" style="height: 0.8rem; width: auto; margin-right: 3px;" viewBox="0 0 22 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-											<g transform="translate(-4, -7)" fill="currentColor" fill-rule="nonzero">
-												<path d="M14.3,7.39 C15.68,7.39 16.91,7.82 17.99,8.67 C19.07,9.52 19.77,10.62 20.09,11.96 L20.42,11.96 C21.32,11.96 22.15,12.18 22.91,12.61 C23.67,13.04 24.28,13.64 24.72,14.4 C25.16,15.16 25.39,15.98 25.39,16.88 C25.39,17.76 25.18,18.58 24.76,19.33 C24.34,20.08 23.76,20.68 23.03,21.13 C22.3,21.58 21.49,21.82 20.62,21.85 L9.41,21.85 C8.07,21.79 6.94,21.28 6.01,20.32 C5.08,19.37 4.61,18.22 4.61,16.88 C4.61,15.73 4.97,14.71 5.69,13.81 C6.41,12.91 7.32,12.33 8.43,12.08 C8.74,10.71 9.45,9.59 10.54,8.71 C11.63,7.83 12.89,7.39 14.3,7.39 Z M20.4488622,16.7826726 C19.6832379,16.7826726 19.1363635,17.1704563 19.1363635,17.8565352 L20.0113626,17.8565352 C20.0113626,17.6079559 20.1803966,17.498581 20.438919,17.498581 C20.6775552,17.498581 20.8764186,17.5980127 20.8764186,17.7968761 C20.8764186,17.9460237 20.7851038,18.0495139 20.6495809,18.1580771 L19.225852,19.2187498 L19.225852,19.8749992 L21.7414746,19.8749992 L21.7414746,19.1292612 L20.5383508,19.1292612 L20.5383508,19.0994317 L20.8465891,18.9303978 C21.4630658,18.5923299 21.7414746,18.2443189 21.7414746,17.786933 C21.7414746,17.2301153 21.244316,16.7826726 20.4488622,16.7826726 Z M10.7642019,13.8394936 C9.39204413,13.8394936 8.30823834,14.7542654 8.30823834,16.4545479 C8.30823834,18.147373 9.36221461,19.0696022 10.7642019,19.0696022 C12.2556778,19.0696022 13.0113589,18.0355123 13.0809611,17.1704563 L11.6789738,17.1605131 C11.6093716,17.5955269 11.3011332,17.8664784 10.7940314,17.8664784 C10.1203815,17.8664784 9.73011199,17.3892061 9.73011199,16.4545479 C9.73011199,15.5696055 10.1079525,15.0426174 10.8039746,15.0426174 C11.3359343,15.0426174 11.6392011,15.3558273 11.6789738,15.8181849 L13.0809611,15.8181849 C12.9715862,14.555402 12.0468711,13.8394936 10.7642019,13.8394936 Z M16.1633496,13.8394936 C14.7713055,13.8394936 13.6874997,14.7542654 13.6874997,16.4545479 C13.6874997,18.1448872 14.7713055,19.0696022 16.1633496,19.0696022 C17.5454506,19.0696022 18.6391995,18.1548304 18.6391995,16.4545479 C18.6391995,14.7542654 17.5454506,13.8394936 16.1633496,13.8394936 Z M16.1633496,15.0426174 C16.8494285,15.0426174 17.2173259,15.539776 17.2173259,16.4545479 C17.2173259,17.3693197 16.8494285,17.8664784 16.1633496,17.8664784 C15.4772707,17.8664784 15.1093734,17.3693197 15.1093734,16.4545479 C15.1093734,15.539776 15.4772707,15.0426174 16.1633496,15.0426174 Z"></path>
-											</g>
-										</svg>
-										<span id="secondary-co2-value" class="value">--</span>
-										<span class="unit">ppm</span>
-									</div>
-								</div>
-							</div>
-							<div class="room-container">
-								<div class="room-name" id="tertiary-room-name">--</div>
-								<div class="temperature-container">
-										<span class="trend"><i id="tertiary-temperature-trend-icon" class="wi wi-direction-up"></i></span>
-										<span class="value" id="tertiary-temp-value"
-											>--</span
-										><span class="unit">°C</span>
-								</div>
-								<div class="other-container">
-									<div class="humidity">
-										<i id="tertiary-humidity-icon" class="wi wi-humidity"></i>
-										<span id="tertiary-humidity-value" class="value">--</span
-										><span class="unit">%</span>
-									</div>
-									<div class="co2">
-										<svg id="tertiary-co2-icon" style="height: 0.8rem; width: auto; margin-right: 3px;" viewBox="0 0 22 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-											<g transform="translate(-4, -7)" fill="currentColor" fill-rule="nonzero">
-												<path d="M14.3,7.39 C15.68,7.39 16.91,7.82 17.99,8.67 C19.07,9.52 19.77,10.62 20.09,11.96 L20.42,11.96 C21.32,11.96 22.15,12.18 22.91,12.61 C23.67,13.04 24.28,13.64 24.72,14.4 C25.16,15.16 25.39,15.98 25.39,16.88 C25.39,17.76 25.18,18.58 24.76,19.33 C24.34,20.08 23.76,20.68 23.03,21.13 C22.3,21.58 21.49,21.82 20.62,21.85 L9.41,21.85 C8.07,21.79 6.94,21.28 6.01,20.32 C5.08,19.37 4.61,18.22 4.61,16.88 C4.61,15.73 4.97,14.71 5.69,13.81 C6.41,12.91 7.32,12.33 8.43,12.08 C8.74,10.71 9.45,9.59 10.54,8.71 C11.63,7.83 12.89,7.39 14.3,7.39 Z M20.4488622,16.7826726 C19.6832379,16.7826726 19.1363635,17.1704563 19.1363635,17.8565352 L20.0113626,17.8565352 C20.0113626,17.6079559 20.1803966,17.498581 20.438919,17.498581 C20.6775552,17.498581 20.8764186,17.5980127 20.8764186,17.7968761 C20.8764186,17.9460237 20.7851038,18.0495139 20.6495809,18.1580771 L19.225852,19.2187498 L19.225852,19.8749992 L21.7414746,19.8749992 L21.7414746,19.1292612 L20.5383508,19.1292612 L20.5383508,19.0994317 L20.8465891,18.9303978 C21.4630658,18.5923299 21.7414746,18.2443189 21.7414746,17.786933 C21.7414746,17.2301153 21.244316,16.7826726 20.4488622,16.7826726 Z M10.7642019,13.8394936 C9.39204413,13.8394936 8.30823834,14.7542654 8.30823834,16.4545479 C8.30823834,18.147373 9.36221461,19.0696022 10.7642019,19.0696022 C12.2556778,19.0696022 13.0113589,18.0355123 13.0809611,17.1704563 L11.6789738,17.1605131 C11.6093716,17.5955269 11.3011332,17.8664784 10.7940314,17.8664784 C10.1203815,17.8664784 9.73011199,17.3892061 9.73011199,16.4545479 C9.73011199,15.5696055 10.1079525,15.0426174 10.8039746,15.0426174 C11.3359343,15.0426174 11.6392011,15.3558273 11.6789738,15.8181849 L13.0809611,15.8181849 C12.9715862,14.555402 12.0468711,13.8394936 10.7642019,13.8394936 Z M16.1633496,13.8394936 C14.7713055,13.8394936 13.6874997,14.7542654 13.6874997,16.4545479 C13.6874997,18.1448872 14.7713055,19.0696022 16.1633496,19.0696022 C17.5454506,19.0696022 18.6391995,18.1548304 18.6391995,16.4545479 C18.6391995,14.7542654 17.5454506,13.8394936 16.1633496,13.8394936 Z M16.1633496,15.0426174 C16.8494285,15.0426174 17.2173259,15.539776 17.2173259,16.4545479 C17.2173259,17.3693197 16.8494285,17.8664784 16.1633496,17.8664784 C15.4772707,17.8664784 15.1093734,17.3693197 15.1093734,16.4545479 C15.1093734,15.539776 15.4772707,15.0426174 16.1633496,15.0426174 Z"></path>
-											</g>
-										</svg>
-										<span id="tertiary-co2-value" class="value">--</span>
-										<span class="unit">ppm</span>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					</div>
-			</div>
-			<!-- Connection status indicator -->
-			<div id="connection-display">
-				<div class="connecting" id="connection-status"></div>
-				<div class="idle" id="connection-activity"></div>
-			</div>
-		</div>
-		<!-- Admin Controls (outside the circle) -->
-		<div class="admin-controls top-left">
-			<button id="test-button" class="admin-button test-button">
-				Test Gauges
-			</button>
-		</div>
+          <!-- Center content -->
+          <div class="gauge-center">
+            <div class="outdoor-display">
+              <div class="temperature-container">
+                <span class="trend"
+                  ><i id="temperature-trend-icon" class="wi wi-direction-up"></i
+                ></span>
+                <span class="value" id="temperature-value">--</span>
+                <span class="unit">°C</span>
+              </div>
+              <div class="other-container">
+                <div class="humidity">
+                  <i id="humidity-icon" class="wi wi-humidity"></i>
+                  <span id="humidity-value" class="value">--</span
+                  ><span class="unit">%</span>
+                </div>
+                <div class="pressure">
+                  <i id="pressure-icon" class="wi wi-barometer"></i>
+                  <span class="value" id="pressure-value">--</span>
+                  <span class="unit">hPa</span>
+                  <span class="trend"
+                    ><i id="pressure-trend-icon" class="wi wi-direction-up"></i
+                  ></span>
+                </div>
+              </div>
+            </div>
+            <div class="indoor-display">
+              <div class="room-container">
+                <div class="room-name" id="secondary-room-name">--</div>
+                <div class="temperature-container">
+                  <span class="trend"
+                    ><i
+                      id="secondary-temperature-trend-icon"
+                      class="wi wi-direction-up"
+                    ></i
+                  ></span>
+                  <span class="value" id="secondary-temp-value">--</span
+                  ><span class="unit">°C</span>
+                </div>
+                <div class="other-container">
+                  <div class="humidity">
+                    <i id="secondary-humidity-icon" class="wi wi-humidity"></i>
+                    <span id="secondary-humidity-value" class="value">--</span
+                    ><span class="unit">%</span>
+                  </div>
+                  <div class="co2">
+                    <svg
+                      id="secondary-co2-icon"
+                      style="height: 0.8rem; width: auto; margin-right: 3px"
+                      viewBox="0 0 22 15"
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                    >
+                      <g
+                        transform="translate(-4, -7)"
+                        fill="currentColor"
+                        fill-rule="nonzero"
+                      >
+                        <path
+                          d="M14.3,7.39 C15.68,7.39 16.91,7.82 17.99,8.67 C19.07,9.52 19.77,10.62 20.09,11.96 L20.42,11.96 C21.32,11.96 22.15,12.18 22.91,12.61 C23.67,13.04 24.28,13.64 24.72,14.4 C25.16,15.16 25.39,15.98 25.39,16.88 C25.39,17.76 25.18,18.58 24.76,19.33 C24.34,20.08 23.76,20.68 23.03,21.13 C22.3,21.58 21.49,21.82 20.62,21.85 L9.41,21.85 C8.07,21.79 6.94,21.28 6.01,20.32 C5.08,19.37 4.61,18.22 4.61,16.88 C4.61,15.73 4.97,14.71 5.69,13.81 C6.41,12.91 7.32,12.33 8.43,12.08 C8.74,10.71 9.45,9.59 10.54,8.71 C11.63,7.83 12.89,7.39 14.3,7.39 Z M20.4488622,16.7826726 C19.6832379,16.7826726 19.1363635,17.1704563 19.1363635,17.8565352 L20.0113626,17.8565352 C20.0113626,17.6079559 20.1803966,17.498581 20.438919,17.498581 C20.6775552,17.498581 20.8764186,17.5980127 20.8764186,17.7968761 C20.8764186,17.9460237 20.7851038,18.0495139 20.6495809,18.1580771 L19.225852,19.2187498 L19.225852,19.8749992 L21.7414746,19.8749992 L21.7414746,19.1292612 L20.5383508,19.1292612 L20.5383508,19.0994317 L20.8465891,18.9303978 C21.4630658,18.5923299 21.7414746,18.2443189 21.7414746,17.786933 C21.7414746,17.2301153 21.244316,16.7826726 20.4488622,16.7826726 Z M10.7642019,13.8394936 C9.39204413,13.8394936 8.30823834,14.7542654 8.30823834,16.4545479 C8.30823834,18.147373 9.36221461,19.0696022 10.7642019,19.0696022 C12.2556778,19.0696022 13.0113589,18.0355123 13.0809611,17.1704563 L11.6789738,17.1605131 C11.6093716,17.5955269 11.3011332,17.8664784 10.7940314,17.8664784 C10.1203815,17.8664784 9.73011199,17.3892061 9.73011199,16.4545479 C9.73011199,15.5696055 10.1079525,15.0426174 10.8039746,15.0426174 C11.3359343,15.0426174 11.6392011,15.3558273 11.6789738,15.8181849 L13.0809611,15.8181849 C12.9715862,14.555402 12.0468711,13.8394936 10.7642019,13.8394936 Z M16.1633496,13.8394936 C14.7713055,13.8394936 13.6874997,14.7542654 13.6874997,16.4545479 C13.6874997,18.1448872 14.7713055,19.0696022 16.1633496,19.0696022 C17.5454506,19.0696022 18.6391995,18.1548304 18.6391995,16.4545479 C18.6391995,14.7542654 17.5454506,13.8394936 16.1633496,13.8394936 Z M16.1633496,15.0426174 C16.8494285,15.0426174 17.2173259,15.539776 17.2173259,16.4545479 C17.2173259,17.3693197 16.8494285,17.8664784 16.1633496,17.8664784 C15.4772707,17.8664784 15.1093734,17.3693197 15.1093734,16.4545479 C15.1093734,15.539776 15.4772707,15.0426174 16.1633496,15.0426174 Z"
+                        ></path>
+                      </g>
+                    </svg>
+                    <span id="secondary-co2-value" class="value">--</span>
+                    <span class="unit">ppm</span>
+                  </div>
+                </div>
+              </div>
+              <div class="room-container">
+                <div class="room-name" id="tertiary-room-name">--</div>
+                <div class="temperature-container">
+                  <span class="trend"
+                    ><i
+                      id="tertiary-temperature-trend-icon"
+                      class="wi wi-direction-up"
+                    ></i
+                  ></span>
+                  <span class="value" id="tertiary-temp-value">--</span
+                  ><span class="unit">°C</span>
+                </div>
+                <div class="other-container">
+                  <div class="humidity">
+                    <i id="tertiary-humidity-icon" class="wi wi-humidity"></i>
+                    <span id="tertiary-humidity-value" class="value">--</span
+                    ><span class="unit">%</span>
+                  </div>
+                  <div class="co2">
+                    <svg
+                      id="tertiary-co2-icon"
+                      style="height: 0.8rem; width: auto; margin-right: 3px"
+                      viewBox="0 0 22 15"
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                    >
+                      <g
+                        transform="translate(-4, -7)"
+                        fill="currentColor"
+                        fill-rule="nonzero"
+                      >
+                        <path
+                          d="M14.3,7.39 C15.68,7.39 16.91,7.82 17.99,8.67 C19.07,9.52 19.77,10.62 20.09,11.96 L20.42,11.96 C21.32,11.96 22.15,12.18 22.91,12.61 C23.67,13.04 24.28,13.64 24.72,14.4 C25.16,15.16 25.39,15.98 25.39,16.88 C25.39,17.76 25.18,18.58 24.76,19.33 C24.34,20.08 23.76,20.68 23.03,21.13 C22.3,21.58 21.49,21.82 20.62,21.85 L9.41,21.85 C8.07,21.79 6.94,21.28 6.01,20.32 C5.08,19.37 4.61,18.22 4.61,16.88 C4.61,15.73 4.97,14.71 5.69,13.81 C6.41,12.91 7.32,12.33 8.43,12.08 C8.74,10.71 9.45,9.59 10.54,8.71 C11.63,7.83 12.89,7.39 14.3,7.39 Z M20.4488622,16.7826726 C19.6832379,16.7826726 19.1363635,17.1704563 19.1363635,17.8565352 L20.0113626,17.8565352 C20.0113626,17.6079559 20.1803966,17.498581 20.438919,17.498581 C20.6775552,17.498581 20.8764186,17.5980127 20.8764186,17.7968761 C20.8764186,17.9460237 20.7851038,18.0495139 20.6495809,18.1580771 L19.225852,19.2187498 L19.225852,19.8749992 L21.7414746,19.8749992 L21.7414746,19.1292612 L20.5383508,19.1292612 L20.5383508,19.0994317 L20.8465891,18.9303978 C21.4630658,18.5923299 21.7414746,18.2443189 21.7414746,17.786933 C21.7414746,17.2301153 21.244316,16.7826726 20.4488622,16.7826726 Z M10.7642019,13.8394936 C9.39204413,13.8394936 8.30823834,14.7542654 8.30823834,16.4545479 C8.30823834,18.147373 9.36221461,19.0696022 10.7642019,19.0696022 C12.2556778,19.0696022 13.0113589,18.0355123 13.0809611,17.1704563 L11.6789738,17.1605131 C11.6093716,17.5955269 11.3011332,17.8664784 10.7940314,17.8664784 C10.1203815,17.8664784 9.73011199,17.3892061 9.73011199,16.4545479 C9.73011199,15.5696055 10.1079525,15.0426174 10.8039746,15.0426174 C11.3359343,15.0426174 11.6392011,15.3558273 11.6789738,15.8181849 L13.0809611,15.8181849 C12.9715862,14.555402 12.0468711,13.8394936 10.7642019,13.8394936 Z M16.1633496,13.8394936 C14.7713055,13.8394936 13.6874997,14.7542654 13.6874997,16.4545479 C13.6874997,18.1448872 14.7713055,19.0696022 16.1633496,19.0696022 C17.5454506,19.0696022 18.6391995,18.1548304 18.6391995,16.4545479 C18.6391995,14.7542654 17.5454506,13.8394936 16.1633496,13.8394936 Z M16.1633496,15.0426174 C16.8494285,15.0426174 17.2173259,15.539776 17.2173259,16.4545479 C17.2173259,17.3693197 16.8494285,17.8664784 16.1633496,17.8664784 C15.4772707,17.8664784 15.1093734,17.3693197 15.1093734,16.4545479 C15.1093734,15.539776 15.4772707,15.0426174 16.1633496,15.0426174 Z"
+                        ></path>
+                      </g>
+                    </svg>
+                    <span id="tertiary-co2-value" class="value">--</span>
+                    <span class="unit">ppm</span>
+                  </div>
+                </div>
+              </div>
+              <div class="room-container">
+                <div class="room-name" id="quad-room-name">--</div>
+                <div class="temperature-container">
+                  <span class="trend"
+                    ><i
+                      id="quad-temperature-trend-icon"
+                      class="wi wi-direction-up"
+                    ></i
+                  ></span>
+                  <span class="value" id="quad-temp-value">--</span
+                  ><span class="unit">°C</span>
+                </div>
+                <div class="other-container">
+                  <div class="humidity">
+                    <i id="quad-humidity-icon" class="wi wi-humidity"></i>
+                    <span id="quad-humidity-value" class="value">--</span
+                    ><span class="unit">%</span>
+                  </div>
+                  <div class="co2">
+                    <svg
+                      id="quad-co2-icon"
+                      style="height: 0.8rem; width: auto; margin-right: 3px"
+                      viewBox="0 0 22 15"
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                    >
+                      <g
+                        transform="translate(-4, -7)"
+                        fill="currentColor"
+                        fill-rule="nonzero"
+                      >
+                        <path
+                          d="M14.3,7.39 C15.68,7.39 16.91,7.82 17.99,8.67 C19.07,9.52 19.77,10.62 20.09,11.96 L20.42,11.96 C21.32,11.96 22.15,12.18 22.91,12.61 C23.67,13.04 24.28,13.64 24.72,14.4 C25.16,15.16 25.39,15.98 25.39,16.88 C25.39,17.76 25.18,18.58 24.76,19.33 C24.34,20.08 23.76,20.68 23.03,21.13 C22.3,21.58 21.49,21.82 20.62,21.85 L9.41,21.85 C8.07,21.79 6.94,21.28 6.01,20.32 C5.08,19.37 4.61,18.22 4.61,16.88 C4.61,15.73 4.97,14.71 5.69,13.81 C6.41,12.91 7.32,12.33 8.43,12.08 C8.74,10.71 9.45,9.59 10.54,8.71 C11.63,7.83 12.89,7.39 14.3,7.39 Z M20.4488622,16.7826726 C19.6832379,16.7826726 19.1363635,17.1704563 19.1363635,17.8565352 L20.0113626,17.8565352 C20.0113626,17.6079559 20.1803966,17.498581 20.438919,17.498581 C20.6775552,17.498581 20.8764186,17.5980127 20.8764186,17.7968761 C20.8764186,17.9460237 20.7851038,18.0495139 20.6495809,18.1580771 L19.225852,19.2187498 L19.225852,19.8749992 L21.7414746,19.8749992 L21.7414746,19.1292612 L20.5383508,19.1292612 L20.5383508,19.0994317 L20.8465891,18.9303978 C21.4630658,18.5923299 21.7414746,18.2443189 21.7414746,17.786933 C21.7414746,17.2301153 21.244316,16.7826726 20.4488622,16.7826726 Z M10.7642019,13.8394936 C9.39204413,13.8394936 8.30823834,14.7542654 8.30823834,16.4545479 C8.30823834,18.147373 9.36221461,19.0696022 10.7642019,19.0696022 C12.2556778,19.0696022 13.0113589,18.0355123 13.0809611,17.1704563 L11.6789738,17.1605131 C11.6093716,17.5955269 11.3011332,17.8664784 10.7940314,17.8664784 C10.1203815,17.8664784 9.73011199,17.3892061 9.73011199,16.4545479 C9.73011199,15.5696055 10.1079525,15.0426174 10.8039746,15.0426174 C11.3359343,15.0426174 11.6392011,15.3558273 11.6789738,15.8181849 L13.0809611,15.8181849 C12.9715862,14.555402 12.0468711,13.8394936 10.7642019,13.8394936 Z M16.1633496,13.8394936 C14.7713055,13.8394936 13.6874997,14.7542654 13.6874997,16.4545479 C13.6874997,18.1448872 14.7713055,19.0696022 16.1633496,19.0696022 C17.5454506,19.0696022 18.6391995,18.1548304 18.6391995,16.4545479 C18.6391995,14.7542654 17.5454506,13.8394936 16.1633496,13.8394936 Z M16.1633496,15.0426174 C16.8494285,15.0426174 17.2173259,15.539776 17.2173259,16.4545479 C17.2173259,17.3693197 16.8494285,17.8664784 16.1633496,17.8664784 C15.4772707,17.8664784 15.1093734,17.3693197 15.1093734,16.4545479 C15.1093734,15.539776 15.4772707,15.0426174 16.1633496,15.0426174 Z"
+                        ></path>
+                      </g>
+                    </svg>
+                    <span id="quad-co2-value" class="value">--</span>
+                    <span class="unit">ppm</span>
+                  </div>
+                </div>
+              </div>
+              <div class="room-container">
+                <div class="room-name" id="quint-room-name">--</div>
+                <div class="temperature-container">
+                  <span class="trend"
+                    ><i
+                      id="quint-temperature-trend-icon"
+                      class="wi wi-direction-up"
+                    ></i
+                  ></span>
+                  <span class="value" id="quint-temp-value">--</span
+                  ><span class="unit">°C</span>
+                </div>
+                <div class="other-container">
+                  <div class="humidity">
+                    <i id="quint-humidity-icon" class="wi wi-humidity"></i>
+                    <span id="quint-humidity-value" class="value">--</span
+                    ><span class="unit">%</span>
+                  </div>
+                  <div class="co2">
+                    <svg
+                      id="quint-co2-icon"
+                      style="height: 0.8rem; width: auto; margin-right: 3px"
+                      viewBox="0 0 22 15"
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                    >
+                      <g
+                        transform="translate(-4, -7)"
+                        fill="currentColor"
+                        fill-rule="nonzero"
+                      >
+                        <path
+                          d="M14.3,7.39 C15.68,7.39 16.91,7.82 17.99,8.67 C19.07,9.52 19.77,10.62 20.09,11.96 L20.42,11.96 C21.32,11.96 22.15,12.18 22.91,12.61 C23.67,13.04 24.28,13.64 24.72,14.4 C25.16,15.16 25.39,15.98 25.39,16.88 C25.39,17.76 25.18,18.58 24.76,19.33 C24.34,20.08 23.76,20.68 23.03,21.13 C22.3,21.58 21.49,21.82 20.62,21.85 L9.41,21.85 C8.07,21.79 6.94,21.28 6.01,20.32 C5.08,19.37 4.61,18.22 4.61,16.88 C4.61,15.73 4.97,14.71 5.69,13.81 C6.41,12.91 7.32,12.33 8.43,12.08 C8.74,10.71 9.45,9.59 10.54,8.71 C11.63,7.83 12.89,7.39 14.3,7.39 Z M20.4488622,16.7826726 C19.6832379,16.7826726 19.1363635,17.1704563 19.1363635,17.8565352 L20.0113626,17.8565352 C20.0113626,17.6079559 20.1803966,17.498581 20.438919,17.498581 C20.6775552,17.498581 20.8764186,17.5980127 20.8764186,17.7968761 C20.8764186,17.9460237 20.7851038,18.0495139 20.6495809,18.1580771 L19.225852,19.2187498 L19.225852,19.8749992 L21.7414746,19.8749992 L21.7414746,19.1292612 L20.5383508,19.1292612 L20.5383508,19.0994317 L20.8465891,18.9303978 C21.4630658,18.5923299 21.7414746,18.2443189 21.7414746,17.786933 C21.7414746,17.2301153 21.244316,16.7826726 20.4488622,16.7826726 Z M10.7642019,13.8394936 C9.39204413,13.8394936 8.30823834,14.7542654 8.30823834,16.4545479 C8.30823834,18.147373 9.36221461,19.0696022 10.7642019,19.0696022 C12.2556778,19.0696022 13.0113589,18.0355123 13.0809611,17.1704563 L11.6789738,17.1605131 C11.6093716,17.5955269 11.3011332,17.8664784 10.7940314,17.8664784 C10.1203815,17.8664784 9.73011199,17.3892061 9.73011199,16.4545479 C9.73011199,15.5696055 10.1079525,15.0426174 10.8039746,15.0426174 C11.3359343,15.0426174 11.6392011,15.3558273 11.6789738,15.8181849 L13.0809611,15.8181849 C12.9715862,14.555402 12.0468711,13.8394936 10.7642019,13.8394936 Z M16.1633496,13.8394936 C14.7713055,13.8394936 13.6874997,14.7542654 13.6874997,16.4545479 C13.6874997,18.1448872 14.7713055,19.0696022 16.1633496,19.0696022 C17.5454506,19.0696022 18.6391995,18.1548304 18.6391995,16.4545479 C18.6391995,14.7542654 17.5454506,13.8394936 16.1633496,13.8394936 Z M16.1633496,15.0426174 C16.8494285,15.0426174 17.2173259,15.539776 17.2173259,16.4545479 C17.2173259,17.3693197 16.8494285,17.8664784 16.1633496,17.8664784 C15.4772707,17.8664784 15.1093734,17.3693197 15.1093734,16.4545479 C15.1093734,15.539776 15.4772707,15.0426174 16.1633496,15.0426174 Z"
+                        ></path>
+                      </g>
+                    </svg>
+                    <span id="quint-co2-value" class="value">--</span>
+                    <span class="unit">ppm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-		<div class="admin-controls top-right">
-			<button id="admin-button" class="admin-button">Admin Settings</button>
-		</div>
+        <!-- Connection status indicator -->
+        <div id="connection-display">
+          <div class="connecting" id="connection-status"></div>
+          <div class="idle" id="connection-activity"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Admin Controls (outside the circle) -->
+    <div class="admin-controls top-left">
+      <button id="test-button" class="admin-button test-button">
+        Test Gauges
+      </button>
+    </div>
 
-		<div class="admin-controls bottom-right">
-			<button id="toggle-rain-view" class="admin-button">Toggle Rain View</button>
-		</div>
+    <div class="admin-controls top-right">
+      <button id="admin-button" class="admin-button">Admin Settings</button>
+    </div>
 
-		<div class="admin-controls bottom-left">
-			<div>
-				Current Rain: <span id="rain-value">0</span>mm
-			</div>
-			<div>
-				Rain Today: <span id="rain-today-value">0</span>mm
-			</div>
-		</div>
+    <div class="admin-controls bottom-right">
+      <button id="toggle-rain-view" class="admin-button">
+        Toggle Rain View
+      </button>
+    </div>
 
+    <div class="admin-controls bottom-left">
+      <div>Current Rain: <span id="rain-value">0</span>mm</div>
+      <div>Rain Today: <span id="rain-today-value">0</span>mm</div>
+    </div>
 
-		<!-- Charts section removed -->
+    <!-- Charts section removed -->
 
-		<!-- Load libraries -->
-		<script src="https://cdn.jsdelivr.net/npm/home-assistant-js-websocket@8.2.0/dist/haws.umd.js"></script>
+    <!-- Load libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/home-assistant-js-websocket@8.2.0/dist/haws.umd.js"></script>
 
-		<!-- Load our scripts as ES modules with cache-busting -->
-		<script src="js/sparkline-utils.js" type="module"></script>
-		<script src="js/pressure-history.js" type="module"></script>
-		<script src="js/temp-history.js" type="module"></script>
-		<script src="js/humidity-history.js" type="module"></script>
-		<script src="js/app.js" type="module"></script>
-	</body>
+    <!-- Load our scripts as ES modules with cache-busting -->
+    <script src="js/sparkline-utils.js" type="module"></script>
+    <script src="js/pressure-history.js" type="module"></script>
+    <script src="js/temp-history.js" type="module"></script>
+    <script src="js/humidity-history.js" type="module"></script>
+    <script src="js/app.js" type="module"></script>
+  </body>
 </html>

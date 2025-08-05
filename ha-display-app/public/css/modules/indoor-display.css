@@ -1,17 +1,22 @@
 /* Outdoor display styles */
 
 .indoor-display {
+    height: 48px;
+    overflow-y: hidden;
+
     .room-container {
+        height: 48px;
         display: flex;
         flex-direction: row;
         align-items: center;
+        margin-bottom: 8px;
 
         .room-name {
             font-weight: bold;
             color: #fff;
             transform: rotate(-90deg);
             transform-origin: center;
-            font-size: 0.5rem;
+            font-size: 0.6rem;
         }
 
         .value {

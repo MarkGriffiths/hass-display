@@ -1,6 +1,7 @@
 // Home Assistant connection handling - simplified approach matching working minimal test
 import { config } from './config.js';
 import { updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge, updateRainfallGauge } from './gauge-manager.js';
+import { addTempPoint } from './temp-history.js';
 
 let connection = null;
 let states = {};
@@ -350,11 +351,14 @@ function updateRainLastHour(state) {
             }
         }
     } catch (error) {
-        // Silent fail
+        console.error('Error updating rain last hour:', error);
     }
 }
 
-// Update rain today value and gauge
+/**
+ * Update the rain today display with new state data
+ * @param {Object} state - The state object from Home Assistant
+ */
 function updateRainToday(state) {
     try {
         if (!state) {
@@ -371,8 +375,40 @@ function updateRainToday(state) {
         // Always update the rainfall gauge regardless of rain view status
         // The gauge's own visibility logic will handle whether it should be displayed
         updateRainfallGauge(rainTodayValue);
+
+        // Auto-switch to rain view if there's rain today
+        if (rainTodayValue > 0 && !config.display.showRainView) {
+            config.display.showRainView = true;
+            // Call the updateRainViewDisplay function from app.js
+            if (window.updateRainViewDisplay && typeof window.updateRainViewDisplay === 'function') {
+                window.updateRainViewDisplay();
+            }
+        }
     } catch (error) {
-        // Silent fail
+        console.error('Error updating rain today:', error);
+    }
+}
+
+// Update main temperature value and gauge
+function updateMainTemperature(state) {
+    try {
+        if (!state) {
+            console.error('Temperature state is undefined');
+            return;
+        }
+
+        const tempValue = parseFloat(state.state);
+        if (!isNaN(tempValue)) {
+            // Update temperature gauge with new value
+            updateTemperatureGauge(tempValue);
+
+            // Add temperature data point to history sparkline
+            addTempPoint(tempValue);
+        } else {
+            console.warn('Invalid temperature value:', state.state);
+        }
+    } catch (error) {
+        console.error('Error updating main temperature:', error);
     }
 }
 
@@ -422,5 +458,6 @@ export {
     addEntityListener,
     updateRainLastHour,
     updateRainToday,
+    updateMainTemperature,
     fetchEntityHistory
 };

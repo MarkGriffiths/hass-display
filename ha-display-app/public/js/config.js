@@ -1,5 +1,35 @@
 // Configuration for the Home Assistant connection and display settings
 export const config = {
+    // Color scheme for the entire application
+    colorScheme: {
+        // Trend colors
+        trends: {
+            up: '#e74c3c',      // Red for rising temperature (bad)
+            down: '#3498db',    // Blue for falling temperature (good)
+            stable: '#2ecc71',  // Green for stable temperature (neutral)
+            // Pressure trend colors (different meaning than temperature)
+            pressureUp: '#3498db',    // Blue for rising pressure (good)
+            pressureDown: '#e74c3c',  // Red for falling pressure (bad)
+            pressureStable: '#2ecc71' // Green for stable pressure (neutral)
+        },
+        // Room display colors
+        roomDisplays: {
+            // CO2 levels
+            co2: [
+                { value: 400, color: '#2ecc71' },  // Green for good CO2 levels
+                { value: 800, color: '#f39c12' },  // Orange for moderate CO2 levels
+                { value: 1200, color: '#e74c3c' }, // Red for high CO2 levels
+                { value: 2000, color: '#9b59b6' }  // Purple for very high CO2 levels
+            ],
+            // Humidity levels for room displays
+            humidity: [
+                { value: 30, color: '#3498db' },  // Blue for dry
+                { value: 45, color: '#2ecc71' },  // Green for comfortable
+                { value: 60, color: '#f39c12' },  // Orange for humid
+                { value: 80, color: '#e74c3c' }   // Red for very humid
+            ]
+        },
+    },
     // Home Assistant connection settings
     homeAssistant: {
         url: '', // Will be loaded from backend
@@ -21,6 +51,14 @@ export const config = {
         temperatureTertiaryTrend: '',
         humidityTertiary: '',
         co2Tertiary: '',
+        temperatureQuad: '',
+        temperatureQuadTrend: '',
+        humidityQuad: '',
+        co2Quad: '',
+        temperatureQuint: '',
+        temperatureQuintTrend: '',
+        humidityQuint: '',
+        co2Quint: '',
         weather: '',
         sun: '',
         rain: '',

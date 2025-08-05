@@ -50,14 +50,20 @@ export function convertToBeaufort(speed) {
  * @param {string} position - 'left' for wind, 'right' for gust
  * @returns {boolean} - True if successful
  */
-export function updateWindDisplay(angle, speed, position) {
+export function updateWindDisplay(type, angle, speed) {
     try {
-        // Get the container based on position
-        const container = document.querySelector(`.wind-panel.${position}`);
+        // Map type to position and element ID
+        const position = type === 'wind' ? 'left' : 'right';
+        const containerId = type === 'wind' ? 'wind-panel-left' : 'wind-panel-right';
+        
+        // Get the container based on ID
+        const container = document.getElementById(containerId);
         if (!container) {
-            console.error(`Wind ${position} container not found`);
+            console.error(`Wind ${type} container not found with ID: ${containerId}`);
             return false;
         }
+        
+        console.log(`Updating ${type} display: angle=${angle}°, speed=${speed} km/h`);
 
         // Update state with new values if provided, otherwise keep existing values
         if (angle !== null && angle !== undefined) {
@@ -160,10 +166,10 @@ export function initWindDisplays() {
         }
         
         // Initialize wind display (left)
-        updateWindDisplay(0, 0, 'left');
+        updateWindDisplay('wind', 0, 0);
         
         // Initialize gust display (right)
-        updateWindDisplay(0, 0, 'right');
+        updateWindDisplay('gust', 0, 0);
         
         return true;
     } catch (error) {
