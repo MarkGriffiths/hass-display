@@ -7,6 +7,7 @@ import { addHumidityPoint } from './humidity-history.js';
 import { updateHumidityGauge, updatePressureGauge } from './gauge-manager.js';
 import { setupRoomEntityListeners } from './room-manager.js';
 import { updateWindDisplay } from './wind-display.js';
+import { updateDewPointDisplay } from './dewpoint-utils.js';
 
 /**
  * Setup entity listeners for Home Assistant entities
@@ -69,6 +70,16 @@ function setupEntityListeners() {
 
     // Update the main temperature gauge and history
     updateMainTemperature(state);
+    
+    // Update dew point calculation if humidity is available
+    if (state.state && !isNaN(state.state)) {
+      const temperature = parseFloat(state.state);
+      const humidityState = getState(config.entities.humidity);
+      if (humidityState && humidityState.state && !isNaN(humidityState.state)) {
+        const humidity = parseFloat(humidityState.state);
+        updateDewPointDisplay(temperature, humidity);
+      }
+    }
   });
 
   // Listen for temperature trend changes
@@ -113,13 +124,18 @@ function setupEntityListeners() {
       return;
     }
 
-    const humidityValue = parseFloat(state.state);
-    if (!isNaN(humidityValue)) {
-      // Update humidity gauge with new value
+    // Update the humidity gauge and history
+    if (state.state && !isNaN(state.state)) {
+      const humidityValue = parseFloat(state.state);
       updateHumidityGauge(humidityValue);
-
-      // Add humidity data point to history sparkline
       addHumidityPoint(humidityValue);
+      
+      // Update dew point calculation if temperature is available
+      const temperatureState = getState(config.entities.temperature);
+      if (temperatureState && temperatureState.state && !isNaN(temperatureState.state)) {
+        const temperature = parseFloat(temperatureState.state);
+        updateDewPointDisplay(temperature, humidityValue);
+      }
     } else {
       console.warn('Invalid humidity value:', state.state);
     }

@@ -56,6 +56,10 @@
             font-size: 1rem;
         }
 
+        .dewpoint {
+            color: rgb(100, 100, 204);
+        }
+
         /* .humidity {} */
 
         /* .pressure {} */
