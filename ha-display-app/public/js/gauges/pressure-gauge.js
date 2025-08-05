@@ -200,7 +200,7 @@ export function updatePressureGauge(pressure, initializing = false) {
 
             // Update the value display if it exists
             if (valueDisplay) {
-                valueDisplay.textContent = initializing ? '----' : pressure.toFixed(0);
+                valueDisplay.textContent = initializing ? '----' : pressure.toFixed(1);
 
                 // Update the pressure icon color to match the current pressure value
                 const pressureIcon = document.getElementById('pressure-icon');
