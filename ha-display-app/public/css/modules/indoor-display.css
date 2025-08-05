@@ -19,6 +19,11 @@
             font-size: 0.6rem;
         }
 
+        .room-icon {
+            font-size: 1.5rem;
+            margin-right: -0.4rem;
+        }
+
         .value {
             font-weight: bold;
             color: #fff;

@@ -1,6 +1,7 @@
 // Room management module
 import { config } from './config.js';
 import { addEntityListener } from './ha-connection.js';
+import { updateRoomIcon } from './room-icons.js';
 
 /**
  * Sets up room displays based on configuration
@@ -19,8 +20,12 @@ function setupRoomDisplays(roomConfigs) {
     const roomNameElement = document.getElementById(`${config.prefix}-room-name`);
     console.log(`Setting ${config.prefix} room name to '${config.name}', element exists:`, !!roomNameElement);
     if (roomNameElement) {
-      roomNameElement.textContent = config.name || `${config.prefix.charAt(0).toUpperCase() + config.prefix.slice(1)} Room`;
+      const roomName = config.name || `${config.prefix.charAt(0).toUpperCase() + config.prefix.slice(1)} Room`;
+      roomNameElement.textContent = roomName;
       console.log(`Updated ${config.prefix} room name element to:`, roomNameElement.textContent);
+      
+      // Update the room icon based on the room name
+      updateRoomIcon(config.prefix, roomName);
     }
   });
 }
