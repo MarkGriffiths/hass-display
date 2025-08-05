@@ -6,7 +6,7 @@ import { config } from './config.js';
  * @type {Object}
  */
 const roomIconMap = {
-  'Studio': 'fa-image-music',
+  'Studio': 'fa-computer-speaker',
   'Lounge': 'fa-couch',
   'Bedroom': 'fa-bed-front',
   'Servers': 'fa-server',
@@ -28,9 +28,9 @@ function updateRoomIcon(prefix, roomName) {
   }
 
   // Remove any existing icon class (except the base classes)
-  const baseClasses = ['room-icon', 'fa-duotone', 'fa-regular'];
+  const baseClasses = ['room-icon', 'fa-duotone', 'fa-solid'];
   const currentClasses = Array.from(iconElement.classList);
-  
+
   currentClasses.forEach(className => {
     if (!baseClasses.includes(className) && className.startsWith('fa-')) {
       iconElement.classList.remove(className);
@@ -39,7 +39,7 @@ function updateRoomIcon(prefix, roomName) {
 
   // Find the matching icon class for the room name
   let iconClass = roomIconMap[roomName];
-  
+
   // If no exact match, try case-insensitive matching
   if (!iconClass) {
     const lowerRoomName = roomName.toLowerCase();
