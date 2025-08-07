@@ -1,6 +1,7 @@
 // Temperature history sparkline module
 import { config } from './config.js';
 import { loadEntityHistory, addDataPoint, updateSparkline } from './sparkline-utils.js';
+import { addHourlyGridLines } from './sparkline-grid.js';
 
 // Temperature history data store
 const tempHistory = {
@@ -26,6 +27,9 @@ async function initSparkline() {
     tempHistory.maxTemp = -Infinity;
     tempHistory.isLoading = false;
 
+    // Add hourly grid lines to the sparkline
+    addHourlyGridLines('combined-sparkline');
+    
     // Get the entity IDs from config
     const temperatureEntityId = config.entities.temperature;
 
