@@ -10,6 +10,7 @@ import { setupEntityListeners, validateConfiguration } from './entity-listeners.
 import { setupRoomDisplays, setupRoomEntityListeners } from './room-manager.js';
 import { showError, updateRainViewDisplay, initIndoorDisplayScroll } from './ui-manager.js';
 import { updateConnectionStatus } from './error-handler.js';
+import { initClock } from './clock.js';
 
 /**
  * Wait for DOM to be fully loaded and ready - optimized version
@@ -217,6 +218,9 @@ async function initApp() {
 
     // Initialize indoor display auto-scrolling
     initIndoorDisplayScroll();
+    
+    // Initialize clock display
+    initClock();
 
     console.log('Application initialized successfully');
   } catch (error) {

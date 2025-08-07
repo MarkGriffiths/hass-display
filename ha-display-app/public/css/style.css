@@ -47,3 +47,6 @@
 
 /* Import history display styles */
 @import url('./modules/history-display.css');
+
+/* Import clock styles */
+@import url('./modules/clock.css');
