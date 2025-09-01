@@ -342,10 +342,16 @@ function updateRainLastHour(state) {
             rainLastHourElement.textContent = rainLastHourValue.toFixed(1);
         }
 
-        // Auto-switch to rain view if there's rain in the last hour
+        // Auto-switch display based on rainfall
         if (rainLastHourValue > 0 && !config.display.showRainView) {
+            // Switch to rain view if there's rain
             config.display.showRainView = true;
-            // Call the updateRainViewDisplay function from app.js
+            if (window.updateRainViewDisplay && typeof window.updateRainViewDisplay === 'function') {
+                window.updateRainViewDisplay();
+            }
+        } else if (rainLastHourValue === 0 && config.display.showRainView) {
+            // Switch back to conditions view if there's no rain
+            config.display.showRainView = false;
             if (window.updateRainViewDisplay && typeof window.updateRainViewDisplay === 'function') {
                 window.updateRainViewDisplay();
             }
@@ -376,10 +382,13 @@ function updateRainToday(state) {
         // The gauge's own visibility logic will handle whether it should be displayed
         updateRainfallGauge(rainTodayValue);
 
-        // Auto-switch to rain view if there's rain today
-        if (rainTodayValue > 0 && !config.display.showRainView) {
+        // Auto-switch display based on rain today (only if rain last hour is also > 0)
+        // This prevents switching to rain view for historical rain that's no longer falling
+        const rainLastHourElement = document.getElementById('rain-last-hour-value');
+        const rainLastHourValue = rainLastHourElement ? parseFloat(rainLastHourElement.textContent) : 0;
+        
+        if (rainTodayValue > 0 && rainLastHourValue > 0 && !config.display.showRainView) {
             config.display.showRainView = true;
-            // Call the updateRainViewDisplay function from app.js
             if (window.updateRainViewDisplay && typeof window.updateRainViewDisplay === 'function') {
                 window.updateRainViewDisplay();
             }
