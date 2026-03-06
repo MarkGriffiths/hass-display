@@ -30,3 +30,6 @@ pids
 .vscode
 *.swp
 *.swo
+
+#agents
+.claude
