@@ -1,0 +1,88 @@
+/* Status overlay styles */
+
+.status-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.85);
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 1;
+	transition: opacity 0.2s ease;
+}
+
+.status-overlay.hidden {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.status-overlay-panel {
+	background: #222;
+	border-radius: 12px;
+	padding: 24px;
+	min-width: 300px;
+	max-width: 90vw;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.status-overlay-panel h2 {
+	color: #fff;
+	margin: 0 0 16px 0;
+	font-size: 18px;
+	font-weight: 600;
+	text-align: center;
+}
+
+.status-info {
+	margin-bottom: 20px;
+}
+
+.status-row {
+	display: flex;
+	justify-content: space-between;
+	padding: 6px 0;
+	border-bottom: 1px solid #333;
+}
+
+.status-row:last-child {
+	border-bottom: none;
+}
+
+.status-label {
+	color: #999;
+	font-size: 13px;
+}
+
+.status-value {
+	color: #fff;
+	font-size: 13px;
+	font-weight: 500;
+	text-align: right;
+	max-width: 180px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.status-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.status-actions .admin-button {
+	width: 100%;
+	min-width: unset;
+}
+
+.status-close-button {
+	background-color: rgba(244, 67, 54, 0.8) !important;
+}
+
+.status-close-button:hover {
+	background-color: rgba(244, 67, 54, 1) !important;
+}

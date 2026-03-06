@@ -50,3 +50,6 @@
 
 /* Import clock styles */
 @import url('./modules/clock.css');
+
+/* Import status overlay styles */
+@import url('./modules/status-overlay.css');

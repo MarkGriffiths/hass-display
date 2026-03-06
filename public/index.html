@@ -310,6 +310,9 @@
               viewBox="0 0 260 80"
               preserveAspectRatio="none"
             >
+              <!-- Rainfall bars (behind sparklines) -->
+              <g id="rainfall-bars-group"></g>
+
               <!-- Humidity sparkline -->
               <path
                 id="humidity-sparkline-path"
@@ -559,20 +562,43 @@
         </div>
       </div>
     </div>
-    <!-- Admin Controls (outside the circle) -->
-    <div class="admin-controls top-left">
-      <button id="test-button" class="admin-button test-button">
-        Test Gauges
-      </button>
+    <!-- Status Overlay (triple-tap to open) -->
+    <div id="status-overlay" class="status-overlay hidden">
+      <div class="status-overlay-panel">
+        <h2>Status</h2>
+        <div class="status-info">
+          <div class="status-row">
+            <span class="status-label">Connection</span>
+            <span id="status-connection" class="status-value">--</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">HA URL</span>
+            <span id="status-ha-url" class="status-value">--</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Entities</span>
+            <span id="status-entities" class="status-value">--</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Listeners</span>
+            <span id="status-listeners" class="status-value">--</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Uptime</span>
+            <span id="status-uptime" class="status-value">--</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">View Mode</span>
+            <span id="status-view-mode" class="status-value">--</span>
+          </div>
+        </div>
+        <div class="status-actions">
+          <button id="status-test-gauges" class="admin-button">Test Gauges</button>
+          <button id="status-toggle-rain" class="admin-button">Toggle Rain View</button>
+          <button id="status-close" class="admin-button status-close-button">Close</button>
+        </div>
+      </div>
     </div>
-
-    <div class="admin-controls bottom-right">
-      <button id="toggle-rain-view" class="admin-button">
-        Toggle Rain View
-      </button>
-    </div>
-
-    <!-- Charts section removed -->
 
     <!-- Load libraries -->
     <script src="https://cdn.jsdelivr.net/npm/home-assistant-js-websocket@8.2.0/dist/haws.umd.js"></script>

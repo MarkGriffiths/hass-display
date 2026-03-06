@@ -516,6 +516,16 @@ async function fetchEntityHistory(entityId, startTime) {
 	}
 }
 
+// Get connection info for status overlay
+function getConnectionInfo() {
+	return {
+		entityCount: Object.keys(states).length,
+		listenerCount: entityListeners.size,
+		reconnectAttempts,
+		isConnected: ws !== null && ws.readyState === WebSocket.OPEN
+	};
+}
+
 // Export functions
 export {
 	connectToHA,
@@ -524,5 +534,6 @@ export {
 	updateRainLastHour,
 	updateRainToday,
 	updateMainTemperature,
-	fetchEntityHistory
+	fetchEntityHistory,
+	getConnectionInfo
 };
