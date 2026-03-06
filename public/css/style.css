@@ -33,14 +33,8 @@
 /* Import sensor info styles */
 @import url('./modules/sensor-info.css');
 
-/* Import admin controls styles */
-@import url('./modules/admin-controls.css');
-
 /* Import admin buttons styles */
 @import url('./modules/admin-buttons.css');
-
-/* Import test controls styles */
-@import url('./modules/test-controls.css');
 
 /* Import connection status styles */
 @import url('./modules/connection-status.css');

@@ -8,23 +8,16 @@ import { config } from './config.js';
 function updateRainViewDisplay() {
 	const rainCenter = document.getElementById('rain-center');
 	const conditionsCenter = document.getElementById('conditions-center');
-	const toggleRainViewButton = document.getElementById('toggle-rain-view');
 
 	if (rainCenter && conditionsCenter) {
 		if (config.display.showRainView) {
 			rainCenter.style.display = 'flex';
 			rainCenter.classList.add('active');
 			conditionsCenter.style.display = 'none';
-			if (toggleRainViewButton) {
-				toggleRainViewButton.textContent = 'Show Temperature';
-			}
 		} else {
 			rainCenter.style.display = 'none';
 			rainCenter.classList.remove('active');
 			conditionsCenter.style.display = 'flex';
-			if (toggleRainViewButton) {
-				toggleRainViewButton.textContent = 'Show Rainfall';
-			}
 		}
 	}
 
