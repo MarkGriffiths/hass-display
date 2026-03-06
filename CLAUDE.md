@@ -60,8 +60,7 @@ Modular CSS in `public/css/modules/` imported by `style.css`. Dark theme (#12121
 
 ## Code Style
 
-- **Indentation:** Tabs, width 3 (per `.editorconfig` for JS/CSS/HTML)
-- **Note:** `.prettierrc` exists with `tabWidth: 2, useTabs: false` which conflicts with `.editorconfig` — follow `.editorconfig` (tabs, width 3) as it reflects the actual codebase style
+- **Indentation:** Tabs, width 3 (per `.editorconfig` and `.prettierrc`)
 - **Quotes:** Single quotes
 - **Semicolons:** Yes
 - **Line endings:** LF
