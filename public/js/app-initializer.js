@@ -4,6 +4,7 @@ import { connectToHA } from './ha-connection.js';
 import { initSparkline } from './temp-history.js';
 import { initPressureSparkline } from './pressure-history.js';
 import { initHumiditySparkline } from './humidity-history.js';
+import { initRainfallSparkline } from './rainfall-history.js';
 import { initTemperatureGauge } from './gauge-manager.js';
 import { initWindDisplays } from './wind-display.js';
 import { setupEntityListeners, validateConfiguration } from './entity-listeners.js';
@@ -113,6 +114,7 @@ async function initApp() {
 		initSparkline();
 		initPressureSparkline();
 		initHumiditySparkline();
+		initRainfallSparkline();
 		initWindDisplays();
 
 		// Set up room displays

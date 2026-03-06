@@ -8,6 +8,7 @@ import { updateHumidityGauge, updatePressureGauge } from './gauge-manager.js';
 import { setupRoomEntityListeners } from './room-manager.js';
 import { updateWindDisplay } from './wind-display.js';
 import { updateDewPointDisplay } from './dewpoint-utils.js';
+import { addRainfallPoint } from './rainfall-history.js';
 
 /**
  * Setup entity listeners for Home Assistant entities
@@ -207,6 +208,9 @@ function setupEntityListeners() {
       const value = parseFloat(state.state);
       console.log('Parsed rain value:', value, 'isNaN:', isNaN(value));
       if (!isNaN(value)) {
+        // Update rainfall history bars
+        addRainfallPoint(value);
+
         // Update the rain value display
         const rainValueElement = document.getElementById('rain-value');
         if (rainValueElement) {
