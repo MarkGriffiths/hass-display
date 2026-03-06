@@ -2,6 +2,7 @@
 import { config } from './config.js';
 import { updateTemperatureGauge, updateSecondaryTemperatureGauge, updateHumidityGauge, updatePressureGauge, updateRainfallGauge } from './gauge-manager.js';
 import { addTempPoint } from './temp-history.js';
+import { updateRainViewDisplay } from './ui-manager.js';
 
 let connection = null;
 let states = {};
@@ -422,14 +423,10 @@ function updateRainLastHour(state) {
 		// Auto-switch display based on rainfall
 		if (rainLastHourValue > 0 && !config.display.showRainView) {
 			config.display.showRainView = true;
-			if (window.updateRainViewDisplay && typeof window.updateRainViewDisplay === 'function') {
-				window.updateRainViewDisplay();
-			}
+			updateRainViewDisplay();
 		} else if (rainLastHourValue === 0 && config.display.showRainView) {
 			config.display.showRainView = false;
-			if (window.updateRainViewDisplay && typeof window.updateRainViewDisplay === 'function') {
-				window.updateRainViewDisplay();
-			}
+			updateRainViewDisplay();
 		}
 	} catch (error) {
 		console.error('Error updating rain last hour:', error);
@@ -457,9 +454,7 @@ function updateRainToday(state) {
 
 		if (rainTodayValue > 0 && rainLastHourValue > 0 && !config.display.showRainView) {
 			config.display.showRainView = true;
-			if (window.updateRainViewDisplay && typeof window.updateRainViewDisplay === 'function') {
-				window.updateRainViewDisplay();
-			}
+			updateRainViewDisplay();
 		}
 	} catch (error) {
 		console.error('Error updating rain today:', error);

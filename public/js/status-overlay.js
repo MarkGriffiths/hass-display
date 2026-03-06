@@ -11,7 +11,9 @@ function initStatusOverlay() {
 	const overlay = document.getElementById('status-overlay');
 	if (!overlay) return;
 
-	// Triple-tap detection
+	// Triple-tap detection — use only one event type to avoid double-firing
+	const tapEvent = 'ontouchstart' in window ? 'touchstart' : 'click';
+
 	const handleTap = (e) => {
 		// Ignore taps within the overlay itself
 		if (overlay.contains(e.target) && !overlay.classList.contains('hidden')) return;
@@ -31,8 +33,7 @@ function initStatusOverlay() {
 		}
 	};
 
-	document.addEventListener('click', handleTap);
-	document.addEventListener('touchstart', handleTap, { passive: true });
+	document.addEventListener(tapEvent, handleTap, { passive: true });
 
 	// Close on backdrop click (outside panel)
 	overlay.addEventListener('click', (e) => {
@@ -43,18 +44,15 @@ function initStatusOverlay() {
 
 	// Button handlers
 	document.getElementById('status-test-gauges')?.addEventListener('click', () => {
+		hideStatusOverlay();
 		testGauges();
 	});
 
 	document.getElementById('status-toggle-rain')?.addEventListener('click', () => {
 		config.display.showRainView = !config.display.showRainView;
+		hideStatusOverlay();
 		updateRainViewDisplay();
 		saveDisplaySettings();
-		// Update the displayed view mode
-		const viewModeEl = document.getElementById('status-view-mode');
-		if (viewModeEl) {
-			viewModeEl.textContent = config.display.showRainView ? 'Rain' : 'Conditions';
-		}
 	});
 
 	document.getElementById('status-close')?.addEventListener('click', () => {
@@ -79,7 +77,6 @@ function hideStatusOverlay() {
 
 function populateStatus() {
 	const connInfo = getConnectionInfo();
-	const connectionStatusEl = document.getElementById('connection-status');
 
 	// Connection state
 	const statusEl = document.getElementById('status-connection');

@@ -126,9 +126,6 @@ async function initApp() {
 		// Set up entity listeners
 		setupEntityListeners();
 
-		// Expose updateRainViewDisplay globally for ha-connection.js
-		window.updateRainViewDisplay = updateRainViewDisplay;
-
 		// Initialize indoor display auto-scrolling
 		initIndoorDisplayScroll();
 
