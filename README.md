@@ -2,6 +2,8 @@
 
 A real-time Home Assistant dashboard designed for a Raspberry Pi with a 720x720px round display. Displays weather and sensor data via concentric SVG gauges, sparkline charts, wind compasses, and multi-room indoor readings.
 
+![Dashboard screenshot](example.png)
+
 ## Features
 
 - Real-time WebSocket connection to Home Assistant with auto-reconnect
