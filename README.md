@@ -1,49 +1,56 @@
-# Home Assistant Display App for Raspberry Pi
+# Home Assistant Round Display Dashboard
 
-A web application designed to display Home Assistant data on a 720x720px round display. The app features radial temperature gauges and background charts for visualizing your smart home data.
+A real-time Home Assistant dashboard designed for a Raspberry Pi with a 720x720px round display. Displays weather and sensor data via concentric SVG gauges, sparkline charts, wind compasses, and multi-room indoor readings.
 
 ## Features
 
-- Real-time connection to Home Assistant using WebSocket API
-- Radial temperature and humidity gauges
-- Background charts showing historical data
-- Responsive design optimized for a 720x720px round display
-- Easy setup page for configuration
+- Real-time WebSocket connection to Home Assistant with auto-reconnect
+- Concentric SVG gauges for temperature, humidity, pressure, and rainfall
+- 24-hour sparkline history charts for temperature, humidity, pressure, and rainfall
+- Wind direction/speed compass with Beaufort scale (wind + gust)
+- Multi-room indoor display (up to 5 rooms) with auto-scrolling
+- Weather condition icons with day/night variants
+- Auto-switching between conditions and rain view based on rainfall
+- Clock display with time and date
+- Hidden status overlay accessible via triple-tap (connection info, debug actions)
+- Dark theme optimized for circular 720x720 display
 
 ## Installation
 
-1. Clone this repository to your Raspberry Pi:
+1. Clone this repository:
 
 ```bash
-git clone https://github.com/yourusername/ha-display-app.git
-cd ha-display-app
+git clone https://github.com/MarkGriffiths/hass-display.git
+cd hass-display
 ```
 
 2. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
-3. Start the application:
+3. Create a `.env` file in the project root with your Home Assistant configuration:
+
+```env
+HA_URL=http://your-home-assistant:8123
+HA_ACCESS_TOKEN=your-long-lived-access-token
+
+# Entity IDs for sensors (30+ mappings available)
+HA_TEMPERATURE_ENTITY=sensor.outdoor_temperature
+HA_HUMIDITY_ENTITY=sensor.outdoor_humidity
+HA_PRESSURE_ENTITY=sensor.barometric_pressure
+# ... see .env.example or server.js for all available entity mappings
+```
+
+4. Start the application:
 
 ```bash
-npm start
+pnpm start        # Production server on port 3000
+pnpm dev          # Development server with auto-reload
 ```
 
-4. Open your browser and navigate to:
-
-```
-http://localhost:3000
-```
-
-## Configuration
-
-On first run, you'll be redirected to the setup page where you can configure:
-
-1. Your Home Assistant URL (e.g., https://10.0.0.128)
-2. Your Long-Lived Access Token (generated in Home Assistant)
-3. Entity IDs for temperature and humidity sensors
+5. Open your browser to `http://localhost:3000`
 
 ## Creating a Long-Lived Access Token
 
@@ -51,46 +58,31 @@ On first run, you'll be redirected to the setup page where you can configure:
 2. Click on your profile (bottom left corner)
 3. Scroll down to "Long-Lived Access Tokens"
 4. Create a new token with a name like "Display App"
-5. Copy the token and paste it in the setup page
+5. Copy the token into your `.env` file
 
-## Running on Boot
+## Architecture
 
-To make the app start automatically when your Raspberry Pi boots:
-
-1. Install PM2:
-
-```bash
-npm install -g pm2
-```
-
-2. Start the app with PM2:
-
-```bash
-pm2 start server.js --name "ha-display"
-```
-
-3. Save the PM2 configuration:
-
-```bash
-pm2 save
-```
-
-4. Set up PM2 to start on boot:
-
-```bash
-pm2 startup
-```
-
-Follow the instructions provided by the command to complete the setup.
+- **Backend:** Express server (`server.js`) serving static files and proxying Home Assistant API calls
+- **Frontend:** Vanilla JavaScript ES6 modules, no build step
+- **Connection:** Direct WebSocket to Home Assistant with exponential backoff reconnect and ping/pong keepalive
+- **Data flow:** HA WebSocket &rarr; `ha-connection.js` &rarr; `entity-listeners.js` &rarr; gauge/sparkline/UI updates &rarr; DOM/SVG re-render
 
 ## Customization
 
-You can customize the app by modifying the following files:
+- `public/js/config.js` — Value ranges, gauge geometry, color schemes, weather icon mappings
+- `public/css/modules/` — Modular CSS files for each UI component
+- `.env` — Entity ID mappings and Home Assistant connection settings
 
-- `public/js/config.js`: Change gauge ranges, colors, and other settings
-- `public/css/style.css`: Modify the appearance of the app
-- `public/js/gauges.js`: Customize gauge behavior
-- `public/js/charts.js`: Customize chart behavior
+## Running on Boot
+
+To auto-start on a Raspberry Pi using PM2:
+
+```bash
+npm install -g pm2
+pm2 start server.js --name "ha-display"
+pm2 save
+pm2 startup
+```
 
 ## License
 

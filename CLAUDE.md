@@ -41,10 +41,12 @@ Vanilla JavaScript using ES6 modules. No build step — files are served directl
 - `gauge-manager.js` — Central controller for all gauge updates
 - `gauges/` — Individual gauge renderers (temperature, humidity, pressure, rainfall) using SVG arcs with dynamic color gradients
 - `config.js` — Value ranges, gauge dimensions (radii, center points), color schemes, weather icon mappings
-- `sparkline-utils.js` + `*-history.js` — 24h sparkline charts for temp/humidity/pressure
+- `sparkline-utils.js` + `*-history.js` — 24h sparkline charts for temp/humidity/pressure/rainfall
 - `wind-display.js` — Wind direction/speed compass with Beaufort scale
 - `room-manager.js` — Multi-room indoor display (up to 5 rooms)
 - `ui-manager.js` — DOM update functions for sensor values, trends, weather conditions
+- `status-overlay.js` — Hidden status overlay (triple-tap to open) with connection info and admin actions
+- `dewpoint-utils.js` — Dew point calculation and display
 
 **Data flow:** HA WebSocket → `ha-connection.js` → `entity-listeners.js` → gauge/sparkline/UI update functions → DOM/SVG re-render
 
